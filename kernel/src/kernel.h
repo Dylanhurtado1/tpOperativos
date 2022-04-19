@@ -13,6 +13,7 @@
 #include <cliente.h>
 #include <servidor.h>
 #include <sockets.h>
+#include <protocolo.h>
 #include <commons/log.h>
 #include "kernel_config.h"
 

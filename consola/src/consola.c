@@ -31,6 +31,7 @@ int main(int argc, char **argv) {
 		log_error(logger, "Error al conectar con el servidor");
 	}
 
+	enviar_mensaje("hola cesar", DEBUG_MENSAJE, server_fd);
 
 	log_destroy(logger);
 	consola_eliminar_configuracion(config);

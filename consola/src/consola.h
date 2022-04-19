@@ -14,6 +14,7 @@
 #include <cliente.h>
 #include <sockets.h>
 #include <errors.h>
+#include <protocolo.h>
 #include "consola_config.h"
 #include "parser.h"
 
