@@ -8,20 +8,37 @@
  ============================================================================
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <cliente.h>
-#include <sockets.h>
-#include <commons/log.h>
+#include "consola.h"
+
+#define PATH_CONSOLA_CONFIG "/home/utnso/tp-2022-1c-lo-importante-es-aprobar/consola/consola.config"
+
 
 int main(int argc, char **argv) {
-	t_log *logger = log_create("consola.log", "SERVER", true, LOG_LEVEL_INFO);
-	int server_fd = conectar_a_servidor("", "");
+	t_log *logger = log_create("consola.log", "CONSOLA", true, LOG_LEVEL_INFO);
 
-	log_info(logger, "Consola iniciado");
+	if(argc < 2) {
+		log_error(logger, "Error de parametros. Ejemplo de uso: ./consola <ruta_a_pseudocodigo> <tam_proceso>");
+		log_destroy(logger);
+		return EXIT_FAILURE;
+	}
+
+	parsear_instrucciones(argv[1]);
+
+	t_consola_config *config = consola_leer_configuracion(PATH_CONSOLA_CONFIG);
+
+	int server_fd = conectar_a_servidor(config->ip, config->puerto);
+	if(server_fd == SERVER_CONNECTION_ERROR) {
+		log_error(logger, "Error al conectar con el servidor");
+	}
+
 
 	log_destroy(logger);
+	consola_eliminar_configuracion(config);
 	cerrar_conexion(server_fd);
 
 	return EXIT_SUCCESS;
+
 }
+
+
+

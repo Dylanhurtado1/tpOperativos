@@ -4,13 +4,19 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../src/consola.c 
+../src/consola.c \
+../src/consola_config.c \
+../src/parser.c 
 
 OBJS += \
-./src/consola.o 
+./src/consola.o \
+./src/consola_config.o \
+./src/parser.o 
 
 C_DEPS += \
-./src/consola.d 
+./src/consola.d \
+./src/consola_config.d \
+./src/parser.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
