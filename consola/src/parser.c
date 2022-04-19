@@ -7,25 +7,20 @@
 
 #include "parser.h"
 
-void parser(char *path) {
+void parsear_instrucciones(char *path) {
 	Instruccion instruccion;
 	char instruccionLeida[10];
-	unsigned long int primerArgumento;
-	unsigned long int segundoArgumento;
+	uint32_t primerArgumento;
+	uint32_t segundoArgumento;
 	//t_list listInstrucciones = *list_create();
 
-
-	//int tamProceso = argv[2]; //Es el tamaño del proceso pasado por parametro, chequear que sea int u otro tipo (probablemente)
 	FILE* archivo = fopen(path, "r");
-	//t_config* config = config_create(argv[1]); //Creo la config pero con el path
 	if (archivo == NULL) {
-		printf(
-				"Ruta de archivo de pseudocodigo inexistente. Por favor revise la ruta");
+		printf("Ruta de archivo de pseudocodigo inexistente. Por favor revise la ruta");
 		exit(2);
 	}
 	while (feof(archivo) == 0) {
-		fscanf(archivo, "%s%lu%lu", &instruccionLeida, &primerArgumento,
-				&segundoArgumento);
+		fscanf(archivo, "%s%lu%lu", &instruccionLeida, &primerArgumento, &segundoArgumento);
 		if (primerArgumento == NULL && segundoArgumento == NULL) {
 			printf("Se encontro la instruccion EXIT");
 
@@ -33,7 +28,6 @@ void parser(char *path) {
 
 		printf("\nSe encontro la instruccion %s con el parametro %lu y %lu\n", //Hay que guardarlas en una lista, no imprimirlas (es para ver si parsea bien)
 				instruccionLeida, primerArgumento, segundoArgumento);
-
 	}
 	fclose(archivo);
 

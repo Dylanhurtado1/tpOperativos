@@ -8,14 +8,14 @@ TARGETS := $(TARGET_1) $(TARGET_2) $(TARGET_3) $(TARGET_4) $(TARGET_5) $(TARGET_
 SHARED_LIB := utils
 LD := LD_LIBRARY_PATH=/home/utnso/tp-2022-1c-lo-importante-es-aprobar/utils/Debug/
 
-PROJECT_HOME := /home/utnso/tp-2022-1c-lo-importante-es-aprobar
+PATH_INSTRUCCIONES := /home/utnso/tp-2022-1c-lo-importante-es-aprobar/consola/instrucciones/pseudocodigo.txt
 
 lib:
 	-cd $(SHARED_LIB)/Debug && make all
 
 $(TARGET_1): lib
 	-cd $@/Debug && make all
-	-cd $@/Debug && $(LD) ./$@ $(PROJECT_HOME)/$@/instrucciones/pseudocodigo.txt 4
+	-cd $@/Debug && $(LD) ./$@ $(PATH_INSTRUCCIONES) 4
 
 $(TARGET_2): lib
 	-cd $@/Debug && make all

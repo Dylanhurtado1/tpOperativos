@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <commons/string.h>
 
 typedef enum {
@@ -21,5 +22,6 @@ typedef enum {
 	EXIT
 } Instruccion;
 
+void parsear_instrucciones(char *path);
 
 #endif /* PARSER_H_ */

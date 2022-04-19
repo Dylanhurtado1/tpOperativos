@@ -22,6 +22,8 @@ int main(int argc, char **argv) {
 		return EXIT_FAILURE;
 	}
 
+	parsear_instrucciones(argv[1]);
+
 	t_consola_config *config = consola_leer_configuracion(PATH_CONSOLA_CONFIG);
 
 	int server_fd = conectar_a_servidor(config->ip, config->puerto);
