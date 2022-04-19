@@ -59,11 +59,14 @@ int crear_conexion(char *ip, char* puerto) {
 	getaddrinfo(ip, puerto, &hints, &server_info);
 
 	int conexion = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol);
-	if (conexion == -1)
+	if (conexion == -1) {
 		return SOCKET_CREATION_ERROR;
+	}
 
-	if(connect(conexion, server_info->ai_addr, server_info->ai_addrlen) == -1)
+	if(connect(conexion, server_info->ai_addr, server_info->ai_addrlen) == -1) {
+		freeaddrinfo(server_info);
 		return CONNECT_ERROR;
+	}
 
 	freeaddrinfo(server_info);
 

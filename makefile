@@ -8,12 +8,14 @@ TARGETS := $(TARGET_1) $(TARGET_2) $(TARGET_3) $(TARGET_4) $(TARGET_5) $(TARGET_
 SHARED_LIB := utils
 LD := LD_LIBRARY_PATH=/home/utnso/tp-2022-1c-lo-importante-es-aprobar/utils/Debug/
 
+PROJECT_HOME := /home/utnso/tp-2022-1c-lo-importante-es-aprobar
+
 lib:
 	-cd $(SHARED_LIB)/Debug && make all
 
 $(TARGET_1): lib
 	-cd $@/Debug && make all
-	-cd $@/Debug && $(LD) ./$@
+	-cd $@/Debug && $(LD) ./$@ $(PROJECT_HOME)/$@/instrucciones/pseudocodigo.txt 4
 
 $(TARGET_2): lib
 	-cd $@/Debug && make all
@@ -45,7 +47,7 @@ all: clean run
 
 memcheck: 
 	$(MAKE) build ARG=$(PROCESO)
-	$(LD) valgrind --leak-check=full --show-leak-kinds=all --log-file="$@-$(PROCESO).log" $(PROCESO)/Debug/$(PROCESO)
+	$(LD) valgrind --leak-check=full --show-leak-kinds=all --log-file="$@-$(PROCESO).log" $(PROCESO)/Debug/$(PROCESO) $(PATH_I) $(TAMANIO)
 
 
 helgrind:
