@@ -1,12 +1,12 @@
-TARGET_1 := servidor
-TARGET_2 := cliente
-TARGET_3 := servidor_multi
-TARGET_4 := cliente_multi
+TARGET_1 := consola
+TARGET_2 := kernel
+TARGET_3 := cpu
+TARGET_4 := memoria
 
 TARGETS := $(TARGET_1) $(TARGET_2) $(TARGET_3) $(TARGET_4) $(TARGET_5) $(TARGET_6)
 
 SHARED_LIB := utils
-LD := LD_LIBRARY_PATH=/home/utnso/template/utils/Debug/
+LD := LD_LIBRARY_PATH=/home/utnso/tp-2022-1c-lo-importante-es-aprobar/utils/Debug/
 
 lib:
 	-cd $(SHARED_LIB)/Debug && make all
