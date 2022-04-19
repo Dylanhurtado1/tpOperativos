@@ -13,8 +13,8 @@
 #include <commons/string.h>
 
 typedef struct {
-	char *ip;
-	char *puerto;
+	char *ip_kernel;
+	char *puerto_kernel;
 } t_consola_config;
 
 t_consola_config *consola_leer_configuracion(char *path);

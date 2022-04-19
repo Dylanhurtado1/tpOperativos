@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
 
 	t_consola_config *config = consola_leer_configuracion(PATH_CONSOLA_CONFIG);
 
-	int server_fd = conectar_a_servidor(config->ip, config->puerto);
+	int server_fd = conectar_a_servidor(config->ip_kernel, config->puerto_kernel);
 	if(server_fd == SERVER_CONNECTION_ERROR) {
 		log_error(logger, "Error al conectar con el servidor");
 	}

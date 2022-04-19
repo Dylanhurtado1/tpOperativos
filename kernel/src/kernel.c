@@ -8,19 +8,21 @@
  ============================================================================
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <cliente.h>
-#include <sockets.h>
-#include <commons/log.h>
+#include "kernel.h"
+
+#define PATH_KERNEL_CONFIG "/home/utnso/tp-2022-1c-lo-importante-es-aprobar/kernel/kernel.config"
 
 int main(void) {
-	t_log *logger = log_create("kernel.log", "SERVER", true, LOG_LEVEL_INFO);
-	int server_fd = conectar_a_servidor("", "");
+	t_log *logger = log_create("kernel.log", "KERNEL", true, LOG_LEVEL_INFO);
 
-	log_info(logger, "Kernel iniciado");
+	t_kernel_config *config = kernel_leer_configuracion(PATH_KERNEL_CONFIG);
+
+	int server_fd = iniciar_servidor(config->ip_kernel, config->puerto_escucha);
+
+	int cliente_fd = esperar_cliente(server_fd);
 
 	log_destroy(logger);
+	kernel_eliminar_configuracion(config);
 	cerrar_conexion(server_fd);
 
 	return EXIT_SUCCESS;

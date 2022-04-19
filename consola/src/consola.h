@@ -11,10 +11,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <commons/log.h>
-#include "consola_config.h"
 #include <cliente.h>
 #include <sockets.h>
 #include <errors.h>
+#include "consola_config.h"
 #include "parser.h"
 
 #endif /* CONSOLA_H_ */
