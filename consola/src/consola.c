@@ -21,8 +21,6 @@ int main(int argc, char **argv) {
 	log_info(logger, "Consola iniciado");
 
 	log_destroy(logger);
-
-	log_destroy(logger);
 	cerrar_conexion(server_fd);
 
 	return EXIT_SUCCESS;
