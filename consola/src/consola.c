@@ -32,6 +32,13 @@ int main(int argc, char **argv) {
 	}
 
 	enviar_mensaje("hola cesar", DEBUG_MENSAJE, server_fd);
+	enviar_mensaje("hola cesar 2", DATOS_CONSOLA, server_fd);
+
+	t_protocolo respuesta = recibir_operacion(server_fd);
+	log_info(logger, "Protocolo %d", respuesta);
+	if(respuesta != FINALIZAR_CONSOLA_OK) {
+		log_error(logger, "La consola no finalizo correctamente");
+	}
 
 	log_destroy(logger);
 	consola_eliminar_configuracion(config);

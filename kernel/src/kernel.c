@@ -13,6 +13,7 @@
 #define PATH_KERNEL_CONFIG "/home/utnso/tp-2022-1c-lo-importante-es-aprobar/kernel/kernel.config"
 
 void procesar_operacion(t_paquete *paquete);
+
 t_log *logger;
 
 int main(void) {
@@ -40,6 +41,7 @@ int main(void) {
 void procesar_operacion(t_paquete *paquete) {
 	char *mensaje;
 	t_list* lista;
+	t_protocolo respuesta;
 	switch (paquete->codigo_operacion) {
 		case DEBUG_MENSAJE:
 			mensaje = deserealizar_mensaje(paquete);
@@ -50,6 +52,14 @@ void procesar_operacion(t_paquete *paquete) {
 			lista = deserealizar_paquete(paquete);
 			log_info(logger,"Tamanio de datos recibidos: %d", list_size(lista));
 			list_destroy_and_destroy_elements(lista, free);
+			break;
+		case DATOS_CONSOLA:
+			mensaje = deserealizar_mensaje(paquete);
+			log_info(logger,"Mensaje recibido: %s", mensaje);
+			free(mensaje);
+			// TODO: implementar la logica cuando recibe este protocolo
+			respuesta = FINALIZAR_CONSOLA_OK;
+			enviar_datos(server_fd, &respuesta, sizeof(t_protocolo));
 			break;
 		default:
 			log_error(logger,"Protocolo invalido.");

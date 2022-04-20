@@ -12,7 +12,9 @@ typedef struct {
 
 typedef enum {
 	DEBUG_MENSAJE = 1,
-	DEBUG_PAQUETE
+	DEBUG_PAQUETE,
+	DATOS_CONSOLA,				// Protocolo que envia Consola a Kernel e indica el envio de instrucciones y tamanio del proceso
+	FINALIZAR_CONSOLA_OK		// Protocolo que envia Kernel a Consola e indica la finalizacion de la consola
 } t_protocolo;
 
 #endif /* PROTOCOLO_H_ */
