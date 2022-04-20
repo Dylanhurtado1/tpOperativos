@@ -17,10 +17,16 @@
 
 typedef struct {
 	int socket;
-	void (*callback)(t_paquete *);
+	t_paquete *paquete;
+} t_cliente;
+
+typedef struct {
+	int socket;
+	void (*callback)(t_cliente *);
 } t_socket;
 
+
 int crear_servidor(char *ip, char *puerto);
-int atender_clientes(int socket_servidor, void (*callback)(t_paquete *));
+int atender_clientes(int socket_servidor, void (*callback)(t_cliente *));
 
 #endif /* SERVIDOR_H_ */

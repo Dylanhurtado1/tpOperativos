@@ -7,7 +7,8 @@
 
 #include "servidor.h"
 
-static t_socket *crear_socket_conexion(int socket_fd, void (*callback)(t_paquete *));
+static t_socket *crear_socket_conexion(int socket_fd, void (*callback)(t_cliente *));
+static t_cliente *crear_estructura_cliente(int socket_fd, t_paquete *paquete);
 static void eliminar_socket_conexion(t_socket *conexion);
 static void ejecutar_instruccion(t_socket *conexion);
 static bool error_conexion(t_paquete *paquete);
@@ -23,7 +24,7 @@ int crear_servidor(char *ip, char *puerto) {
     return socket_servidor;
 }
 
-int atender_clientes(int socket_servidor, void (*callback)(t_paquete *)) {
+int atender_clientes(int socket_servidor, void (*callback)(t_cliente *)) {
     while(true) {
     	int socket_cliente = esperar_cliente(socket_servidor);
         //if(socket_cliente == ACCEPT_ERROR) {
@@ -40,7 +41,7 @@ int atender_clientes(int socket_servidor, void (*callback)(t_paquete *)) {
     return WAIT_CLIENT_ERROR;
 }
 
-static t_socket *crear_socket_conexion(int socket_fd, void (*callback)(t_paquete *)) {
+static t_socket *crear_socket_conexion(int socket_fd, void (*callback)(t_cliente *)) {
     t_socket *conexion = malloc(sizeof(t_socket));
     conexion->socket = socket_fd;
     conexion->callback = callback;
@@ -51,6 +52,17 @@ static void eliminar_socket_conexion(t_socket *conexion) {
 	free(conexion);
 }
 
+static t_cliente *crear_estructura_cliente(int socket_fd, t_paquete *paquete) {
+    t_cliente *cliente = malloc(sizeof(t_cliente));
+    cliente->socket = socket_fd;
+    cliente->paquete = paquete;
+    return cliente;
+}
+
+static void eliminar_estructura_cliente(t_cliente *datos_cliente) {
+	free(datos_cliente);
+}
+
 static void ejecutar_instruccion(t_socket *conexion) {
 	t_paquete *paquete;
 
@@ -59,8 +71,10 @@ static void ejecutar_instruccion(t_socket *conexion) {
 		if(error_conexion(paquete)) {
 	    	break;
 	    }
-	    conexion->callback(paquete);
+		t_cliente *datos_cliente = crear_estructura_cliente(conexion->socket, paquete);
+	    conexion->callback(datos_cliente);
 	    eliminar_paquete(paquete);
+	    eliminar_estructura_cliente(datos_cliente);
 	}
 
 	eliminar_paquete(paquete);

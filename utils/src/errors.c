@@ -7,8 +7,6 @@
 
 #include "errors.h"
 
-
-
 bool es_codigo_de_error(t_socket_error codigo) {
 	switch(codigo) {
 		case SOCKET_CREATION_ERROR:

@@ -1,22 +1,21 @@
 /*
- * consola.h
+ * cpu.h
  *
  *  Created on: 19 abr. 2022
  *      Author: utnso
  */
 
-#ifndef CONSOLA_H_
-#define CONSOLA_H_
+#ifndef CPU_H_
+#define CPU_H_
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <commons/log.h>
 #include <cliente.h>
+#include <servidor.h>
 #include <sockets.h>
-#include <errors.h>
-#include <comunicacion.h>
 #include <protocolo.h>
-#include "consola_config.h"
-#include "parser.h"
+#include <errors.h>
+#include "cpu_config.h"
 
-#endif /* CONSOLA_H_ */
+#endif /* CPU_H_ */
