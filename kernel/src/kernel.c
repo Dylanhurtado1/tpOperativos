@@ -21,19 +21,19 @@ int main(void) {
 	logger = log_create("kernel.log", "KERNEL", true, LOG_LEVEL_INFO);
 	t_kernel_config *config = kernel_leer_configuracion(PATH_KERNEL_CONFIG);
 
-	int server_fd = crear_servidor(config->ip_kernel, config->puerto_escucha);
-	if(server_fd == INIT_SERVER_ERROR) {
-		log_error(logger, "No se pudo iniciar el servidor");
+	int socker_kernel = crear_servidor(config->ip_kernel, config->puerto_escucha);
+	if(socker_kernel == INIT_SERVER_ERROR) {
+		log_error(logger, "No se pudo iniciar el servidor Kernel");
 		return EXIT_FAILURE;
 	}
 
-	if(atender_clientes(server_fd, procesar_operacion) == WAIT_CLIENT_ERROR) {
+	if(atender_clientes(socker_kernel, procesar_operacion) == WAIT_CLIENT_ERROR) {
 		log_error(logger, "Error al escuchar clientes... Finalizando servidor");
 	}
 
 	log_destroy(logger);
 	kernel_eliminar_configuracion(config);
-	cerrar_conexion(server_fd);
+	cerrar_conexion(socker_kernel);
 
 	return EXIT_SUCCESS;
 }
