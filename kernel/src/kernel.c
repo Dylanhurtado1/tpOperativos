@@ -12,7 +12,8 @@
 
 #define PATH_KERNEL_CONFIG "/home/utnso/tp-2022-1c-lo-importante-es-aprobar/kernel/kernel.config"
 
-void procesar_operacion(t_paquete *paquete);
+void procesar_operacion(t_cliente *datos_cliente);
+void enviar_respuesta_a_consola(int socket_fd, t_protocolo protocolo);
 
 t_log *logger;
 
@@ -30,7 +31,6 @@ int main(void) {
 		log_error(logger, "Error al escuchar clientes... Finalizando servidor");
 	}
 
-
 	log_destroy(logger);
 	kernel_eliminar_configuracion(config);
 	cerrar_conexion(server_fd);
@@ -38,31 +38,20 @@ int main(void) {
 	return EXIT_SUCCESS;
 }
 
-void procesar_operacion(t_paquete *paquete) {
-	char *mensaje;
-	t_list* lista;
-	t_protocolo respuesta;
+void procesar_operacion(t_cliente *datos_cliente) {
+	t_paquete *paquete = datos_cliente->paquete;
 	switch (paquete->codigo_operacion) {
-		case DEBUG_MENSAJE:
-			mensaje = deserealizar_mensaje(paquete);
-			log_info(logger,"Mensaje recibido: %s", mensaje);
-			free(mensaje);
-			break;
-		case DEBUG_PAQUETE:
-			lista = deserealizar_paquete(paquete);
-			log_info(logger,"Tamanio de datos recibidos: %d", list_size(lista));
-			list_destroy_and_destroy_elements(lista, free);
-			break;
 		case DATOS_CONSOLA:
-			mensaje = deserealizar_mensaje(paquete);
-			log_info(logger,"Mensaje recibido: %s", mensaje);
-			free(mensaje);
 			// TODO: implementar la logica cuando recibe este protocolo
-			respuesta = FINALIZAR_CONSOLA_OK;
-			enviar_datos(server_fd, &respuesta, sizeof(t_protocolo));
+			enviar_respuesta_a_consola(datos_cliente->socket, FINALIZAR_CONSOLA_OK);
 			break;
 		default:
 			log_error(logger,"Protocolo invalido.");
 			break;
 	}
 }
+
+void enviar_respuesta_a_consola(int socket_fd, t_protocolo protocolo) {
+	enviar_datos(socket_fd, &protocolo, sizeof(t_protocolo));
+}
+
