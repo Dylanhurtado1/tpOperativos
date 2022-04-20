@@ -1,21 +1,4 @@
-/*
- ============================================================================
- Name        : consola.c
- Author      : 
- Version     :
- Copyright   : Your copyright notice
- Description : Hello World in C, Ansi-style
- ============================================================================
- */
-
 #include "consola.h"
-
-#define PATH_CONSOLA_CONFIG "/home/utnso/tp-2022-1c-lo-importante-es-aprobar/consola/consola.config"
-
-int conectar_a_kernel(char *ip, char *puerto);
-void enviar_datos_a_kernel(int socket_kernel, t_list *instrucciones, uint32_t tam_consola);
-t_protocolo esperar_respuesta_de_kernel(int socket_kernel);
-t_paquete *serializar_datos_consola(t_list *instrucciones, uint32_t tam_consola);
 
 int main(int argc, char **argv) {
 	t_log *logger = log_create("consola.log", "CONSOLA", true, LOG_LEVEL_INFO);
