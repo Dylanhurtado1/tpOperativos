@@ -43,6 +43,7 @@ void procesar_operacion(t_cliente *datos_cliente) {
 	switch (paquete->codigo_operacion) {
 		case DATOS_CONSOLA:
 			// TODO: implementar la logica cuando recibe este protocolo
+			log_info(logger, "Procesando DATOS_CONSOLA");
 			enviar_respuesta_a_consola(datos_cliente->socket, FINALIZAR_CONSOLA_OK);
 			break;
 		default:
