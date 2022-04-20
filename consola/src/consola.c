@@ -14,6 +14,7 @@
 
 void enviar_datos_a_kernel(int socket_kernel, t_paquete *paquete);
 t_protocolo esperar_respuesta_de_kernel(int socket_kernel);
+int conectar_a_kernel(char *ip, char *puerto);
 
 int main(int argc, char **argv) {
 	t_log *logger = log_create("consola.log", "CONSOLA", true, LOG_LEVEL_INFO);
@@ -29,9 +30,9 @@ int main(int argc, char **argv) {
 
 	t_consola_config *config = consola_leer_configuracion(PATH_CONSOLA_CONFIG);
 
-	int socket_kernel = conectar_a_servidor(config->ip_kernel, config->puerto_kernel);
+	int socket_kernel = conectar_a_kernel(config->ip_kernel, config->puerto_kernel);
 	if(socket_kernel == SERVER_CONNECTION_ERROR) {
-		log_error(logger, "Error al conectar con el servidor");
+		log_error(logger, "Error al conectar con Kernel");
 		log_destroy(logger);
 		return EXIT_FAILURE;
 	}
@@ -48,6 +49,10 @@ int main(int argc, char **argv) {
 
 	return EXIT_SUCCESS;
 
+}
+
+int conectar_a_kernel(char *ip, char *puerto) {
+	return conectar_a_servidor(ip, puerto);
 }
 
 void enviar_datos_a_kernel(int socket_kernel, t_paquete *paquete) {
