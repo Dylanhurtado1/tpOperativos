@@ -4,14 +4,17 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../src/gestionar_consola.c \
 ../src/kernel.c \
 ../src/kernel_config.c 
 
 OBJS += \
+./src/gestionar_consola.o \
 ./src/kernel.o \
 ./src/kernel_config.o 
 
 C_DEPS += \
+./src/gestionar_consola.d \
 ./src/kernel.d \
 ./src/kernel_config.d 
 
