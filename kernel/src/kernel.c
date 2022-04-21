@@ -1,13 +1,3 @@
-/*
- ============================================================================
- Name        : kernel.c
- Author      : 
- Version     :
- Copyright   : Your copyright notice
- Description : Hello World in C, Ansi-style
- ============================================================================
- */
-
 #include "kernel.h"
 
 t_log *kernel_logger;
@@ -22,7 +12,7 @@ int main(void) {
 		return EXIT_FAILURE;
 	}
 
-	if(atender_clientes(socker_kernel, procesar_operacion) == WAIT_CLIENT_ERROR) {
+	if(atender_clientes(socker_kernel, procesar_datos_consola) == WAIT_CLIENT_ERROR) {
 		log_error(kernel_logger, "Error al escuchar clientes... Finalizando servidor");
 	}
 

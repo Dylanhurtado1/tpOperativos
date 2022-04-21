@@ -1,10 +1,3 @@
-/*
- * consola_config.c
- *
- *  Created on: 19 abr. 2022
- *      Author: utnso
- */
-
 #include "kernel_config.h"
 
 t_kernel_config *kernel_leer_configuracion(char *path) {

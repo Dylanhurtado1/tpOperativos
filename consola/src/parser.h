@@ -1,10 +1,3 @@
-/*
- * parser.h
- *
- *  Created on: 19 abr. 2022
- *      Author: utnso
- */
-
 #ifndef PARSER_H_
 #define PARSER_H_
 
@@ -13,8 +6,9 @@
 #include <stdint.h>
 #include <commons/string.h>
 #include <commons/collections/list.h>
+#include <estructuras.h>
 
-typedef enum {
+/*typedef enum {
 	NO_OP,
 	IO,
 	READ,
@@ -28,7 +22,7 @@ typedef struct {
 	t_identificador identificador;
 	uint32_t primer_operando;
 	uint32_t segundo_operando;
-} t_instruccion;
+} t_instruccion;*/
 
 t_list *parsear_instrucciones(char *path);
 void eliminar_instrucciones(t_list *instrucciones);

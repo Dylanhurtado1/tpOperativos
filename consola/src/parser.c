@@ -1,17 +1,9 @@
-/*
- * parser.c
- *
- *  Created on: 19 abr. 2022
- *      Author: utnso
- */
-
 #include "parser.h"
 
 t_identificador transformar_identificador(char *identificador);
 void imprimir(void *dato);
 
 t_list *parsear_instrucciones(char *path) {
-
 	char identificador[10];
 	uint32_t primer_operando;
 	uint32_t segundo_operando;
