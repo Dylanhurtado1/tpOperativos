@@ -6,20 +6,17 @@
 C_SRCS += \
 ../src/cpu.c \
 ../src/cpu_config.c \
-../src/servidor_dispatch.c \
-../src/servidor_interrupt.c 
+../src/peticiones.c 
 
 OBJS += \
 ./src/cpu.o \
 ./src/cpu_config.o \
-./src/servidor_dispatch.o \
-./src/servidor_interrupt.o 
+./src/peticiones.o 
 
 C_DEPS += \
 ./src/cpu.d \
 ./src/cpu_config.d \
-./src/servidor_dispatch.d \
-./src/servidor_interrupt.d 
+./src/peticiones.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

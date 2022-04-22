@@ -1,5 +1,4 @@
 #include "cpu.h"
-#include <unistd.h>
 
 t_log *cpu_logger;
 
@@ -9,18 +8,14 @@ int main(void) {
 	pthread_t th_dispatch;
 	pthread_t th_interrupt;
 
-	int socket_memoria = conectar_a_memoria(config->ip_memoria, config->puerto_memoria);
-	if(socket_memoria == SERVER_CONNECTION_ERROR) {
-		log_error(cpu_logger, "Error al conectar con Memoria");
-		log_destroy(cpu_logger);
-		return EXIT_FAILURE;
-	}
+	int socket_memoria = conectar_a_modulo(config->ip_memoria, config->puerto_memoria, cpu_logger);
+
 	t_traductor *traductor = obtener_traductor_direcciones(socket_memoria);
 
-	int socket_dispatch = iniciar_servidor_dispatch(config->ip_cpu, config->puerto_escucha_dispatch);
+	int socket_dispatch = iniciar_modulo_servidor(config->ip_cpu, config->puerto_escucha_dispatch, cpu_logger);
 	pthread_create(&th_dispatch, NULL, (void *)peticiones_dispatch, &socket_dispatch);
 
-	int socket_interrupt = iniciar_servidor_interrupt(config->ip_cpu, config->puerto_escucha_interrupt);
+	int socket_interrupt = iniciar_modulo_servidor(config->ip_cpu, config->puerto_escucha_interrupt, cpu_logger);
 	pthread_create(&th_interrupt, NULL, (void *)peticiones_interrupt, &socket_interrupt);
 
 	pthread_join(th_dispatch, NULL);
@@ -34,10 +29,6 @@ int main(void) {
 	cerrar_conexion(socket_interrupt);
 
 	return EXIT_SUCCESS;
-}
-
-int conectar_a_memoria(char *ip, char *puerto) {
-	return conectar_a_servidor(ip, puerto);
 }
 
 t_traductor *obtener_traductor_direcciones(int socket_fd) {
