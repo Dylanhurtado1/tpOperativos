@@ -3,7 +3,7 @@
 t_identificador transformar_identificador(char *identificador);
 void imprimir(void *dato);
 
-t_list *parsear_instrucciones(char *path) {
+t_list *parsear_pseudocodigo(char *path) {
 	char identificador[10];
 	uint32_t primer_operando;
 	uint32_t segundo_operando;

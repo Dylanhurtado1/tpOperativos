@@ -1,12 +1,5 @@
-/*
- * servidor_dispatch.h
- *
- *  Created on: 22 abr. 2022
- *      Author: utnso
- */
-
-#ifndef SERVIDOR_DISPATCH_H_
-#define SERVIDOR_DISPATCH_H_
+#ifndef PETICIONES_H_
+#define PETICIONES_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,7 +11,7 @@
 #include <errors.h>
 #include <estructuras.h>
 
-int iniciar_servidor_dispatch(char *ip, char *puerto);
 void peticiones_dispatch(int *socket_fd);
+void peticiones_interrupt(int *socket_fd);
 
-#endif /* SERVIDOR_DISPATCH_H_ */
+#endif /* PETICIONES_H_ */

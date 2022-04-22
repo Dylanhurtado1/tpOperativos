@@ -10,16 +10,10 @@ int main(int argc, char **argv) {
 		return EXIT_FAILURE;
 	}
 
-	t_list *instrucciones = parsear_instrucciones(argv[1]);
+	t_list *instrucciones = parsear_pseudocodigo(argv[1]);
 	uint32_t tam_consola = atoi(argv[2]);
 
-
-	int socket_kernel = conectar_a_kernel(config->ip_kernel, config->puerto_kernel);
-	if(socket_kernel == SERVER_CONNECTION_ERROR) {
-		log_error(logger, "Error al conectar con Kernel");
-		log_destroy(logger);
-		return EXIT_FAILURE;
-	}
+	int socket_kernel = conectar_a_modulo(config->ip_kernel, config->puerto_kernel, logger);
 
 	enviar_datos_a_kernel(socket_kernel, instrucciones, tam_consola);
 	t_protocolo respuesta = esperar_respuesta_de_kernel(socket_kernel);
@@ -33,11 +27,6 @@ int main(int argc, char **argv) {
 	cerrar_conexion(socket_kernel);
 
 	return EXIT_SUCCESS;
-
-}
-
-int conectar_a_kernel(char *ip, char *puerto) {
-	return conectar_a_servidor(ip, puerto);
 }
 
 t_protocolo esperar_respuesta_de_kernel(int socket_kernel) {
@@ -48,7 +37,6 @@ void enviar_datos_a_kernel(int socket_kernel, t_list *instrucciones, uint32_t ta
 	t_paquete *paquete = serializar_datos_consola(instrucciones, tam_consola);
 
 	enviar_paquete(paquete, socket_kernel);
-
 	eliminar_paquete(paquete);
 }
 

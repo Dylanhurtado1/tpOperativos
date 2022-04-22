@@ -7,14 +7,9 @@ int main(void) {
 	memoria_logger = log_create("memoria.log", "MEMORIA", true, LOG_LEVEL_INFO);
 	memoria_config = memoria_leer_configuracion(PATH_MEMORIA_CONFIG);
 
-	int socket_memoria = iniciar_servidor_memoria(memoria_config->ip_memoria, memoria_config->puerto_escucha);
-	if(socket_memoria == INIT_SERVER_ERROR) {
-		log_error(memoria_logger, "No se pudo iniciar el servidor Memoria");
-		memoria_eliminar_configuracion(memoria_config);
-		return EXIT_FAILURE;
-	}
-
+	int socket_memoria = iniciar_modulo_servidor(memoria_config->ip_memoria, memoria_config->puerto_escucha, memoria_logger);
 	log_info(memoria_logger, "Memoria iniciado como servidor");
+
 	if(atender_clientes(socket_memoria, procesar_conexiones) == WAIT_CLIENT_ERROR) {
 		log_error(memoria_logger, "Error al escuchar clientes... Finalizando servidor");
 	}
@@ -24,10 +19,6 @@ int main(void) {
 	cerrar_conexion(socket_memoria);
 
 	return EXIT_SUCCESS;
-}
-
-int iniciar_servidor_memoria(char *ip, char *puerto) {
-	return crear_servidor(ip, puerto);
 }
 
 void procesar_conexiones(t_cliente *datos_cliente) {
