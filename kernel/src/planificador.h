@@ -24,6 +24,9 @@
 void agregar_proceso_a_ready(t_pcb *proceso);
 void iniciar_cola_ready();
 void eliminar_cola_ready();
+void ejecutar_proceso();
+bool hay_proceso_en_ejecucion();
+t_paquete *serealizar_proceso(t_pcb *proceso);
 
 // Planificador de largo plazo
 void agregar_proceso_a_new(t_list *instrucciones, uint32_t tam_proceso);

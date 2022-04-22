@@ -20,6 +20,7 @@ void procesar_datos_consola(t_cliente *datos_cliente) {
 			if(es_posible_admitir_proceso()) {
 				admitir_proceso();
 			}
+			ejecutar_proceso();
 
 			enviar_respuesta_a_consola(datos_cliente->socket, FINALIZAR_CONSOLA_OK);
 			list_destroy_and_destroy_elements(datos, free);
