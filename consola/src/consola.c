@@ -58,8 +58,8 @@ t_paquete *serializar_datos_consola(t_list *instrucciones, uint32_t tam_consola)
 	for(int i = 0; i < list_size(instrucciones); i++) {
 		t_instruccion *instruccion = (t_instruccion *)list_get(instrucciones, i);
 		agregar_a_paquete(paquete, &(instruccion->identificador), sizeof(t_identificador));
-		agregar_a_paquete(paquete, &(instruccion->primer_operando), sizeof(t_identificador));
-		agregar_a_paquete(paquete, &(instruccion->segundo_operando), sizeof(t_identificador));
+		agregar_a_paquete(paquete, &(instruccion->primer_operando), sizeof(uint32_t));
+		agregar_a_paquete(paquete, &(instruccion->segundo_operando), sizeof(uint32_t));
 	}
 	agregar_a_paquete(paquete, &tam_consola, sizeof(tam_consola));
 

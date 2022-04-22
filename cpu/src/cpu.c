@@ -6,6 +6,8 @@ t_log *cpu_logger;
 int main(void) {
 	cpu_logger = log_create("cpu.log", "CPU", true, LOG_LEVEL_INFO);
 	t_cpu_config *config = cpu_leer_configuracion(PATH_CPU_CONFIG);
+	pthread_t th_dispatch;
+	pthread_t th_interrupt;
 
 	int socket_memoria = conectar_a_memoria(config->ip_memoria, config->puerto_memoria);
 	if(socket_memoria == SERVER_CONNECTION_ERROR) {
@@ -15,21 +17,14 @@ int main(void) {
 	}
 	t_traductor *traductor = obtener_traductor_direcciones(socket_memoria);
 
-	// TODO: servidor dispatch deberia ser lanzado en un hilo
 	int socket_dispatch = iniciar_servidor_dispatch(config->ip_cpu, config->puerto_escucha_dispatch);
-	if(socket_dispatch == INIT_SERVER_ERROR) {
-		log_error(cpu_logger, "No se pudo iniciar el servidor de Dispatch");
-		return EXIT_FAILURE;
-	}
-	log_info(cpu_logger, "CPU escuchando puerto dispatch");
+	pthread_create(&th_dispatch, NULL, (void *)peticiones_dispatch, &socket_dispatch);
 
-	// TODO: servidor interrupt deberia ser lanzado en un hilo
 	int socket_interrupt = iniciar_servidor_interrupt(config->ip_cpu, config->puerto_escucha_interrupt);
-	if(socket_interrupt == INIT_SERVER_ERROR) {
-		log_error(cpu_logger, "No se pudo iniciar el servidor de Interrupt");
-		return EXIT_FAILURE;
-	}
-	log_info(cpu_logger, "CPU escuchando puerto interrupt");
+	pthread_create(&th_interrupt, NULL, (void *)peticiones_interrupt, &socket_interrupt);
+
+	pthread_join(th_dispatch, NULL);
+	pthread_join(th_interrupt, NULL);
 
 	log_destroy(cpu_logger);
 	cpu_eliminar_configuracion(config);
@@ -43,14 +38,6 @@ int main(void) {
 
 int conectar_a_memoria(char *ip, char *puerto) {
 	return conectar_a_servidor(ip, puerto);
-}
-
-int iniciar_servidor_dispatch(char *ip, char *puerto) {
-	return crear_servidor(ip, puerto);
-}
-
-int iniciar_servidor_interrupt(char *ip, char *puerto) {
-	return crear_servidor(ip, puerto);
 }
 
 t_traductor *obtener_traductor_direcciones(int socket_fd) {
