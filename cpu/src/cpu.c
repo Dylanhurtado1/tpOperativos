@@ -15,6 +15,7 @@ int main(void) {
 	}
 	t_traductor *traductor = obtener_traductor_direcciones(socket_memoria);
 
+	// TODO: servidor dispatch deberia ser lanzado en un hilo
 	int socket_dispatch = iniciar_servidor_dispatch(config->ip_cpu, config->puerto_escucha_dispatch);
 	if(socket_dispatch == INIT_SERVER_ERROR) {
 		log_error(cpu_logger, "No se pudo iniciar el servidor de Dispatch");
@@ -22,14 +23,13 @@ int main(void) {
 	}
 	log_info(cpu_logger, "CPU escuchando puerto dispatch");
 
+	// TODO: servidor interrupt deberia ser lanzado en un hilo
 	int socket_interrupt = iniciar_servidor_interrupt(config->ip_cpu, config->puerto_escucha_interrupt);
 	if(socket_interrupt == INIT_SERVER_ERROR) {
 		log_error(cpu_logger, "No se pudo iniciar el servidor de Interrupt");
 		return EXIT_FAILURE;
 	}
 	log_info(cpu_logger, "CPU escuchando puerto interrupt");
-
-	while(1);
 
 	log_destroy(cpu_logger);
 	cpu_eliminar_configuracion(config);

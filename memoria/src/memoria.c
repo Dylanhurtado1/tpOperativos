@@ -1,15 +1,16 @@
 #include "memoria.h"
 
 t_log *memoria_logger;
+t_memoria_config *memoria_config;
 
 int main(void) {
 	memoria_logger = log_create("memoria.log", "MEMORIA", true, LOG_LEVEL_INFO);
-	t_memoria_config *config = memoria_leer_configuracion(PATH_MEMORIA_CONFIG);
+	memoria_config = memoria_leer_configuracion(PATH_MEMORIA_CONFIG);
 
-	int socket_memoria = iniciar_servidor_memoria(config->ip_memoria, config->puerto_escucha);
+	int socket_memoria = iniciar_servidor_memoria(memoria_config->ip_memoria, memoria_config->puerto_escucha);
 	if(socket_memoria == INIT_SERVER_ERROR) {
 		log_error(memoria_logger, "No se pudo iniciar el servidor Memoria");
-		memoria_eliminar_configuracion(config);
+		memoria_eliminar_configuracion(memoria_config);
 		return EXIT_FAILURE;
 	}
 
@@ -19,7 +20,7 @@ int main(void) {
 	}
 
 	log_destroy(memoria_logger);
-	memoria_eliminar_configuracion(config);
+	memoria_eliminar_configuracion(memoria_config);
 	cerrar_conexion(socket_memoria);
 
 	return EXIT_SUCCESS;
@@ -54,8 +55,8 @@ void enviar_numero_tabla_de_pagina(int socket_fd, uint32_t numero) {
 
 void enviar_estructura_traductora(int socket_fd, t_traductor *traductor) {
 	t_paquete *paquete = crear_paquete(HANDSHAKE_INICIAL, buffer_vacio());
-	traductor->cantidad_entradas_tabla = 5;
-	traductor->tamanio_pagina = 2;
+	traductor->cantidad_entradas_tabla = memoria_config->paginas_por_tabla;
+	traductor->tamanio_pagina = memoria_config->tam_pagina;
 
 	agregar_a_paquete(paquete, &(traductor->cantidad_entradas_tabla), sizeof(uint32_t));
 	agregar_a_paquete(paquete, &(traductor->tamanio_pagina), sizeof(uint32_t));
