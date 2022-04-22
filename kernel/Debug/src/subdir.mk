@@ -6,17 +6,23 @@
 C_SRCS += \
 ../src/gestionar_consola.c \
 ../src/kernel.c \
-../src/kernel_config.c 
+../src/kernel_config.c \
+../src/planificador_corto_plazo.c \
+../src/planificador_largo_plazo.c 
 
 OBJS += \
 ./src/gestionar_consola.o \
 ./src/kernel.o \
-./src/kernel_config.o 
+./src/kernel_config.o \
+./src/planificador_corto_plazo.o \
+./src/planificador_largo_plazo.o 
 
 C_DEPS += \
 ./src/gestionar_consola.d \
 ./src/kernel.d \
-./src/kernel_config.d 
+./src/kernel_config.d \
+./src/planificador_corto_plazo.d \
+./src/planificador_largo_plazo.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

@@ -4,11 +4,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <commons/log.h>
+#include <commons/collections/list.h>
 #include <sockets.h>
 #include <servidor.h>
 #include <protocolo.h>
 #include <comunicacion.h>
 #include <estructuras.h>
+#include "planificador.h"
 
 void procesar_datos_consola(t_cliente *datos_cliente);
 void enviar_respuesta_a_consola(int socket_fd, t_protocolo protocolo);
