@@ -5,15 +5,21 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../src/cpu.c \
-../src/cpu_config.c 
+../src/cpu_config.c \
+../src/servidor_dispatch.c \
+../src/servidor_interrupt.c 
 
 OBJS += \
 ./src/cpu.o \
-./src/cpu_config.o 
+./src/cpu_config.o \
+./src/servidor_dispatch.o \
+./src/servidor_interrupt.o 
 
 C_DEPS += \
 ./src/cpu.d \
-./src/cpu_config.d 
+./src/cpu_config.d \
+./src/servidor_dispatch.d \
+./src/servidor_interrupt.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
