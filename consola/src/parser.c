@@ -1,6 +1,5 @@
 #include "parser.h"
 
-t_identificador transformar_identificador(char *identificador);
 void imprimir(void *dato);
 
 t_list *parsear_pseudocodigo(char *path) {
@@ -17,11 +16,21 @@ t_list *parsear_pseudocodigo(char *path) {
 		primer_operando = 0xFFFF;
 		segundo_operando = 0xFFFF;
 		fscanf(archivo, "%s %u %u", identificador, &primer_operando, &segundo_operando);
-		t_instruccion *instruccion = malloc(sizeof(t_instruccion));
+		/*t_instruccion *instruccion = malloc(sizeof(t_instruccion));
 		instruccion->identificador = transformar_identificador(identificador);
 		instruccion->primer_operando = primer_operando;
-		instruccion->segundo_operando = segundo_operando;
-		list_add(lista_instrucciones, instruccion);
+		instruccion->segundo_operando = segundo_operando;*/
+
+
+		if(string_equals_ignore_case(identificador, "NO_OP")) {
+			for(int i = 0; i < primer_operando; i++) {
+				t_instruccion *instruccion = generar_instruccion(identificador, 0xFFFF, 0xFFFF);
+				list_add(lista_instrucciones, instruccion);
+			}
+		} else {
+			t_instruccion *instruccion = generar_instruccion(identificador, primer_operando, segundo_operando);
+			list_add(lista_instrucciones, instruccion);
+		}
 	}
 
 	list_iterate(lista_instrucciones, imprimir);
@@ -30,6 +39,16 @@ t_list *parsear_pseudocodigo(char *path) {
 
 	return lista_instrucciones;
 }
+
+t_instruccion *generar_instruccion(char *identificador, uint32_t primer_operando, uint32_t segundo_operando) {
+	t_instruccion *instruccion = malloc(sizeof(t_instruccion));
+	instruccion->identificador = transformar_identificador(identificador);
+	instruccion->primer_operando = primer_operando;
+	instruccion->segundo_operando = segundo_operando;
+
+	return instruccion;
+}
+
 
 void imprimir(void *dato) {
 	t_instruccion *instruccion = (t_instruccion *)dato;
