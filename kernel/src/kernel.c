@@ -1,26 +1,38 @@
 #include "kernel.h"
 
 t_log *kernel_logger;
+t_kernel_config *kernel_config;
+
+int socket_memoria;
+int socket_cpu_dispatch;
+int socket_cpu_interrupt;
 
 int main(void) {
 	kernel_logger = log_create("kernel.log", "KERNEL", true, LOG_LEVEL_INFO);
-	t_kernel_config *config = kernel_leer_configuracion(PATH_KERNEL_CONFIG);
+	kernel_config = kernel_leer_configuracion(PATH_KERNEL_CONFIG);
+	iniciar_colas_de_planificacion();
 
-	int socker_kernel = crear_servidor(config->ip_kernel, config->puerto_escucha);
-	if(socker_kernel == INIT_SERVER_ERROR) {
-		log_error(kernel_logger, "No se pudo iniciar el servidor Kernel");
-		return EXIT_FAILURE;
-	}
+	socket_memoria = conectar_a_modulo(kernel_config->ip_memoria, kernel_config->puerto_memoria, kernel_logger);
 
-	if(atender_clientes(socker_kernel, procesar_datos_consola) == WAIT_CLIENT_ERROR) {
+	socket_cpu_dispatch = conectar_a_modulo(kernel_config->ip_cpu, kernel_config->puerto_cpu_dispatch, kernel_logger);
+
+	socket_cpu_interrupt = conectar_a_modulo(kernel_config->ip_cpu, kernel_config->puerto_cpu_interrupt, kernel_logger);
+
+	int socket_kernel = iniciar_modulo_servidor(kernel_config->ip_kernel, kernel_config->puerto_escucha, kernel_logger);
+
+	log_info(kernel_logger, "Esperando conexion de consolas");
+	if(atender_clientes(socket_kernel, procesar_datos_consola) == WAIT_CLIENT_ERROR) {
 		log_error(kernel_logger, "Error al escuchar clientes... Finalizando servidor");
 	}
 
 	log_destroy(kernel_logger);
-	kernel_eliminar_configuracion(config);
-	cerrar_conexion(socker_kernel);
+	kernel_eliminar_configuracion(kernel_config);
+	cerrar_conexion(socket_kernel);
 
 	return EXIT_SUCCESS;
 }
 
-
+void iniciar_colas_de_planificacion() {
+	iniciar_cola_new();
+	iniciar_cola_ready();
+}

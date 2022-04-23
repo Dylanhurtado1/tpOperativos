@@ -7,6 +7,7 @@ C_SRCS += \
 ../src/buffer.c \
 ../src/cliente.c \
 ../src/comunicacion.c \
+../src/conexiones.c \
 ../src/errors.c \
 ../src/paquete.c \
 ../src/servidor.c \
@@ -16,6 +17,7 @@ OBJS += \
 ./src/buffer.o \
 ./src/cliente.o \
 ./src/comunicacion.o \
+./src/conexiones.o \
 ./src/errors.o \
 ./src/paquete.o \
 ./src/servidor.o \
@@ -25,6 +27,7 @@ C_DEPS += \
 ./src/buffer.d \
 ./src/cliente.d \
 ./src/comunicacion.d \
+./src/conexiones.d \
 ./src/errors.d \
 ./src/paquete.d \
 ./src/servidor.d \
