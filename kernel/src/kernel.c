@@ -18,7 +18,15 @@ int main(void) {
 
 	socket_cpu_interrupt = conectar_a_modulo(kernel_config->ip_cpu, kernel_config->puerto_cpu_interrupt, kernel_logger);
 
+
 	int socket_kernel = iniciar_modulo_servidor(kernel_config->ip_kernel, kernel_config->puerto_escucha, kernel_logger);
+
+	log_info(kernel_logger, "Iniciando planificacion");
+		if(strcmp(kernel_config->algoritmo_planificacion,"FIFO")){
+		log_info(kernel_logger,"Se inicia la planificacion SRT");
+		}else{
+		log_info(kernel_logger,"Se inicia el algoritmo FIFO");
+		}
 
 	log_info(kernel_logger, "Esperando conexion de consolas");
 	if(atender_clientes(socket_kernel, procesar_datos_consola) == WAIT_CLIENT_ERROR) {
