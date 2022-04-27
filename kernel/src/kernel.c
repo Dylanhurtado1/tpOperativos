@@ -25,25 +25,7 @@ int main(void) {
 
 	int socket_kernel = iniciar_modulo_servidor(kernel_config->ip_kernel, kernel_config->puerto_escucha, kernel_logger);
 
-	log_info(kernel_logger, "Iniciando planificacion");
-
-
-	if(strcmp(kernel_config->algoritmo_planificacion,"FIFO") == 0){
-	log_info(kernel_logger,"Algoritmo de planificacion leido: FIFO");
-	pthread_t hilo_planificacion_FIFO;
-	pthread_create(&hilo_planificacion_FIFO, NULL, (void*) planificacionFIFO, NULL);
-	pthread_detach(hilo_planificacion_FIFO);
-
-	}
-
-	else {
-
-	log_info(kernel_logger,"Algoritmo de planificacion leido: SRT");
-	pthread_t hilo_planificacion_SRT;
-	pthread_create(&hilo_planificacion_SRT, NULL, (void*) planificacionSRT, NULL);
-	pthread_detach(hilo_planificacion_SRT);
-
-	}
+    inicio_planificacion();
 
 
 	log_info(kernel_logger, "Esperando conexion de consolas");
@@ -55,10 +37,6 @@ int main(void) {
 	cerrar_conexion(socket_kernel);
 
 	return EXIT_SUCCESS;
-
-
-
-
 }
 
 void iniciar_colas_de_planificacion() {
@@ -68,3 +46,21 @@ void iniciar_colas_de_planificacion() {
 	iniciar_cola_suspended_blocked();
 	iniciar_cola_suspended_ready();
 }
+
+void inicio_planificacion(){
+	log_info(kernel_logger, "Iniciando planificacion");
+	if(strcmp(kernel_config->algoritmo_planificacion,"FIFO") == 0){
+	log_info(kernel_logger,"Algoritmo de planificacion leido: FIFO");
+	pthread_t hilo_planificacion_FIFO;
+	pthread_create(&hilo_planificacion_FIFO, NULL, (void*) planificacionFIFO, NULL);
+	pthread_detach(hilo_planificacion_FIFO);
+	}
+	else {
+	log_info(kernel_logger,"Algoritmo de planificacion leido: SRT");
+	pthread_t hilo_planificacion_SRT;
+	pthread_create(&hilo_planificacion_SRT, NULL, (void*) planificacionSRT, NULL);
+	pthread_detach(hilo_planificacion_SRT);
+	}
+}
+
+

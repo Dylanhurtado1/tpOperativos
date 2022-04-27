@@ -21,5 +21,6 @@
 
 void iniciar_colas_de_planificacion();
 //void imprimirProcesos(void *dato);
+void inicio_planificacion();
 
 #endif /* KERNEL_H_ */
