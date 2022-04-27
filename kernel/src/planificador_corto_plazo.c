@@ -102,15 +102,35 @@ void enviar_interrupcion_a_cpu(int socket_fd){
 }
 */
 
-void planificacionFIFO(){
-
+void planificacionFIFO(){//ESTA ES UNA IMPLEMENTACION CON LISTAS, HAY QUE DEFINIR COLAS O LISTAS, PERO ES
+	//UN APROXIMADO A LO QUE PENSE, NO ESTA TERMINADO
+	    int tamanioReady = 5;//SUPONIENDO HAY 5 procesos en ready, nose si estoy haciendolo bien xD
+		int tamanioNew;
+		int grado_multitarea = 2;//cantidad de procesos que pueden estar ejecutando
+		int ejecutando = 1;
+		t_list* procesosReady;
+		t_list* procesosExec;
 	log_info(kernel_logger,"Hilo de planificador FIFO iniciado");
 
 	while(true){
 		//if(hay_procesos_en_ready() && !hayUnProcesoEnEjecucion()){
 		//	ejecutar_proceso();
+		//el pequeño fifo xD
+			if (tamanioReady > 0){ //si hay procesos en ready
+			if (ejecutando<grado_multitarea){//cant de procesos ejecutando < grado que permite
+			int i=0;//y con este codigo todos los tripulantes de rdy pasar a exec
+			while(ejecutando<grado_multitarea && (tamanioReady-i)>0){//cant de procesos en rdy > 0
+			t_pcb* primerProceso= list_get(procesosReady,0);
+			list_remove(procesosReady,0);
+			list_add(procesosExec,primerProceso);//POR AHORA EL PANIF ES EL UNICO QUE MANEJA ESTA LISTA
+			i++;
+			ejecutando++;
+			log_info(kernel_logger,"Se pasaron algunos procesos de ready a Exec");
+			}
+			}
+			}
 		}
-	}
+}
 
 
 
