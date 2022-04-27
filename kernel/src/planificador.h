@@ -27,6 +27,8 @@ void eliminar_cola_ready();
 void ejecutar_proceso();
 bool hay_proceso_en_ejecucion();
 t_paquete *serealizar_proceso(t_pcb *proceso);
+void planificacionFIFO();
+void planificacionSRT();
 
 // Planificador de largo plazo
 void agregar_proceso_a_new(t_list *instrucciones, uint32_t tam_proceso);
@@ -38,5 +40,7 @@ void eliminar_cola_new();
 // Planificador de mediano plazo
 void agregar_proceso_a_suspended_blocked(t_pcb *proceso);
 void iniciar_cola_suspended_blocked();
+void iniciar_cola_suspended_ready();
+void iniciar_cola_blocked();
 
 #endif /* PLANIFICADOR_H_ */

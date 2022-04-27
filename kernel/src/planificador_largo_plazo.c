@@ -5,12 +5,18 @@ void eliminar_proceso_cola_new(t_pcb *proceso);
 uint32_t obtener_numero_tabla_de_pagina(int socket_fd);
 
 uint32_t generador_de_id = 0;
-uint32_t procesos_admitidos = 0;
+uint32_t procesos_admitidos_en_ready = 0;
 t_queue *cola_new;
 
 extern t_log *kernel_logger;
 extern t_kernel_config *kernel_config;
 extern int socket_memoria;
+
+
+void iniciar_cola_new() {
+	cola_new = queue_create();
+}
+
 
 void agregar_proceso_a_new(t_list *instrucciones, uint32_t tam_proceso) {
 	t_pcb *proceso = crear_estructura_pcb(instrucciones, tam_proceso);
@@ -31,7 +37,7 @@ t_pcb *crear_estructura_pcb(t_list *instrucciones, uint32_t tam_proceso) {
 }
 
 bool es_posible_admitir_proceso() {
-	return procesos_admitidos < kernel_config->grado_multiprogramacion;
+	return procesos_admitidos_en_ready < kernel_config->grado_multiprogramacion;
 }
 
 void admitir_proceso() {
@@ -39,13 +45,9 @@ void admitir_proceso() {
 	t_pcb *proceso = (t_pcb *)queue_pop(cola_new);
 	proceso->tabla_paginas = numero;
 	agregar_proceso_a_ready(proceso);
-	procesos_admitidos++;
-	log_info(kernel_logger, "Procesos en memoria: %d", procesos_admitidos);
+	procesos_admitidos_en_ready++;
 }
 
-void iniciar_cola_new() {
-	cola_new = queue_create();
-}
 
 void eliminar_cola_new() {
 	queue_destroy_and_destroy_elements(cola_new, (void *)eliminar_proceso_cola_new);
@@ -69,6 +71,11 @@ uint32_t obtener_numero_tabla_de_pagina(int socket_fd) {
 
 	return numero;
 }
+
+
+
+
+
 
 
 
