@@ -10,7 +10,9 @@ void peticiones_dispatch(int *socket_dispatch) {
 		switch (paquete->codigo_operacion) {
 			case PCB:
 				log_info(cpu_logger,"PCB recibida");
-				deserealizar_pcb(paquete);
+				t_pcb *pcb = deserealizar_pcb(paquete);
+				log_info(cpu_logger,"Eliminando PCB...");
+				eliminar_pcb(pcb);
 				break;
 			default:
 				log_error(cpu_logger,"Operacion desconocida.");
@@ -64,5 +66,10 @@ t_pcb *deserealizar_pcb(t_paquete *paquete) {
 	log_info(cpu_logger, "PCB cantidad de instrucciones = %d", list_size(pcb->instrucciones));
 
 	return pcb;
+}
+
+void eliminar_pcb(t_pcb *pcb) {
+	list_destroy_and_destroy_elements(pcb->instrucciones, free);
+	free(pcb);
 }
 
