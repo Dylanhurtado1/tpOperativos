@@ -1,6 +1,7 @@
 #include "peticiones.h"
 
 extern t_log *cpu_logger;
+extern int socket_memoria;
 
 void peticiones_dispatch(int *socket_dispatch) {
 	log_info(cpu_logger, "CPU escuchando puerto dispatch");
@@ -11,6 +12,9 @@ void peticiones_dispatch(int *socket_dispatch) {
 			case PCB:
 				log_info(cpu_logger,"PCB recibida");
 				t_pcb *pcb = deserealizar_pcb(paquete);
+
+				ejecutar_ciclo_de_instruccion(pcb);
+
 				log_info(cpu_logger,"Eliminando PCB...");
 				eliminar_pcb(pcb);
 				break;
@@ -71,5 +75,50 @@ t_pcb *deserealizar_pcb(t_paquete *paquete) {
 void eliminar_pcb(t_pcb *pcb) {
 	list_destroy_and_destroy_elements(pcb->instrucciones, free);
 	free(pcb);
+}
+
+void ejecutar_ciclo_de_instruccion(t_pcb *pcb) {
+	t_instruccion *proxima_instruccion = fetch(pcb);
+	bool buscar_operandos = decode(proxima_instruccion);
+	int valor_a_escribir;
+	if(buscar_operandos) {
+		valor_a_escribir = fetch_operands(proxima_instruccion->segundo_operando, socket_memoria);
+	}
+	execute(proxima_instruccion, valor_a_escribir);
+}
+
+t_instruccion *fetch(t_pcb *pcb) {
+	uint32_t pc = pcb->program_counter;
+	t_instruccion *instruccion = list_get(pcb->instrucciones, pc);
+	return instruccion;
+}
+
+bool decode(t_instruccion *proxima_instruccion) {
+	return proxima_instruccion->identificador == COPY;
+}
+
+uint32_t fetch_operands(uint32_t operando, int socket_fd) {
+	// TODO: Buscar en memoria
+	return 10;
+}
+
+void execute(t_instruccion *instruccion, uint32_t valor) {
+	switch(instruccion->identificador) {
+		case NO_OP:
+			break;
+		case IO:
+			break;
+		case READ:
+			break;
+		case WRITE:
+			break;
+		case COPY:
+			break;
+		case EXIT:
+			break;
+		default:
+			break;
+	}
+
 }
 

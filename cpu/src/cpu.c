@@ -1,6 +1,7 @@
 #include "cpu.h"
 
 t_log *cpu_logger;
+int socket_memoria;
 
 int main(void) {
 	cpu_logger = log_create("cpu.log", "CPU", true, LOG_LEVEL_INFO);
@@ -8,7 +9,7 @@ int main(void) {
 	pthread_t th_dispatch;
 	pthread_t th_interrupt;
 
-	int socket_memoria = conectar_a_modulo(config->ip_memoria, config->puerto_memoria, cpu_logger);
+	socket_memoria = conectar_a_modulo(config->ip_memoria, config->puerto_memoria, cpu_logger);
 
 	t_traductor *traductor = obtener_traductor_direcciones(socket_memoria);
 
