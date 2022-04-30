@@ -13,5 +13,6 @@
 
 void peticiones_dispatch(int *socket_fd);
 void peticiones_interrupt(int *socket_fd);
+t_pcb *deserealizar_pcb(t_paquete *paquete);
 
 #endif /* PETICIONES_H_ */
