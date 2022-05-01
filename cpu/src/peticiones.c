@@ -103,8 +103,14 @@ uint32_t fetch_operands(uint32_t operando, int socket_fd) {
 }
 
 void execute(t_instruccion *instruccion, uint32_t valor) {
+	int i,ciclosCPU;
 	switch(instruccion->identificador) {
-		case NO_OP:
+		case NO_OP: // Cada instruccion NO_OP corresponde a q ciclo de CPU
+			ciclosCPU =instruccion->primer_operando;
+			for (i=0;i<ciclosCPU;i++){
+				sleep(1000); // duerme 1 segundo por cada ciclo de cpu
+			}
+			// falta ver el chekeo de insterrrupciones por parte de SJF con desalojo
 			break;
 		case IO:
 			break;
