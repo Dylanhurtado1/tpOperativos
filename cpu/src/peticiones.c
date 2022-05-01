@@ -103,22 +103,33 @@ uint32_t fetch_operands(uint32_t operando, int socket_fd) {
 }
 
 void execute(t_instruccion *instruccion, uint32_t valor) {
-	int i,ciclosCPU;
+	int i,ciclosCPU, ciclosIO;
+	int dir_logica;
 	switch(instruccion->identificador) {
-		case NO_OP: // Cada instruccion NO_OP corresponde a q ciclo de CPU
+		case NO_OP: // Cada instruccion NO_OP corresponde a 1 ciclo de CPU
 			ciclosCPU =instruccion->primer_operando;
 			for (i=0;i<ciclosCPU;i++){
+				log_info(cpu_logger, "Se ejecuto operacion NO_OP %d", i+1);
 				sleep(1000); // duerme 1 segundo por cada ciclo de cpu
 			}
 			// falta ver el chekeo de insterrrupciones por parte de SJF con desalojo
 			break;
 		case IO:
+			ciclosIO =instruccion->primer_operando;
+			// ACA DEBE MANDAR A KERNEL LA PCB PARA QUE LO BLOQUEE mediante socket
+			// le enviamos la pcb y el tiempo de ciclos IO Por la cual debe blockearse
 			break;
 		case READ:
+            dir_logica=instruccion->primer_operando;
+			exec_instruccion_READ (dir_logica);
 			break;
 		case WRITE:
+			dir_logica=instruccion->primer_operando;
+			exec_instruccion_WRITE (dir_logica, valor);
 			break;
 		case COPY:
+			dir_logica=instruccion->primer_operando;
+			exec_instruccion_COPY (dir_logica, valor);
 			break;
 		case EXIT:
 			break;

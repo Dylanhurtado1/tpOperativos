@@ -23,4 +23,10 @@ bool decode(t_instruccion *proxima_instruccion);
 void execute(t_instruccion *instruccion, uint32_t valor);
 uint32_t fetch_operands(uint32_t operando, int socket_fd);
 
+//instrucciones con acceso a MEMORIA
+void exec_instruccion_READ (int dir_logica);
+void exec_instruccion_WRITE (int dir_logica, int valor);
+void exec_instruccion_COPY (int dir_logica_destino, int dir_logica_origen);
+
+
 #endif /* PETICIONES_H_ */
