@@ -132,10 +132,33 @@ void execute(t_instruccion *instruccion, uint32_t valor) {
 			exec_instruccion_COPY (dir_logica, valor);
 			break;
 		case EXIT:
+			// enviar al Kernel el PCB actualizado y msj finalizado
 			break;
 		default:
 			break;
 	}
 
 }
+void exec_instruccion_READ (int dir_logica){
+	int dir_fisica =traducir_direccion(dir_logica);
 
+}
+void exec_instruccion_WRITE (int dir_logica, int valor){
+	// traduccion y acceso a memoria
+}
+void exec_instruccion_COPY (int dir_logica_destino, int dir_logica_origen){
+
+}
+
+int traducir_direccion(int dir_logica){
+	// ACA SE IMPLEMENTARIA EL PROCESO DE TRADUCCION DE DIR LOGICA A FISICA
+	/*
+	int numero_pagina = dir_logica/tamanio_pagina;
+	int entrada_tabla_1er_nivel = numero_pagina/cantidad_entradas_por_tabla;
+	int entrada_tabla_2do_nivel = numero_pagina mod (cantidad_entradas_por_tabla);
+	int desplazamiento = dir_logica-numero_pagina*tamanio_pagina;
+
+	// CREAR ESTRUCTURA TLB en otra funcion posiblemente
+*/
+	return 0;
+}

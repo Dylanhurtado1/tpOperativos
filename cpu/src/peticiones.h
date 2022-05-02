@@ -28,5 +28,6 @@ void exec_instruccion_READ (int dir_logica);
 void exec_instruccion_WRITE (int dir_logica, int valor);
 void exec_instruccion_COPY (int dir_logica_destino, int dir_logica_origen);
 
+int traducir_direccion(int dir_logica);
 
 #endif /* PETICIONES_H_ */
