@@ -7,7 +7,10 @@
 #include "paquete.h"
 #include "estructuras.h"
 
-t_paquete *serealizar_instrucciones(t_list *instrucciones, t_protocolo protocolo);
-t_traductor *deserealizar_traductor(t_paquete *paquete);
+t_paquete *serializar_instrucciones(t_list *instrucciones, t_protocolo protocolo);
+t_list *deserializar_instrucciones(t_list *datos, t_log *logger);
+t_paquete *serializar_pcb(t_pcb *proceso, t_protocolo protocolo);
+t_pcb *deserializar_pcb(t_paquete *paquete, t_log *logger);
+t_traductor *deserializar_traductor(t_paquete *paquete);
 
 #endif /* SERIALIZADOR_H_ */

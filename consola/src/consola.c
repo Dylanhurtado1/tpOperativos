@@ -36,7 +36,7 @@ t_protocolo esperar_respuesta_de_kernel(int socket_kernel) {
 }
 
 void enviar_datos_a_kernel(int socket_kernel, t_list *instrucciones, uint32_t tam_consola) {
-	t_paquete *paquete = serealizar_instrucciones(instrucciones, DATOS_CONSOLA);
+	t_paquete *paquete = serializar_instrucciones(instrucciones, DATOS_CONSOLA);
 	agregar_a_paquete(paquete, &tam_consola, sizeof(tam_consola));
 
 	enviar_paquete(paquete, socket_kernel);
