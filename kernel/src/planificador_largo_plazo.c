@@ -7,6 +7,7 @@ uint32_t obtener_numero_tabla_de_pagina(int socket_fd);
 uint32_t generador_de_id = 0;
 uint32_t procesos_admitidos_en_ready = 0;
 t_queue *cola_new;
+t_queue *cola_fin;
 
 extern t_log *kernel_logger;
 extern t_kernel_config *kernel_config;
@@ -15,6 +16,10 @@ extern int socket_memoria;
 
 void iniciar_cola_new() {
 	cola_new = queue_create();
+}
+
+void iniciar_cola_fin(){
+	cola_fin = queue_create();
 }
 
 
