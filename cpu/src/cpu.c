@@ -2,10 +2,11 @@
 
 t_log *cpu_logger;
 int socket_memoria;
+t_cpu_config *config;
 
 int main(void) {
 	cpu_logger = log_create("cpu.log", "CPU", true, LOG_LEVEL_INFO);
-	t_cpu_config *config = cpu_leer_configuracion(PATH_CPU_CONFIG);
+	config = cpu_leer_configuracion(PATH_CPU_CONFIG);
 	pthread_t th_dispatch;
 	pthread_t th_interrupt;
 

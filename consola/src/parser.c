@@ -1,6 +1,8 @@
 #include "parser.h"
 
-void imprimir(void *dato);
+extern t_log *consola_logger;
+
+void imprimir_instrucciones(t_instruccion *instruccion);
 
 t_list *parsear_pseudocodigo(char *path) {
 	char identificador[10];
@@ -28,7 +30,7 @@ t_list *parsear_pseudocodigo(char *path) {
 		}
 	}
 
-	list_iterate(lista_instrucciones, imprimir);
+	list_iterate(lista_instrucciones, (void *)imprimir_instrucciones);
 
 	fclose(archivo);
 
@@ -45,9 +47,8 @@ t_instruccion *generar_instruccion(char *identificador, uint32_t primer_operando
 }
 
 
-void imprimir(void *dato) {
-	t_instruccion *instruccion = (t_instruccion *)dato;
-	printf("\nIdentificador: %d, op_1: %d, op_2: %d\n", instruccion->identificador, instruccion->primer_operando, instruccion->segundo_operando);
+void imprimir_instrucciones(t_instruccion *instruccion) {
+	log_info(consola_logger, "Identificador: %d, op_1: %d, op_2: %d\n", instruccion->identificador, instruccion->primer_operando, instruccion->segundo_operando);
 }
 
 t_identificador transformar_identificador(char *identificador) {
