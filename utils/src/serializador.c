@@ -2,6 +2,7 @@
 
 void print_instrucciones(t_list *instrucciones, t_log *logger);
 void print_pcb(t_pcb *pcb, t_log *logger);
+void print_traductor(t_traductor *traductor, t_log *logger);
 
 t_paquete *serializar_instrucciones(t_list *instrucciones, t_protocolo protocolo) {
 	t_paquete *paquete = crear_paquete(protocolo, buffer_vacio());
@@ -92,14 +93,29 @@ void print_pcb(t_pcb *pcb, t_log *logger) {
 	log_info(logger, "PCB cantidad de instrucciones = %d", list_size(pcb->instrucciones));
 }
 
+t_paquete *serializar_traductor(t_traductor *traductor, t_protocolo protocolo) {
+	t_paquete *paquete = crear_paquete(protocolo, buffer_vacio());
+	agregar_a_paquete(paquete, &(traductor->cantidad_entradas_tabla), sizeof(uint32_t));
+	agregar_a_paquete(paquete, &(traductor->tamanio_pagina), sizeof(uint32_t));
 
-t_traductor *deserializar_traductor(t_paquete *paquete) {
+	return paquete;
+}
+
+t_traductor *deserializar_traductor(t_paquete *paquete, t_log *logger) {
 	t_list *datos = deserealizar_paquete(paquete);
 	t_traductor *traductor = malloc(sizeof(t_traductor));
 	traductor->cantidad_entradas_tabla = *(uint32_t *)list_get(datos, 0);
 	traductor->tamanio_pagina = *(uint32_t *)list_get(datos, 1);
+	print_traductor(traductor, logger);
 
 	list_destroy_and_destroy_elements(datos, free);
 
 	return traductor;
 }
+
+void print_traductor(t_traductor *traductor, t_log *logger) {
+	log_info(logger, "Traductor: Cant entradas tabla = %d", traductor->cantidad_entradas_tabla);
+	log_info(logger, "Traductor: Tamanio pagina = %d", traductor->tamanio_pagina);
+
+}
+

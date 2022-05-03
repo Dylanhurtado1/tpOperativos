@@ -78,7 +78,7 @@ void execute(t_instruccion *instruccion, uint32_t valor) {
 			ciclosCPU =instruccion->primer_operando;
 			for (i=0;i<ciclosCPU;i++){
 				log_info(cpu_logger, "Se ejecuto operacion NO_OP %d", i+1);
-				sleep(1000); // duerme 1 segundo por cada ciclo de cpu
+				usleep(1000); // duerme 1 segundo por cada ciclo de cpu
 			}
 			// falta ver el chekeo de insterrrupciones por parte de SJF con desalojo
 			break;
