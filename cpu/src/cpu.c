@@ -1,14 +1,16 @@
 #include "cpu.h"
 
 t_log *cpu_logger;
+int socket_memoria;
+t_cpu_config *config;
 
 int main(void) {
 	cpu_logger = log_create("cpu.log", "CPU", true, LOG_LEVEL_INFO);
-	t_cpu_config *config = cpu_leer_configuracion(PATH_CPU_CONFIG);
+	config = cpu_leer_configuracion(PATH_CPU_CONFIG);
 	pthread_t th_dispatch;
 	pthread_t th_interrupt;
 
-	int socket_memoria = conectar_a_modulo(config->ip_memoria, config->puerto_memoria, cpu_logger);
+	socket_memoria = conectar_a_modulo(config->ip_memoria, config->puerto_memoria, cpu_logger);
 
 	t_traductor *traductor = obtener_traductor_direcciones(socket_memoria);
 
@@ -34,12 +36,9 @@ int main(void) {
 t_traductor *obtener_traductor_direcciones(int socket_fd) {
 	realizar_handshake(socket_fd);
 	t_paquete *paquete = recibir_paquete(socket_fd);
-	t_traductor *traductor = deserealizar_traductor(paquete);
+	t_traductor *traductor = deserializar_traductor(paquete, cpu_logger);
 
 	eliminar_paquete(paquete);
-
-	log_info(cpu_logger, "Datos de traductor: cantidas entradas = %d, tamanio pagina = %d",
-			traductor->cantidad_entradas_tabla, traductor->tamanio_pagina);
 
 	return traductor;
 }
@@ -50,17 +49,6 @@ void realizar_handshake(int socket_fd) {
 	agregar_a_paquete(paquete, &fake_data, sizeof(uint32_t)); // TODO: problemas con paquete sin datos
 	enviar_paquete(paquete, socket_fd);
 	eliminar_paquete(paquete);
-}
-
-t_traductor *deserealizar_traductor(t_paquete *paquete) {
-	t_list *datos = deserealizar_paquete(paquete);
-	t_traductor *traductor = malloc(sizeof(t_traductor));
-	traductor->cantidad_entradas_tabla = *(uint32_t *)list_get(datos, 0);
-	traductor->tamanio_pagina = *(uint32_t *)list_get(datos, 1);
-
-	list_destroy_and_destroy_elements(datos, free);
-
-	return traductor;
 }
 
 void eliminar_traductor_direcciones(t_traductor *traductor) {
