@@ -2,29 +2,29 @@
 
 t_log *cpu_logger;
 int socket_memoria;
-t_cpu_config *config;
+t_cpu_config *cpu_config;
 
 int main(void) {
 	cpu_logger = log_create("cpu.log", "CPU", true, LOG_LEVEL_INFO);
-	config = cpu_leer_configuracion(PATH_CPU_CONFIG);
+	cpu_config = cpu_leer_configuracion(PATH_CPU_CONFIG);
 	pthread_t th_dispatch;
 	pthread_t th_interrupt;
 
-	socket_memoria = conectar_a_modulo(config->ip_memoria, config->puerto_memoria, cpu_logger);
+	socket_memoria = conectar_a_modulo(cpu_config->ip_memoria, cpu_config->puerto_memoria, cpu_logger);
 
 	t_traductor *traductor = obtener_traductor_direcciones(socket_memoria);
 
-	int socket_dispatch = iniciar_modulo_servidor(config->ip_cpu, config->puerto_escucha_dispatch, cpu_logger);
+	int socket_dispatch = iniciar_modulo_servidor(cpu_config->ip_cpu, cpu_config->puerto_escucha_dispatch, cpu_logger);
 	pthread_create(&th_dispatch, NULL, (void *)peticiones_dispatch, &socket_dispatch);
 
-	int socket_interrupt = iniciar_modulo_servidor(config->ip_cpu, config->puerto_escucha_interrupt, cpu_logger);
+	int socket_interrupt = iniciar_modulo_servidor(cpu_config->ip_cpu, cpu_config->puerto_escucha_interrupt, cpu_logger);
 	pthread_create(&th_interrupt, NULL, (void *)peticiones_interrupt, &socket_interrupt);
 
 	pthread_join(th_dispatch, NULL);
 	pthread_join(th_interrupt, NULL);
 
 	log_destroy(cpu_logger);
-	cpu_eliminar_configuracion(config);
+	cpu_eliminar_configuracion(cpu_config);
 	eliminar_traductor_direcciones(traductor);
 	cerrar_conexion(socket_memoria);
 	cerrar_conexion(socket_dispatch);

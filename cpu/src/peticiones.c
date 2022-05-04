@@ -1,8 +1,8 @@
 #include "peticiones.h"
-#include "serializador.h"
+
 extern t_log *cpu_logger;
 extern int socket_memoria;
-//extern t_cpu_config *config_cpu;
+extern t_cpu_config *cpu_config;
 
 extern int socket_cpu_dispatch;
 
