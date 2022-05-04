@@ -1,8 +1,10 @@
 #include "peticiones.h"
-
+#include "serializador.h"
 extern t_log *cpu_logger;
 extern int socket_memoria;
 //extern t_cpu_config *config_cpu;
+
+extern int socket_cpu_dispatch;
 
 void peticiones_dispatch(int *socket_dispatch) {
 	log_info(cpu_logger, "CPU escuchando puerto dispatch");
@@ -67,10 +69,13 @@ void ejecutar_ciclo_de_instruccion(t_pcb *pcb) {
 		} else  if(execute(proxima_instruccion, valor_a_escribir)==2){
 			// EXIT
 			pcb->program_counter++;
+			t_paquete *pcb_actualizado = serializar_pcb(pcb, PCB);
+			enviar_paquete(pcb_actualizado, socket_cpu_dispatch);
+			eliminar_paquete(pcb_actualizado);
 			// SERIALIZAR EL PCB NORMAL Y ENVIAR A KERNEL
-
 		}
-	} while(pcb->program_counter <= tamanio_list_instrucciones );
+	} while(pcb->program_counter<=tamanio_list_instrucciones );
+	eliminar_proceso(pcb); //Not sure 
 }
 
 t_instruccion *fetch(t_pcb *pcb) {
