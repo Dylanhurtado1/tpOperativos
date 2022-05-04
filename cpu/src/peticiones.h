@@ -21,7 +21,7 @@ void eliminar_pcb(t_pcb *pcb);
 void ejecutar_ciclo_de_instruccion(t_pcb *pcb);
 t_instruccion *fetch(t_pcb *pcb);
 bool decode(t_instruccion *proxima_instruccion);
-void execute(t_instruccion *instruccion, uint32_t valor);
+int execute(t_instruccion *instruccion, uint32_t valor);
 uint32_t fetch_operands(uint32_t operando, int socket_fd);
 
 //instrucciones con acceso a MEMORIA
