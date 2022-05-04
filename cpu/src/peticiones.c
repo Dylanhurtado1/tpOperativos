@@ -2,7 +2,7 @@
 
 extern t_log *cpu_logger;
 extern int socket_memoria;
-//extern t_cpu_config *config;
+//extern t_cpu_config *config_cpu;
 
 void peticiones_dispatch(int *socket_dispatch) {
 	log_info(cpu_logger, "CPU escuchando puerto dispatch");
@@ -70,7 +70,7 @@ void ejecutar_ciclo_de_instruccion(t_pcb *pcb) {
 			// SERIALIZAR EL PCB NORMAL Y ENVIAR A KERNEL
 
 		}
-	} while(pcb->program_counter<=tamanio_list_instrucciones );
+	} while(pcb->program_counter <= tamanio_list_instrucciones );
 }
 
 t_instruccion *fetch(t_pcb *pcb) {
@@ -89,30 +89,35 @@ uint32_t fetch_operands(uint32_t operando, int socket_fd) {
 }
 
 int execute(t_instruccion *instruccion, uint32_t valor) {
-	int i,ciclosCPU, ciclosIO;
 	int dir_logica;
 	switch(instruccion->identificador) {
 		case NO_OP: // Cada instruccion NO_OP corresponde a 1 ciclo de CPU
-				log_info(cpu_logger, "Se ejecuto operacion NO_OP %d", i+1);
-				usleep(1000); //deberia leer RETARDO_NOOP del config de cpu
-			break;
+				log_info(cpu_logger, "[CPU] --> Instruccion NO_OP ejecutada...");
+				usleep(1000);
+				//usleep(config_cpu->RETARDO_NOOP); asi es correctamente pero no LEE el config
+				break;
 		case IO:
 			// ACA DEBE MANDAR A KERNEL LA PCB PARA QUE LO BLOQUEE mediante socket
 			// le enviamos la pcb y el tiempo de ciclos IO Por la cual debe blockearse
+			log_info(cpu_logger, "[CPU] --> Instruccion IO ejecutada...");
 			return 1;
 		case READ:
+			log_info(cpu_logger, "[CPU] --> Instruccion READ ejecutada...");
             dir_logica=instruccion->primer_operando;
 			exec_instruccion_READ (dir_logica);
 			break;
 		case WRITE:
+			log_info(cpu_logger, "[CPU] --> Instruccion WRITE ejecutada...");
 			dir_logica=instruccion->primer_operando;
 			exec_instruccion_WRITE (dir_logica, valor);
 			break;
 		case COPY:
+			log_info(cpu_logger, "[CPU] --> Instruccion COPY ejecutada...");
 			dir_logica=instruccion->primer_operando;
 			exec_instruccion_COPY (dir_logica, valor);
 			break;
 		case EXIT:
+			log_info(cpu_logger, "[CPU] --> Instruccion EXIT ejecutada...");
 			// enviar al Kernel el PCB actualizado y msj finalizado
 			return 2;
 		default:
@@ -122,10 +127,10 @@ int execute(t_instruccion *instruccion, uint32_t valor) {
 }
 void exec_instruccion_READ (int dir_logica){
 	int dir_fisica =traducir_direccion(dir_logica);
-
+	// traduccion y acceso a memoria para LEER
 }
 void exec_instruccion_WRITE (int dir_logica, int valor){
-	// traduccion y acceso a memoria
+	// traduccion y acceso a memoria para ESCRIBIR
 }
 void exec_instruccion_COPY (int dir_logica_destino, int dir_logica_origen){
 
@@ -134,9 +139,9 @@ void exec_instruccion_COPY (int dir_logica_destino, int dir_logica_origen){
 int traducir_direccion(int dir_logica){
 	// ACA SE IMPLEMENTARIA EL PROCESO DE TRADUCCION DE DIR LOGICA A FISICA
 	/*
-	int numero_pagina = dir_logica/tamanio_pagina;
-	int entrada_tabla_1er_nivel = numero_pagina/cantidad_entradas_por_tabla;
-	int entrada_tabla_2do_nivel = numero_pagina mod (cantidad_entradas_por_tabla);
+	int numero_pagina = dir_logica/config_memoria->tamanio_pagina;
+	int entrada_tabla_1er_nivel = numero_pagina/config_cpu->cantidad_entradas_por_tabla;
+	int entrada_tabla_2do_nivel = numero_pagina mod (config_cpu->cantidad_entradas_por_tabla);
 	int desplazamiento = dir_logica-numero_pagina*tamanio_pagina;
 
 	// CREAR ESTRUCTURA TLB en otra funcion posiblemente
