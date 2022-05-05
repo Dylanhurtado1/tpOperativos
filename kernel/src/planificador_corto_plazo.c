@@ -23,9 +23,13 @@ void ejecutar_proceso() {
 	t_paquete *paquete = serializar_pcb(proceso, PCB);
 	enviar_paquete(paquete, socket_cpu_dispatch);
 	eliminar_paquete(paquete);
+
+	paquete = recibir_paquete(socket_cpu_dispatch);
+	analizar_datos(paquete);
+	eliminar_paquete(paquete);
+
 	eliminar_proceso(proceso);
 	procesos_admitidos--;
-
 }
 
 bool hay_proceso_en_ejecucion() {
@@ -50,4 +54,17 @@ void eliminar_proceso(t_pcb *proceso) {
 	free(proceso);
 }
 
+void analizar_datos(t_paquete *paquete) {
+	switch(paquete->codigo_operacion) {
+		case BLOQUEAR_PROCESO:
+			log_info(kernel_logger, "Proceso ejecuto IO, enviando a cola de bloqueo...");
+			break;
+		case FINALIZAR_PROCESO:
+			log_info(kernel_logger, "Proceso finalizado, liberando recursos...");
+			break;
+		case PROCESO_DESALOJADO:
+			log_info(kernel_logger, "Proceso desalojado por interrupcion, seleccionar siguiente proceso a ejecutar...");
+			break;
+	}
+}
 

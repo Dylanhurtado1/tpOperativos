@@ -27,6 +27,7 @@ void iniciar_cola_ready();
 void eliminar_cola_ready();
 void ejecutar_proceso();
 bool hay_proceso_en_ejecucion();
+void analizar_datos(t_paquete *paquete);
 
 // Planificador de largo plazo
 void agregar_proceso_a_new(t_list *instrucciones, uint32_t tam_proceso);

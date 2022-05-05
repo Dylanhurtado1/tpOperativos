@@ -61,17 +61,19 @@ void ejecutar_ciclo_de_instruccion(t_pcb *pcb, int socket_kernel) {
 		pcb->program_counter++;
 	} while(status == 0 && check_interrupt());
 
+	t_paquete *paquete;
 	if(status == 1) {
-		t_paquete *paquete = serializar_pcb(pcb, BLOQUEAR_PROCESO);
+		paquete = serializar_pcb(pcb, BLOQUEAR_PROCESO);
 		agregar_a_paquete(paquete, &(proxima_instruccion->primer_operando), sizeof(uint32_t));
 		enviar_paquete(paquete, socket_kernel);
 	} else if(status == 2) {
-		t_paquete *paquete = serializar_pcb(pcb, FINALIZAR_PROCESO);
+		paquete = serializar_pcb(pcb, FINALIZAR_PROCESO);
 		enviar_paquete(paquete, socket_kernel);
 	} else {
-		t_paquete *paquete = serializar_pcb(pcb, PROCESO_DESALOJADO);
+		paquete = serializar_pcb(pcb, PROCESO_DESALOJADO);
 		enviar_paquete(paquete, socket_kernel);
 	}
+	eliminar_paquete(paquete);
 }
 
 t_instruccion *fetch(t_pcb *pcb) {
