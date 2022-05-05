@@ -4,16 +4,19 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../src/ciclo_instruccion.c \
 ../src/cpu.c \
 ../src/cpu_config.c \
 ../src/peticiones.c 
 
 OBJS += \
+./src/ciclo_instruccion.o \
 ./src/cpu.o \
 ./src/cpu_config.o \
 ./src/peticiones.o 
 
 C_DEPS += \
+./src/ciclo_instruccion.d \
 ./src/cpu.d \
 ./src/cpu_config.d \
 ./src/peticiones.d 

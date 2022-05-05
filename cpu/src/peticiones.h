@@ -19,11 +19,12 @@ void peticiones_interrupt(int *socket_fd);
 void eliminar_pcb(t_pcb *pcb);
 
 // funciones del ciclo de instruccion
-void ejecutar_ciclo_de_instruccion(t_pcb *pcb);
+void ejecutar_ciclo_de_instruccion(t_pcb *pcb, int socket_kernel);
 t_instruccion *fetch(t_pcb *pcb);
 bool decode(t_instruccion *proxima_instruccion);
+uint32_t fetch_operands(uint32_t direccion_logica, int socket_memoria);
 int execute(t_instruccion *instruccion, uint32_t valor);
-uint32_t fetch_operands(uint32_t operando, int socket_fd);
+bool check_interrupt();
 
 //instrucciones con acceso a MEMORIA
 void exec_instruccion_READ (int dir_logica);

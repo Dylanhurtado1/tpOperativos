@@ -3,6 +3,7 @@
 t_log *cpu_logger;
 int socket_memoria;
 t_cpu_config *cpu_config;
+t_traductor *traductor;
 
 int main(void) {
 	cpu_logger = log_create("cpu.log", "CPU", true, LOG_LEVEL_INFO);
@@ -12,7 +13,7 @@ int main(void) {
 
 	socket_memoria = conectar_a_modulo(cpu_config->ip_memoria, cpu_config->puerto_memoria, cpu_logger);
 
-	t_traductor *traductor = obtener_traductor_direcciones(socket_memoria);
+	traductor = obtener_traductor_direcciones(socket_memoria);
 
 	int socket_dispatch = iniciar_modulo_servidor(cpu_config->ip_cpu, cpu_config->puerto_escucha_dispatch, cpu_logger);
 	pthread_create(&th_dispatch, NULL, (void *)peticiones_dispatch, &socket_dispatch);
