@@ -1,10 +1,3 @@
-/*
- * consola_config.c
- *
- *  Created on: 19 abr. 2022
- *      Author: utnso
- */
-
 #include "cpu_config.h"
 
 t_cpu_config *cpu_leer_configuracion(char *path) {

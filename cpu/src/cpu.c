@@ -4,12 +4,15 @@ t_log *cpu_logger;
 int socket_memoria;
 t_cpu_config *cpu_config;
 t_traductor *traductor;
+sem_t sem_interrupt;
+bool desalojar_proceso = false;
 
 int main(void) {
 	cpu_logger = log_create("cpu.log", "CPU", true, LOG_LEVEL_INFO);
 	cpu_config = cpu_leer_configuracion(PATH_CPU_CONFIG);
 	pthread_t th_dispatch;
 	pthread_t th_interrupt;
+	sem_init(&sem_interrupt, 0, 1);
 
 	socket_memoria = conectar_a_modulo(cpu_config->ip_memoria, cpu_config->puerto_memoria, cpu_logger);
 

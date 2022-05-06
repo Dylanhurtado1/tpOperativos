@@ -1,6 +1,9 @@
 #include "peticiones.h"
 
 extern t_log *cpu_logger;
+extern sem_t sem_interrupt;
+extern bool desalojar_proceso;
+
 
 void peticiones_dispatch(int *socket_dispatch) {
 	log_info(cpu_logger, "CPU escuchando puerto dispatch");
@@ -33,6 +36,12 @@ void peticiones_interrupt(int *socket_interrupt) {
 	while (true) {
 		t_paquete *paquete = recibir_paquete(socket_kernel);
 		switch (paquete->codigo_operacion) {
+			case DESALOJAR_PROCESO:
+				log_info(cpu_logger, "Interrupcion recibida, proximamente se desalojara el proceso...");
+				sem_wait(&sem_interrupt);
+				desalojar_proceso = true;
+				sem_post(&sem_interrupt);
+				break;
 			default:
 				log_error(cpu_logger,"Operacion desconocida.");
 				break;
