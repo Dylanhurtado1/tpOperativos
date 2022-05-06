@@ -1,28 +1,34 @@
 #include "cpu.h"
 
 t_log *cpu_logger;
+int socket_memoria;
+t_cpu_config *cpu_config;
+t_traductor *traductor;
+sem_t sem_interrupt;
+bool desalojar_proceso = false;
 
 int main(void) {
 	cpu_logger = log_create("cpu.log", "CPU", true, LOG_LEVEL_INFO);
-	t_cpu_config *config = cpu_leer_configuracion(PATH_CPU_CONFIG);
+	cpu_config = cpu_leer_configuracion(PATH_CPU_CONFIG);
 	pthread_t th_dispatch;
 	pthread_t th_interrupt;
+	sem_init(&sem_interrupt, 0, 1);
 
-	int socket_memoria = conectar_a_modulo(config->ip_memoria, config->puerto_memoria, cpu_logger);
+	socket_memoria = conectar_a_modulo(cpu_config->ip_memoria, cpu_config->puerto_memoria, cpu_logger);
 
-	t_traductor *traductor = obtener_traductor_direcciones(socket_memoria);
+	traductor = obtener_traductor_direcciones(socket_memoria);
 
-	int socket_dispatch = iniciar_modulo_servidor(config->ip_cpu, config->puerto_escucha_dispatch, cpu_logger);
+	int socket_dispatch = iniciar_modulo_servidor(cpu_config->ip_cpu, cpu_config->puerto_escucha_dispatch, cpu_logger);
 	pthread_create(&th_dispatch, NULL, (void *)peticiones_dispatch, &socket_dispatch);
 
-	int socket_interrupt = iniciar_modulo_servidor(config->ip_cpu, config->puerto_escucha_interrupt, cpu_logger);
+	int socket_interrupt = iniciar_modulo_servidor(cpu_config->ip_cpu, cpu_config->puerto_escucha_interrupt, cpu_logger);
 	pthread_create(&th_interrupt, NULL, (void *)peticiones_interrupt, &socket_interrupt);
 
 	pthread_join(th_dispatch, NULL);
 	pthread_join(th_interrupt, NULL);
 
 	log_destroy(cpu_logger);
-	cpu_eliminar_configuracion(config);
+	cpu_eliminar_configuracion(cpu_config);
 	eliminar_traductor_direcciones(traductor);
 	cerrar_conexion(socket_memoria);
 	cerrar_conexion(socket_dispatch);
@@ -34,12 +40,9 @@ int main(void) {
 t_traductor *obtener_traductor_direcciones(int socket_fd) {
 	realizar_handshake(socket_fd);
 	t_paquete *paquete = recibir_paquete(socket_fd);
-	t_traductor *traductor = deserealizar_traductor(paquete);
+	t_traductor *traductor = deserializar_traductor(paquete, cpu_logger);
 
 	eliminar_paquete(paquete);
-
-	log_info(cpu_logger, "Datos de traductor: cantidas entradas = %d, tamanio pagina = %d",
-			traductor->cantidad_entradas_tabla, traductor->tamanio_pagina);
 
 	return traductor;
 }
@@ -50,17 +53,6 @@ void realizar_handshake(int socket_fd) {
 	agregar_a_paquete(paquete, &fake_data, sizeof(uint32_t)); // TODO: problemas con paquete sin datos
 	enviar_paquete(paquete, socket_fd);
 	eliminar_paquete(paquete);
-}
-
-t_traductor *deserealizar_traductor(t_paquete *paquete) {
-	t_list *datos = deserealizar_paquete(paquete);
-	t_traductor *traductor = malloc(sizeof(t_traductor));
-	traductor->cantidad_entradas_tabla = *(uint32_t *)list_get(datos, 0);
-	traductor->tamanio_pagina = *(uint32_t *)list_get(datos, 1);
-
-	list_destroy_and_destroy_elements(datos, free);
-
-	return traductor;
 }
 
 void eliminar_traductor_direcciones(t_traductor *traductor) {
