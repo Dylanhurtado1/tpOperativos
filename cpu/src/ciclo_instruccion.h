@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <semaphore.h>
 #include <commons/log.h>
 #include <cliente.h>
 #include <servidor.h>

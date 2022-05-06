@@ -18,11 +18,11 @@ void procesar_datos_consola(t_cliente *datos_cliente) {
 
 			agregar_proceso_a_new(lista_instrucciones, tamanio_consola);
 			log_info(kernel_logger, "Se creo la PCB correctamente y se agrego al estado NEW");
-			//if(es_posible_admitir_proceso()) {                          			//Deberia gestionarse segun el algoritmo a usar ingreso a la cola de ready
-			//	admitir_proceso();													//FIFO: lo agrega como viene, SRT lo agrega pero desaloja al que esta ejecutando
-			//log_info(kernel_logger, "Se movio el proceso a la cola de ready");
-			//}
-			//ejecutar_proceso();
+			if(es_posible_admitir_proceso()) {                          			//Deberia gestionarse segun el algoritmo a usar ingreso a la cola de ready
+				admitir_proceso();													//FIFO: lo agrega como viene, SRT lo agrega pero desaloja al que esta ejecutando
+			log_info(kernel_logger, "Se movio el proceso a la cola de ready");
+			}
+			ejecutar_proceso();
 
 			enviar_respuesta_a_consola(datos_cliente->socket, FINALIZAR_CONSOLA_OK);
 			list_destroy_and_destroy_elements(datos, free);

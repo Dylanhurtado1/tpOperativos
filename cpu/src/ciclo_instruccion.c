@@ -4,6 +4,8 @@ extern t_log *cpu_logger;
 extern int socket_memoria;
 extern t_cpu_config *cpu_config;
 extern t_traductor *traductor;
+extern sem_t sem_interrupt;
+extern bool desalojar_proceso;
 
 void ejecutar_ciclo_de_instruccion(t_pcb *pcb, int socket_kernel) {
 	int status;
@@ -18,7 +20,7 @@ void ejecutar_ciclo_de_instruccion(t_pcb *pcb, int socket_kernel) {
 		}
 		status = execute(proxima_instruccion, valor_a_escribir);
 		pcb->program_counter++;
-	} while(status == 0 && check_interrupt());
+	} while(status == 0 && !check_interrupt());
 
 	t_paquete *paquete;
 	if(status == 1) {
@@ -84,8 +86,14 @@ int execute(t_instruccion *instruccion, uint32_t valor) {
 }
 
 bool check_interrupt() {
-	// TODO: checkear que llego una interrupcion
-	return true;
+	sem_wait(&sem_interrupt);
+	bool status = desalojar_proceso;
+	if(desalojar_proceso) {
+		desalojar_proceso = false;
+	}
+	sem_post(&sem_interrupt);
+
+	return status;
 }
 
 

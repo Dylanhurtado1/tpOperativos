@@ -3,20 +3,22 @@
 
 void eliminar_proceso_cola_ready(t_pcb *proceso);
 void eliminar_proceso(t_pcb *proceso);
-//void enviar_interrupcion_a_cpu(int socket_fd);
+void enviar_interrupcion_a_cpu(int socket_fd);
 
 t_queue *cola_ready;
 t_queue *cola_new;
 t_queue *cola_exec;
 bool exec = false;
 
-//extern int socket_cpu_interrupt;
+extern int socket_cpu_interrupt;
 extern int socket_cpu_dispatch;
 extern t_log *kernel_logger;
 extern uint32_t procesos_admitidos_en_ready;
 
 void agregar_proceso_a_ready(t_pcb *proceso) {
 	queue_push(cola_ready, proceso);
+	// TODO: agregar condicion para saber si es SRT (la interrupcion solo se envia en SRT)
+	enviar_interrupcion_a_cpu(socket_cpu_interrupt);
 }
 
 void ejecutar_proceso() {
@@ -87,6 +89,11 @@ void analizar_datos(t_paquete *paquete) {
 			break;
 		case PROCESO_DESALOJADO:
 			log_info(kernel_logger, "Proceso desalojado por interrupcion, seleccionar siguiente proceso a ejecutar...");
+			pcb = deserializar_pcb(datos, kernel_logger);
+			usleep(20000); // <-- Solo para debug
+			log_info(kernel_logger, "Se envia siguiente proceso...");
+			enviar_proceso_a_cpu(pcb, socket_cpu_dispatch);
+			eliminar_proceso(pcb);
 			break;
 	}
 	list_destroy_and_destroy_elements(datos, free);
@@ -114,23 +121,18 @@ void agregar_proceso_a_ready_SRT(t_pcb *proceso){
 	queue_push(cola_ready, proceso);
 	enviar_interrupcion_a_cpu(socket_cpu_interrupt);
 	procesos_admitidos_en_ready++;
-}
+}*/
 
 
 
 void enviar_interrupcion_a_cpu(int socket_fd){
-	uint32_t nada = 0;
-	t_pcb *pcbProceso;
+	log_info(kernel_logger, "Enviando interrupcion de desalojo");
 	t_paquete *paquete = crear_paquete(DESALOJAR_PROCESO, buffer_vacio());
-	agregar_a_paquete(paquete, &nada, sizeof(uint32_t));           //Envia una interrupcion, igual que con memoria no tiene que enviar datos
+	uint32_t nada = 0;
+	agregar_a_paquete(paquete, &nada, sizeof(uint32_t));
 	enviar_paquete(paquete, socket_fd);
 	eliminar_paquete(paquete);
-
-	//recibir_datos(socket_fd, &pcbProceso, sizeof(t_pcb));
-	//log_info(kernel_logger, "PCB del proceso en ejecucion desalojado recibido");
-
 }
-*/
 
 
 
