@@ -25,6 +25,9 @@ void analizar_datos(t_paquete *paquete);
 void enviar_proceso_a_cpu(t_pcb *pcb, int socket_cpu_dispatch);
 t_paquete *esperar_respuesta_cpu(int socket_cpu_dispatch);
 
+void planificacionFIFO();
+void planificacionSRT();
+
 // Planificador de largo plazo
 void agregar_proceso_a_new(t_list *instrucciones, uint32_t tam_proceso);
 bool es_posible_admitir_proceso();
@@ -32,5 +35,10 @@ void admitir_proceso();
 void iniciar_cola_new();
 void eliminar_cola_new();
 
+// Planificador de mediano plazo
+void agregar_proceso_a_suspended_blocked(t_pcb *proceso);
+void iniciar_cola_suspended_blocked();
+void iniciar_cola_suspended_ready();
+void iniciar_cola_blocked();
 
 #endif /* PLANIFICADOR_H_ */
