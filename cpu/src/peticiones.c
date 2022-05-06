@@ -10,7 +10,9 @@ void peticiones_dispatch(int *socket_dispatch) {
 		switch (paquete->codigo_operacion) {
 			case PCB:
 				log_info(cpu_logger,"PCB recibida");
-				t_pcb *pcb = deserializar_pcb(paquete, cpu_logger);
+				t_list *datos = deserealizar_paquete(paquete);
+				t_pcb *pcb = deserializar_pcb(datos, cpu_logger);
+				list_destroy_and_destroy_elements(datos, free);
 
 				ejecutar_ciclo_de_instruccion(pcb, socket_kernel);
 

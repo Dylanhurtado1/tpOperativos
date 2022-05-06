@@ -1,15 +1,9 @@
-/*
- * planificador.h
- *
- *  Created on: 21 abr. 2022
- *      Author: utnso
- */
-
 #ifndef PLANIFICADOR_H_
 #define PLANIFICADOR_H_
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <commons/log.h>
 #include <commons/collections/list.h>
 #include <commons/collections/queue.h>
@@ -28,6 +22,8 @@ void eliminar_cola_ready();
 void ejecutar_proceso();
 bool hay_proceso_en_ejecucion();
 void analizar_datos(t_paquete *paquete);
+void enviar_proceso_a_cpu(t_pcb *pcb, int socket_cpu_dispatch);
+t_paquete *esperar_respuesta_cpu(int socket_cpu_dispatch);
 
 // Planificador de largo plazo
 void agregar_proceso_a_new(t_list *instrucciones, uint32_t tam_proceso);
