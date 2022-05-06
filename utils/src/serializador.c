@@ -59,8 +59,7 @@ t_paquete *serializar_pcb(t_pcb *proceso, t_protocolo protocolo) {
 	return paquete;
 }
 
-t_pcb *deserializar_pcb(t_paquete *paquete, t_log *logger) {
-	t_list *datos = deserealizar_paquete(paquete);
+t_pcb *deserializar_pcb(t_list *datos, t_log *logger) {
 	t_pcb *pcb = malloc(sizeof(t_pcb));
 
 	pcb->id = *(uint32_t *)list_get(datos, 0);
@@ -78,8 +77,6 @@ t_pcb *deserializar_pcb(t_paquete *paquete, t_log *logger) {
 		list_add(pcb->instrucciones, instruccion);
 	}
 	print_pcb(pcb, logger);
-
-	list_destroy_and_destroy_elements(datos, free);
 
 	return pcb;
 }
