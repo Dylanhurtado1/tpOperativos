@@ -27,7 +27,7 @@ void ejecutar_proceso() {
 		return;
 	}
 	t_pcb *proceso = queue_pop(cola_ready);
-	enviar_proceso_a_cpu(proceso, socket_cpu_dispatch);
+	enviar_proceso_a_cpu(proceso, socket_cpu_dispatch);//todos los procesos son enviados por dispatch
 	eliminar_proceso(proceso);
 
 	t_protocolo protocolo;
@@ -75,6 +75,7 @@ void analizar_datos(t_paquete *paquete) {
 			log_info(kernel_logger, "Proceso ejecuto IO, enviando a cola de bloqueo...");
 			uint32_t *tiempo_bloqueo = (uint32_t *)list_remove(datos, list_size(datos) - 1);
 			pcb = deserializar_pcb(datos, kernel_logger);
+			agregar_proceso_a_blocked(pcb);//se agrega a la cola de bloqueados
 			log_info(kernel_logger, "Tiempo bloqueo = %d", *tiempo_bloqueo);
 			usleep(*tiempo_bloqueo * 1000);
 			log_info(kernel_logger, "Finalizo bloqueo, enviando proceso a CPU...");
@@ -85,6 +86,9 @@ void analizar_datos(t_paquete *paquete) {
 		case FINALIZAR_PROCESO:
 			log_info(kernel_logger, "Proceso finalizado, liberando recursos...");
 			pcb = deserializar_pcb(datos, kernel_logger);
+			//mandar un mensaje a memoria
+			//espera respuesta de memoria
+			//envia mensaje a consola
 			eliminar_proceso(pcb);
 			break;
 		case PROCESO_DESALOJADO:
@@ -241,7 +245,7 @@ void inicio_planificacion(){
 
 
 void iniciar_colas_de_planificacion() {
-	iniciar_hilo_cola_ready();
+	iniciar_hilo_cola_ready();//cada hilo es una cola
 	iniciar_hilo_cola_blocked();
 	iniciar_hilo_cola_suspended_blocked();
 	iniciar_hilo_cola_suspended_ready();
