@@ -12,6 +12,7 @@ bool exec = false;
 
 extern int socket_cpu_interrupt;
 extern int socket_cpu_dispatch;
+extern int socket_memoria;//esto para conectarse con memoria
 extern t_log *kernel_logger;
 extern uint32_t procesos_admitidos_en_ready;
 
@@ -84,8 +85,11 @@ void analizar_datos(t_paquete *paquete) {
 			free(tiempo_bloqueo);
 			break;
 		case FINALIZAR_PROCESO:
-			log_info(kernel_logger, "Proceso finalizado, liberando recursos...");
+			log_info(kernel_logger, "Proceso finalizado, liberando recursos a memoria...");//todavia no implementado
 			pcb = deserializar_pcb(datos, kernel_logger);
+			enviar_proceso_a_memoria(pcb, socket_memoria); //falta la parte de memoria :(
+			esperar_respuesta_memoria(socket_memoria);
+			log_info(kernel_logger,"Aviso a consola que finaliza proceso :)");
 			//mandar un mensaje a memoria
 			//espera respuesta de memoria
 			//envia mensaje a consola
@@ -109,10 +113,20 @@ void enviar_proceso_a_cpu(t_pcb *pcb, int socket_cpu_dispatch) {
 	eliminar_paquete(paquete);
 }
 
+void enviar_proceso_a_memoria(t_pcb *pcb, int socket_memoria) {
+	t_paquete *paquete = serializar_pcb(pcb, PCB);
+	enviar_paquete(paquete, socket_memoria);
+	eliminar_paquete(paquete);
+}// esta funcion para el mensaje a memoria
+
+
 t_paquete *esperar_respuesta_cpu(int socket_cpu_dispatch) {
 	return recibir_paquete(socket_cpu_dispatch);
 }
 
+t_paquete *esperar_respuesta_memoria(int socket_memoria) {//nose si seria con dispath
+	return recibir_paquete(socket_memoria);
+}
 
 bool hay_procesos_en_ready(){
 	int cantidadReady = queue_size(cola_ready);
