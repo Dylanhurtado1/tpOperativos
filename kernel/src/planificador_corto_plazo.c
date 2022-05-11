@@ -29,7 +29,7 @@ void ejecutar_proceso() {
 	}
 	t_pcb *proceso = queue_pop(cola_ready);
 	enviar_proceso_a_cpu(proceso, socket_cpu_dispatch);//todos los procesos son enviados por dispatch
-	eliminar_proceso(proceso);
+	//eliminar_proceso(proceso);
 
 	t_protocolo protocolo;
 	do {
@@ -234,7 +234,7 @@ void inicio_estructuras_planificacion(){
 	iniciar_cola_suspended_ready();
 	iniciar_cola_fin(); //Ver si es necesario
 
-
+    //iniiciar semaforos
 	pthread_mutex_init(&planificador_mutex_new,NULL);
 	pthread_mutex_init(&planificador_mutex_ready,NULL);
 	pthread_mutex_init(&planificador_mutex_exec,NULL);

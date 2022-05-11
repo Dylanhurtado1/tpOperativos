@@ -41,4 +41,6 @@ void iniciar_cola_suspended_blocked();
 void iniciar_cola_suspended_ready();
 void iniciar_cola_blocked();
 
+
+
 #endif /* PLANIFICADOR_H_ */

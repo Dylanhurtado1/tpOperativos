@@ -35,4 +35,5 @@ int main(void) {
 	cerrar_conexion(socket_kernel);
 
 	return EXIT_SUCCESS;
+
 }

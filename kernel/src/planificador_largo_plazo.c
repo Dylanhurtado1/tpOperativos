@@ -25,7 +25,10 @@ void iniciar_cola_fin(){
 
 void agregar_proceso_a_new(t_list *instrucciones, uint32_t tam_proceso) {
 	t_pcb *proceso = crear_estructura_pcb(instrucciones, tam_proceso);
+	//pthread_mutex_t mutexNew;
+	pthread_mutex_lock(&planificador_mutex_new);
 	queue_push(cola_new, proceso);
+	pthread_mutex_unlock(&planificador_mutex_new);
 }
 
 t_pcb *crear_estructura_pcb(t_list *instrucciones, uint32_t tam_proceso) {
@@ -49,7 +52,9 @@ void admitir_proceso() {
 	uint32_t numero = obtener_numero_tabla_de_pagina(socket_memoria);
 	t_pcb *proceso = (t_pcb *)queue_pop(cola_new);
 	proceso->tabla_paginas = numero;
+	pthread_mutex_lock(&planificador_mutex_ready);//semaforos mutex cada vez que metemos proceso
 	agregar_proceso_a_ready(proceso);
+	pthread_mutex_unlock(&planificador_mutex_ready);
 	procesos_admitidos_en_ready++;
 }
 
