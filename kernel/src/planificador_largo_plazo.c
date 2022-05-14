@@ -25,7 +25,7 @@ void iniciar_cola_fin(){
 
 void agregar_proceso_a_new(t_list *instrucciones, uint32_t tam_proceso) {
 	t_pcb *proceso = crear_estructura_pcb(instrucciones, tam_proceso);
-	//pthread_mutex_t mutexNew;
+
 	pthread_mutex_lock(&planificador_mutex_new);
 	queue_push(cola_new, proceso);
 	pthread_mutex_unlock(&planificador_mutex_new);

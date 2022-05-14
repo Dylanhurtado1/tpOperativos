@@ -1,6 +1,6 @@
 #include "serializador.h"
 
-void print_instrucciones(t_list *instrucciones, t_log *logger);
+void print_instrucciones_2(t_list *instrucciones, t_log *logger);
 void print_pcb(t_pcb *pcb, t_log *logger);
 void print_traductor(t_traductor *traductor, t_log *logger);
 
@@ -27,12 +27,17 @@ t_list *deserializar_instrucciones(t_list *datos, t_log *logger) {
 		instruccion->segundo_operando = *(uint32_t *)list_get(datos, i + 2);
 		list_add(lista_instrucciones, instruccion);
 	}
-	print_instrucciones(lista_instrucciones, logger);
+	//print_instrucciones(lista_instrucciones, logger);
 
 	return lista_instrucciones;
 }
 
-void print_instrucciones(t_list *instrucciones, t_log *logger) {
+uint32_t deserialzar_tamanio_consola(t_list *datos) {
+	uint32_t tamanio = *(uint32_t *)list_get(datos, list_size(datos) - 1);
+	return tamanio;
+}
+
+void print_instrucciones_2(t_list *instrucciones, t_log *logger) {
 	log_info(logger,"Cantidad de instrucciones recibidas: %d", list_size(instrucciones));
 	for(int i = 0; i < list_size(instrucciones); i++) {
 		t_instruccion *instruccion = (t_instruccion *)list_get(instrucciones, i);

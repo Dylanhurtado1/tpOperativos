@@ -4,6 +4,8 @@
 void eliminar_proceso_cola_ready(t_pcb *proceso);
 void eliminar_proceso(t_pcb *proceso);
 void enviar_interrupcion_a_cpu(int socket_fd);
+void enviar_proceso_a_memoria(t_pcb *pcb, int socket_memoria);
+t_paquete *esperar_respuesta_memoria(int socket_memoria);
 
 t_queue *cola_ready;
 t_queue *cola_new;
