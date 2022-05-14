@@ -1,6 +1,5 @@
 #include "planificador.h"
 
-t_pcb *crear_estructura_pcb(t_list *instrucciones, uint32_t tam_proceso);
 void eliminar_proceso_cola_new(t_pcb *proceso);
 uint32_t obtener_numero_tabla_de_pagina(int socket_fd);
 
@@ -29,18 +28,23 @@ void agregar_proceso_a_new(t_list *instrucciones, uint32_t tam_proceso) {
 	pthread_mutex_lock(&planificador_mutex_new);
 	queue_push(cola_new, proceso);
 	pthread_mutex_unlock(&planificador_mutex_new);
+	log_info(kernel_logger, "Se agregó PCB a cola NEW");
+
+	sem_post(&sem_ready);
 }
 
 t_pcb *crear_estructura_pcb(t_list *instrucciones, uint32_t tam_proceso) {
 	t_pcb *pcb = malloc(sizeof(t_pcb));
 
+	pthread_mutex_lock(&plp_mutex_generador_id);
 	pcb->id = generador_de_id;
+	generador_de_id++;
+	pthread_mutex_unlock(&plp_mutex_generador_id);
 	pcb->tam_proceso = tam_proceso;
 	pcb->instrucciones = instrucciones;
 	pcb->program_counter = 0;
 	pcb->estimacion_rafaga = kernel_config->estimacion_inicial;
 
-	generador_de_id++;
 	return pcb;
 }
 

@@ -19,7 +19,7 @@ void procesar_datos_consola(t_cliente *datos_cliente) {
 			print_datos_consola(kernel_logger, instrucciones, tamanio);
 
 			agregar_proceso_a_new(instrucciones, tamanio);
-			log_info(kernel_logger, "Se creo la PCB correctamente y se agrego al estado NEW");
+			//log_info(kernel_logger, "Se creo la PCB correctamente y se agrego al estado NEW");
 			if(es_posible_admitir_proceso()) {
 				admitir_proceso();
 			log_info(kernel_logger, "Se movio el proceso a la cola de ready");

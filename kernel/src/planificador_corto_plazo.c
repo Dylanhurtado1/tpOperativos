@@ -256,7 +256,7 @@ void inicio_planificacion(){
 	pthread_t hilo_planificacion;
 	pthread_create(&hilo_planificacion, NULL, (void*) iniciar_colas_de_planificacion, NULL);
 	pthread_detach(hilo_planificacion);
-	}
+}
 
 
 

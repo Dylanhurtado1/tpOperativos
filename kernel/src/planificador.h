@@ -15,7 +15,17 @@
 #include <serializador.h>
 #include "kernel_config.h"
 
-// Planificador de corto plazo
+#include "kernel_global.h"
+
+// Planificador Largo Plazo
+void agregar_proceso_a_new(t_list *instrucciones, uint32_t tam_proceso);
+t_pcb *crear_estructura_pcb(t_list *instrucciones, uint32_t tam_proceso);
+bool es_posible_admitir_proceso();
+void admitir_proceso();
+void iniciar_cola_new();
+void eliminar_cola_new();
+
+// Planificador Corto Plazo
 void agregar_proceso_a_ready(t_pcb *proceso);
 void iniciar_cola_ready();
 void eliminar_cola_ready();
@@ -28,14 +38,7 @@ t_paquete *esperar_respuesta_cpu(int socket_cpu_dispatch);
 void planificacionFIFO();
 void planificacionSRT();
 
-// Planificador de largo plazo
-void agregar_proceso_a_new(t_list *instrucciones, uint32_t tam_proceso);
-bool es_posible_admitir_proceso();
-void admitir_proceso();
-void iniciar_cola_new();
-void eliminar_cola_new();
-
-// Planificador de mediano plazo
+// Planificador Mediano Plazo
 void agregar_proceso_a_suspended_blocked(t_pcb *proceso);
 void iniciar_cola_suspended_blocked();
 void iniciar_cola_suspended_ready();
