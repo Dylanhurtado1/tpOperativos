@@ -37,3 +37,9 @@ int main(void) {
 	return EXIT_SUCCESS;
 
 }
+
+void iniciar_planificador() {
+	iniciar_planificador_largo_plazo();
+}
+
+

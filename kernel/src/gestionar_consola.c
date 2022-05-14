@@ -18,7 +18,9 @@ void procesar_datos_consola(t_cliente *datos_cliente) {
 			//log_info(kernel_logger,"Tamanio de consola: %d", tamanio);
 			print_datos_consola(kernel_logger, instrucciones, tamanio);
 
-			agregar_proceso_a_new(instrucciones, tamanio);
+			t_pcb *proceso = crear_estructura_pcb(instrucciones, tamanio);
+
+			agregar_proceso_a_new(proceso, datos_cliente->socket);
 			//log_info(kernel_logger, "Se creo la PCB correctamente y se agrego al estado NEW");
 			if(es_posible_admitir_proceso()) {
 				admitir_proceso();
@@ -26,7 +28,7 @@ void procesar_datos_consola(t_cliente *datos_cliente) {
 			}
 			ejecutar_proceso();
 
-			enviar_respuesta_a_consola(datos_cliente->socket, FINALIZAR_CONSOLA_OK);
+			//enviar_respuesta_a_consola(datos_cliente->socket, FINALIZAR_CONSOLA_OK);
 			list_destroy_and_destroy_elements(datos, free);
 			break;
 		default:
@@ -35,9 +37,9 @@ void procesar_datos_consola(t_cliente *datos_cliente) {
 	}
 }
 
-void enviar_respuesta_a_consola(int socket_fd, t_protocolo protocolo) {
+/*void enviar_respuesta_a_consola(int socket_fd, t_protocolo protocolo) {
 	enviar_datos(socket_fd, &protocolo, sizeof(t_protocolo));
-}
+}*/
 
 /*uint32_t obtener_tamanio_consola(t_list *datos) {
 	uint32_t tamanio = *(uint32_t *)list_get(datos, list_size(datos) - 1);

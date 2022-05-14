@@ -5,12 +5,23 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-t_log *kernel_logger;
 
+// Kernel
+t_log *kernel_logger;
+t_kernel_config *kernel_config;
+int socket_memoria;
 
 // Planificador Largo Plazo
-pthread_mutex_t planificador_mutex_new;
-pthread_mutex_t plp_mutex_generador_id;
+uint32_t generador_de_id;
+uint32_t procesos_admitidos_en_ready;
+t_queue *cola_new;
+t_queue *cola_exit;
+pthread_mutex_t mutex_generador_id;
+pthread_mutex_t mutex_new;
+//pthread_mutex_t mutex_exit;
+pthread_t thread_exit;
+sem_t sem_exit;
+sem_t sem_grado_multiprogramacion;
 
 
 // Planificador Corto Plazo

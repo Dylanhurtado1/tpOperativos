@@ -228,16 +228,16 @@ void inicio_estructuras_planificacion(){
 
 	//Creo las colas
 
-	iniciar_cola_new();
+	//iniciar_cola_new();
 	iniciar_cola_ready();
 	iniciar_cola_exec();
 	iniciar_cola_blocked();
 	iniciar_cola_suspended_blocked();
 	iniciar_cola_suspended_ready();
-	iniciar_cola_fin(); //Ver si es necesario
+	//iniciar_cola_fin(); //Ver si es necesario
 
     //iniiciar semaforos
-	pthread_mutex_init(&planificador_mutex_new,NULL);
+	//pthread_mutex_init(&planificador_mutex_new,NULL);
 	pthread_mutex_init(&planificador_mutex_ready,NULL);
 	pthread_mutex_init(&planificador_mutex_exec,NULL);
 	pthread_mutex_init(&planificador_mutex_blocked,NULL);

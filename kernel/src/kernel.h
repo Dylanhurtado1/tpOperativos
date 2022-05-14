@@ -47,13 +47,13 @@ void planificar_cola_exec();
 
 //SEMAFOROS
 
-pthread_mutex_t planificador_mutex_new;
+//pthread_mutex_t planificador_mutex_new;
 pthread_mutex_t planificador_mutex_ready;
 pthread_mutex_t planificador_mutex_exec;
 pthread_mutex_t planificador_mutex_blocked;
 pthread_mutex_t planificador_mutex_suspended_blocked;
 pthread_mutex_t planificador_mutex_suspended_ready;
-pthread_mutex_t planificador_mutex_fin;
+//pthread_mutex_t planificador_mutex_fin;
 
 
 #endif /* KERNEL_H_ */

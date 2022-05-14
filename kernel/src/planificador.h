@@ -18,12 +18,16 @@
 #include "kernel_global.h"
 
 // Planificador Largo Plazo
-void agregar_proceso_a_new(t_list *instrucciones, uint32_t tam_proceso);
+void iniciar_planificador_largo_plazo();
+void agregar_proceso_a_new(t_pcb *proceso, int socket_fd);
 t_pcb *crear_estructura_pcb(t_list *instrucciones, uint32_t tam_proceso);
 bool es_posible_admitir_proceso();
 void admitir_proceso();
-void iniciar_cola_new();
-void eliminar_cola_new();
+void eliminar_proceso_cola_new(t_pcb *proceso);
+void estado_exit(void *dato);
+void enviar_respuesta_a_consola(int socket_fd, t_protocolo protocolo);
+//void iniciar_cola_new();
+//void eliminar_cola_new();
 
 // Planificador Corto Plazo
 void agregar_proceso_a_ready(t_pcb *proceso);
@@ -44,6 +48,9 @@ void iniciar_cola_suspended_blocked();
 void iniciar_cola_suspended_ready();
 void iniciar_cola_blocked();
 
-
+typedef struct {
+	int socket;
+	uint32_t id;
+} t_pid;
 
 #endif /* PLANIFICADOR_H_ */
