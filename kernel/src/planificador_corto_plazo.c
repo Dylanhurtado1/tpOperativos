@@ -1,5 +1,4 @@
 #include "planificador.h"
-#include "kernel.h"
 
 void eliminar_proceso_cola_ready(t_pcb *proceso);
 void eliminar_proceso(t_pcb *proceso);
@@ -7,16 +6,111 @@ void enviar_interrupcion_a_cpu(int socket_fd);
 void enviar_proceso_a_memoria(t_pcb *pcb, int socket_memoria);
 t_paquete *esperar_respuesta_memoria(int socket_memoria);
 
-t_queue *cola_ready;
-t_queue *cola_new;
-t_queue *cola_exec;
 bool exec = false;
 
-extern int socket_cpu_interrupt;
-extern int socket_cpu_dispatch;
-extern int socket_memoria;//esto para conectarse con memoria
-extern t_log *kernel_logger;
-extern uint32_t procesos_admitidos_en_ready;
+
+void iniciar_planificador_corto_plazo() {
+	tiempo_bloqueo = NULL;
+	pthread_mutex_init(&mutex_ready, NULL);
+	pthread_mutex_init(&mutex_blocked, NULL);
+	pthread_mutex_init(&mutex_exec, NULL);
+	sem_init(&sem_ready, 0, 0);
+	sem_init(&sem_exec, 0, 0);
+	sem_init(&sem_blocked, 0, 0);
+	cola_ready = queue_create();
+	cola_exec = queue_create();
+	cola_blocked = queue_create();
+	pthread_create(&thread_ready, NULL, (void *)estado_ready, NULL);
+	pthread_create(&thread_exec, NULL, (void *)estado_exec, NULL);
+	pthread_create(&thread_blocked, NULL, (void *)estado_blocked, NULL);
+}
+
+void estado_ready(void *data) {
+	while(1) {
+		sem_wait(&sem_ready);
+		sem_wait(&sem_grado_multiprogramacion);
+		t_pcb *proceso;
+
+		//pthread_mutex_lock(&mutex_suspend_ready);
+		//if(!queue_is_empty(cola_suspend_ready)) {
+			//proceso = (t_pcb *)queue_pop(cola_suspend_ready);
+			//pthread_mutex_lock(&mutex_suspend_ready);
+		//} else {
+			pthread_mutex_lock(&mutex_new);
+			proceso = queue_pop(cola_new);
+			pthread_mutex_unlock(&mutex_new);
+			proceso->tabla_paginas = obtener_numero_tabla_de_pagina(socket_memoria);
+		//}
+
+		pthread_mutex_lock(&mutex_ready);
+		queue_push(cola_ready, proceso);
+		pthread_mutex_unlock(&mutex_ready);
+
+		sem_post(&sem_exec);
+	}
+}
+
+
+void estado_exec(void *data) {
+	while(1) {
+		sem_wait(&sem_exec);
+		pthread_mutex_lock(&mutex_ready);
+		t_pcb *proceso = queue_pop(cola_ready);
+		pthread_mutex_unlock(&mutex_ready);
+		enviar_proceso_a_cpu(proceso, socket_cpu_dispatch);
+		eliminar_proceso(proceso);
+
+		t_paquete *paquete = esperar_respuesta_cpu(socket_cpu_dispatch);
+		t_list *datos = deserealizar_paquete(paquete);
+		t_pcb *pcb;
+		switch(paquete->codigo_operacion) {
+			case BLOQUEAR_PROCESO:
+				log_info(kernel_logger, "Proceso ejecuto IO, enviando a cola de bloqueo...");
+				tiempo_bloqueo = (uint32_t *)list_remove(datos, list_size(datos) - 1);
+				log_info(kernel_logger, "Tiempo bloqueo = %d ms", *tiempo_bloqueo);
+				pcb = deserializar_pcb(datos, kernel_logger);
+
+				pthread_mutex_lock(&mutex_blocked);
+				queue_push(cola_blocked, pcb);
+				pthread_mutex_unlock(&mutex_blocked);
+
+				sem_post(&sem_blocked);
+				break;
+			case FINALIZAR_PROCESO:
+				log_info(kernel_logger, "Proceso ejecuto EXIT, enviando a cola de salida...");
+				pcb = deserializar_pcb(datos, kernel_logger);
+
+				pthread_mutex_lock(&mutex_exit);
+				queue_push(cola_exit, pcb);
+				pthread_mutex_unlock(&mutex_exit);
+
+				sem_post(&sem_exit);
+				break;
+		}
+		list_destroy_and_destroy_elements(datos, free);
+		eliminar_paquete(paquete);
+	}
+}
+
+void estado_blocked(void *data) {
+	while(1) {
+		sem_wait(&sem_blocked);
+		pthread_mutex_lock(&mutex_blocked);
+		t_pcb *proceso = queue_pop(cola_blocked);
+		pthread_mutex_unlock(&mutex_blocked);
+		log_info(kernel_logger, "Bloqueando proceso con ID = %d...", proceso->id);
+		usleep(*tiempo_bloqueo * 1000);
+		free(tiempo_bloqueo);
+		log_info(kernel_logger, "Finalizo bloqueo...");
+
+		pthread_mutex_lock(&mutex_ready);
+		queue_push(cola_ready, proceso);
+		pthread_mutex_unlock(&mutex_ready);
+		sem_post(&sem_ready);
+	}
+}
+
+
 
 void agregar_proceso_a_ready(t_pcb *proceso) {
 	queue_push(cola_ready, proceso);
@@ -78,7 +172,7 @@ void analizar_datos(t_paquete *paquete) {
 			log_info(kernel_logger, "Proceso ejecuto IO, enviando a cola de bloqueo...");
 			uint32_t *tiempo_bloqueo = (uint32_t *)list_remove(datos, list_size(datos) - 1);
 			pcb = deserializar_pcb(datos, kernel_logger);
-			agregar_proceso_a_blocked(pcb);//se agrega a la cola de bloqueados
+			//agregar_proceso_a_blocked(pcb);//se agrega a la cola de bloqueados
 			log_info(kernel_logger, "Tiempo bloqueo = %d", *tiempo_bloqueo);
 			usleep(*tiempo_bloqueo * 1000);
 			log_info(kernel_logger, "Finalizo bloqueo, enviando proceso a CPU...");
@@ -119,7 +213,7 @@ void enviar_proceso_a_memoria(t_pcb *pcb, int socket_memoria) {
 	t_paquete *paquete = serializar_pcb(pcb, PCB);
 	enviar_paquete(paquete, socket_memoria);
 	eliminar_paquete(paquete);
-}// esta funcion para el mensaje a memoria
+}
 
 
 t_paquete *esperar_respuesta_cpu(int socket_cpu_dispatch) {
@@ -135,13 +229,9 @@ bool hay_procesos_en_ready(){
 	return cantidadReady > 0;
 }
 
-/*
-void agregar_proceso_a_ready_SRT(t_pcb *proceso){
-	proceso = queue_pop(cola_new);
-	queue_push(cola_ready, proceso);
-	enviar_interrupcion_a_cpu(socket_cpu_interrupt);
-	procesos_admitidos_en_ready++;
-}*/
+void agregar_proceso_a_blocked(t_pcb *proceso) {
+	queue_push(cola_blocked, proceso);
+}
 
 
 
@@ -153,206 +243,6 @@ void enviar_interrupcion_a_cpu(int socket_fd){
 	enviar_paquete(paquete, socket_fd);
 	eliminar_paquete(paquete);
 }
-
-
-
-
-//No es que este mal, pero hay que tratarlo con hilos en cada cola porque sino ante alguna operacion o interrupcion o etc etc bloqueas TODA la funcion
-//de planificar, y no es la idea. la idea es trabajarlo por colas separadas y que puedas bloquearlas con semaforos (osea sincronizarlas) ante alguna operacion / etc..
-
-
-
-
-/*
-void planificacionFIFO(){//ESTA ES UNA IMPLEMENTACION CON LISTAS, HAY QUE DEFINIR COLAS O LISTAS, PERO ES
-	//UN APROXIMADO A LO QUE PENSE, NO ESTA TERMINADO
-	    int tamanioReady = 5;//SUPONIENDO HAY 5 procesos en ready, nose si estoy haciendolo bien xD
-		int tamanioNew;
-		int grado_multitarea = 2;//cantidad de procesos que pueden estar ejecutando
-		int ejecutando = 1;
-		t_list* procesosReady;
-		t_list* procesosExec;
-	log_info(kernel_logger,"Hilo de planificador FIFO iniciado");
-
-	while(true){
-		//if(hay_procesos_en_ready() && !hayUnProcesoEnEjecucion()){
-		//	ejecutar_proceso();
-		//el pequeño fifo xD
-			if (tamanioReady > 0){ //si hay procesos en ready
-			if (ejecutando<grado_multitarea){//cant de procesos ejecutando < grado que permite
-			int i=0;//y con este codigo todos los tripulantes de rdy pasar a exec
-			while(ejecutando<grado_multitarea && (tamanioReady-i)>0){//cant de procesos en rdy > 0
-			t_pcb* primerProceso= list_get(procesosReady,0);
-			list_remove(procesosReady,0);
-			list_add(procesosExec,primerProceso);//POR AHORA EL PANIF ES EL UNICO QUE MANEJA ESTA LISTA
-			i++;
-			ejecutando++;
-			log_info(kernel_logger,"Se pasaron algunos procesos de ready a Exec");
-			}
-			}
-			}
-		}
-}
-
-void planificacionSRT(){
-	log_info(kernel_logger,"Hilo de planificador SRT iniciado");
-
-	while(true){
-		//if(hay_procesos_en_ready()){
-			//ejecutar_proceso();
-		}
-	}
-
-
-void inicio_planificacion(){
-	log_info(kernel_logger, "Iniciando planificacion");
-	if(strcmp(kernel_config->algoritmo_planificacion,"FIFO") == 0){
-	log_info(kernel_logger,"Algoritmo de planificacion leido: FIFO");
-	pthread_t hilo_planificacion_FIFO;
-	pthread_create(&hilo_planificacion_FIFO, NULL, (void*) planificacionFIFO, NULL);
-	pthread_detach(hilo_planificacion_FIFO);
-	}
-	else {
-	log_info(kernel_logger,"Algoritmo de planificacion leido: SRT");
-	pthread_t hilo_planificacion_SRT;
-	pthread_create(&hilo_planificacion_SRT, NULL, (void*) planificacionSRT, NULL);
-	pthread_detach(hilo_planificacion_SRT);
-	}
-}
-
-
-*/
-
-
-void inicio_estructuras_planificacion(){
-
-	//Creo las colas
-
-	//iniciar_cola_new();
-	iniciar_cola_ready();
-	iniciar_cola_exec();
-	iniciar_cola_blocked();
-	iniciar_cola_suspended_blocked();
-	iniciar_cola_suspended_ready();
-	//iniciar_cola_fin(); //Ver si es necesario
-
-    //iniiciar semaforos
-	//pthread_mutex_init(&planificador_mutex_new,NULL);
-	pthread_mutex_init(&planificador_mutex_ready,NULL);
-	pthread_mutex_init(&planificador_mutex_exec,NULL);
-	pthread_mutex_init(&planificador_mutex_blocked,NULL);
-	pthread_mutex_init(&planificador_mutex_suspended_blocked,NULL);
-	pthread_mutex_init(&planificador_mutex_suspended_ready,NULL);
-	pthread_mutex_init(&planificador_mutex_fin,NULL);
-
-}
-
-
-
-
-
-void inicio_planificacion(){
-	log_info(kernel_logger, "Iniciando planificacion");
-	pthread_t hilo_planificacion;
-	pthread_create(&hilo_planificacion, NULL, (void*) iniciar_colas_de_planificacion, NULL);
-	pthread_detach(hilo_planificacion);
-}
-
-
-
-void iniciar_colas_de_planificacion() {
-	iniciar_hilo_cola_ready();//cada hilo es una cola
-	iniciar_hilo_cola_blocked();
-	iniciar_hilo_cola_suspended_blocked();
-	iniciar_hilo_cola_suspended_ready();
-}
-
-
-
-
-void iniciar_hilo_cola_exec(){
-	pthread_t hilo = (pthread_t)malloc(sizeof(pthread_t));
-	pthread_create(&hilo ,NULL,(void*) planificar_cola_exec,NULL);
-	pthread_detach(hilo);
-}
-
-
-void iniciar_hilo_cola_ready(){
-	pthread_t hilo = (pthread_t)malloc(sizeof(pthread_t));
-	pthread_create(&hilo , NULL,(void*) planificar_cola_ready,NULL);
-	pthread_detach(hilo);
-}
-
-
-void iniciar_hilo_cola_blocked(){
-	pthread_t hilo = (pthread_t)malloc(sizeof(pthread_t));
-	pthread_create(&hilo , NULL,(void*) planificar_cola_block,NULL);
-	pthread_detach(hilo);
-}
-
-void iniciar_hilo_cola_suspended_blocked(){
-	pthread_t hilo = (pthread_t)malloc(sizeof(pthread_t));
-	pthread_create(&hilo , NULL,(void*) planificar_cola_suspended_blocked,NULL);
-	pthread_detach(hilo);
-}
-
-
-void iniciar_hilo_cola_suspended_ready(){
-	pthread_t hilo = (pthread_t)malloc(sizeof(pthread_t));
-	pthread_create(&hilo , NULL,(void*) planificar_cola_suspended_ready,NULL);
-	pthread_detach(hilo);
-}
-
-
-//En ready va la logica de fifo o srt, y asi con las demas
-
-void planificar_cola_ready(){
-	log_info(kernel_logger, "Se creo el hilo para la cola de ready satisfactoriamente");
-}
-
-void planificar_cola_block(){
-	log_info(kernel_logger, "Se creo el hilo para la cola de block satisfactoriamente");
-}
-
-void planificar_cola_suspended_blocked(){ //Ver como tratarlo en block proque en el enunciado dice que es una sola cola de bloqueados
-	log_info(kernel_logger, "Se creo el hilo para la cola de suspended-blocked satisfactoriamente");
-}
-
-void planificar_cola_suspended_ready(){ //Lo mismo para suspendido-bloqueado
-	log_info(kernel_logger, "Se creo el hilo para la cola de suspended-ready satisfactoriamente");
-}
-
-void planificar_cola_exec(){
-	log_info(kernel_logger, "Se creo el hilo para la cola de exec satisfactoriamente");
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

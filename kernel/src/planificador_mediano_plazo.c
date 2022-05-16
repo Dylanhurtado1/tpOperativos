@@ -26,12 +26,6 @@ void iniciar_cola_suspended_ready() {
 }
 
 
-void agregar_proceso_a_blocked(t_pcb *proceso) {
-	queue_push(cola_blocked, proceso);
-
-}
-
-
 void agregar_proceso_a_suspended_blocked(t_pcb *proceso) {
 	queue_push(cola_suspended_blocked, proceso);
 	//enviar_datos_a_memoria(proceso, socket_memoria)

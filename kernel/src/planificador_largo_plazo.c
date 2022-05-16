@@ -1,8 +1,7 @@
 #include "planificador.h"
 
-void agregar_pid(uint32_t id, int socket_fd);
+void generar_pid(uint32_t id, int socket_fd);
 void eliminar_pid(t_pid *pid);
-uint32_t obtener_numero_tabla_de_pagina(int socket_fd);
 
 t_list *pids;
 
@@ -10,12 +9,12 @@ void iniciar_planificador_largo_plazo() {
 	generador_de_id = 0;
 	procesos_admitidos_en_ready = 0;
 	pthread_mutex_init(&mutex_new, NULL);
+	pthread_mutex_init(&mutex_exit, NULL);
 	pthread_mutex_init(&mutex_generador_id, NULL);
-	cola_new = queue_create();
-	cola_exit = queue_create();
 	sem_init(&sem_exit, 0, 0);
 	sem_init(&sem_grado_multiprogramacion, 0, kernel_config->grado_multiprogramacion);
-
+	cola_new = queue_create();
+	cola_exit = queue_create();
 	pids = list_create();
 	pthread_create(&thread_exit, NULL, (void *)estado_exit, NULL);
 }
@@ -36,8 +35,7 @@ t_pcb *crear_estructura_pcb(t_list *instrucciones, uint32_t tam_proceso) {
 }
 
 void agregar_proceso_a_new(t_pcb *proceso, int socket_fd) {
-	//t_pcb *proceso = crear_estructura_pcb(instrucciones, tam_proceso);
-	agregar_pid(proceso->id, socket_fd);
+	generar_pid(proceso->id, socket_fd);
 
 	pthread_mutex_lock(&mutex_new);
 	queue_push(cola_new, proceso);
@@ -47,7 +45,7 @@ void agregar_proceso_a_new(t_pcb *proceso, int socket_fd) {
 	sem_post(&sem_ready);
 }
 
-void agregar_pid(uint32_t id, int socket_fd) {
+void generar_pid(uint32_t id, int socket_fd) {
 	t_pid *pid = malloc(sizeof(t_pid));
 	pid->socket = socket_fd;
 	pid->id = id;
@@ -63,12 +61,14 @@ bool es_posible_admitir_proceso() {
 }
 
 void admitir_proceso() {
-	uint32_t numero = obtener_numero_tabla_de_pagina(socket_memoria);
+	pthread_mutex_lock(&mutex_new);
 	t_pcb *proceso = (t_pcb *)queue_pop(cola_new);
-	proceso->tabla_paginas = numero;
-	pthread_mutex_lock(&planificador_mutex_ready);//semaforos mutex cada vez que metemos proceso
-	agregar_proceso_a_ready(proceso);
-	pthread_mutex_unlock(&planificador_mutex_ready);
+	pthread_mutex_unlock(&mutex_new);
+	proceso->tabla_paginas = obtener_numero_tabla_de_pagina(socket_memoria);
+
+	pthread_mutex_lock(&mutex_ready);
+	queue_push(cola_ready, proceso);
+	pthread_mutex_unlock(&mutex_ready);
 	procesos_admitidos_en_ready++;
 }
 
@@ -90,6 +90,9 @@ uint32_t obtener_numero_tabla_de_pagina(int socket_fd) {
 
 	return numero;
 }
+
+
+
 
 void estado_exit(void *dato) {
 	while(1) {

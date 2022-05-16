@@ -19,6 +19,7 @@
 
 #define PATH_KERNEL_CONFIG "/home/utnso/tp-2022-1c-lo-importante-es-aprobar/kernel/kernel.config"
 
+void iniciar_planificador();
 
 //KERNEL
 

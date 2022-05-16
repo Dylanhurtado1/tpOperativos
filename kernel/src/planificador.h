@@ -26,10 +26,16 @@ void admitir_proceso();
 void eliminar_proceso_cola_new(t_pcb *proceso);
 void estado_exit(void *dato);
 void enviar_respuesta_a_consola(int socket_fd, t_protocolo protocolo);
+uint32_t obtener_numero_tabla_de_pagina(int socket_fd);
 //void iniciar_cola_new();
 //void eliminar_cola_new();
 
 // Planificador Corto Plazo
+void iniciar_planificador_corto_plazo();
+void estado_ready(void *data);
+void estado_exec(void *data);
+void estado_blocked(void *data);
+
 void agregar_proceso_a_ready(t_pcb *proceso);
 void iniciar_cola_ready();
 void eliminar_cola_ready();
