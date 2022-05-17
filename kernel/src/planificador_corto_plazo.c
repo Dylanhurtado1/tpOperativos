@@ -1,8 +1,6 @@
 #include "planificador.h"
 
 void enviar_interrupcion_a_cpu(int socket_fd);
-void enviar_proceso_a_memoria(t_pcb *pcb, int socket_memoria);
-t_paquete *esperar_respuesta_memoria(int socket_memoria);
 
 void iniciar_planificador_corto_plazo() {
 	tiempo_bloqueo = NULL;
@@ -95,8 +93,6 @@ void estado_blocked(void *data) {
 	}
 }
 
-
-
 void agregar_proceso_a_ready(t_pcb *proceso) {
 	queue_push(cola_ready, proceso);
 	// TODO: agregar condicion para saber si es SRT (la interrupcion solo se envia en SRT)
@@ -119,7 +115,7 @@ void ejecutar_proceso() {
 		analizar_datos(paquete);
 		eliminar_paquete(paquete);
 	} while (protocolo != FINALIZAR_PROCESO);
-	procesos_admitidos_en_ready--;
+	//procesos_admitidos_en_ready--;
 }
 
 /*bool hay_proceso_en_ejecucion() {
@@ -180,19 +176,8 @@ void enviar_proceso_a_cpu(t_pcb *pcb, int socket_cpu_dispatch) {
 	eliminar_paquete(paquete);
 }
 
-void enviar_proceso_a_memoria(t_pcb *pcb, int socket_memoria) {
-	t_paquete *paquete = serializar_pcb(pcb, PCB);
-	enviar_paquete(paquete, socket_memoria);
-	eliminar_paquete(paquete);
-}
-
-
 t_paquete *esperar_respuesta_cpu(int socket_cpu_dispatch) {
 	return recibir_paquete(socket_cpu_dispatch);
-}
-
-t_paquete *esperar_respuesta_memoria(int socket_memoria) {//nose si seria con dispath
-	return recibir_paquete(socket_memoria);
 }
 
 bool hay_procesos_en_ready(){

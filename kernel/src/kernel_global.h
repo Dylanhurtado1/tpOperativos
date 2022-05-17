@@ -14,7 +14,7 @@ int socket_memoria;
 
 // Planificador Largo Plazo
 uint32_t generador_de_id;
-uint32_t procesos_admitidos_en_ready;
+//uint32_t procesos_admitidos_en_ready;
 t_queue *cola_new;
 t_queue *cola_exit;
 sem_t sem_admitir;

@@ -22,6 +22,8 @@ int main(void) {
 }
 
 void procesar_conexiones(t_cliente *datos_cliente) {
+	t_list *datos;
+	t_pcb *pcb;
 	t_paquete *paquete = datos_cliente->paquete;
 	switch (paquete->codigo_operacion) {
 		case AGREGAR_PROCESO_A_MEMORIA:
@@ -35,10 +37,21 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 			enviar_estructura_traductora(datos_cliente->socket, traductor);
 			eliminar_traductor(traductor);
 			break;
+		case LIBERAR_MEMORIA_PCB:
+			datos = deserealizar_paquete(paquete);
+			pcb = deserializar_pcb(datos, memoria_logger);
+			log_info(memoria_logger, "Liberando memoria de proceso ID = %d...", pcb->id);
+			informar_memoria_liberada(datos_cliente->socket, PCB_LIBERADO);
+
+			list_destroy_and_destroy_elements(pcb->instrucciones, free);
+			free(pcb);
+			list_destroy_and_destroy_elements(datos, free);
+			break;
 		default:
 			log_error(memoria_logger,"Protocolo invalido.");
 			break;
 	}
+	eliminar_paquete(paquete);
 }
 
 void enviar_numero_tabla_de_pagina(int socket_fd, uint32_t numero) {
@@ -63,5 +76,8 @@ void eliminar_traductor(t_traductor *traductor) {
 	free(traductor);
 }
 
+void informar_memoria_liberada(int socket_fd, t_protocolo protocolo) {
+	enviar_datos(socket_fd, &protocolo, sizeof(t_protocolo));
+}
 
 

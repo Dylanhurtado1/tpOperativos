@@ -4,6 +4,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../src/colas.c \
 ../src/gestionar_consola.c \
 ../src/kernel.c \
 ../src/kernel_config.c \
@@ -12,6 +13,7 @@ C_SRCS += \
 ../src/planificador_mediano_plazo.c 
 
 OBJS += \
+./src/colas.o \
 ./src/gestionar_consola.o \
 ./src/kernel.o \
 ./src/kernel_config.o \
@@ -20,6 +22,7 @@ OBJS += \
 ./src/planificador_mediano_plazo.o 
 
 C_DEPS += \
+./src/colas.d \
 ./src/gestionar_consola.d \
 ./src/kernel.d \
 ./src/kernel_config.d \

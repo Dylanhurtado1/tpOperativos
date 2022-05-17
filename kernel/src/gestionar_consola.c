@@ -3,9 +3,6 @@
 extern t_log *kernel_logger;
 
 void procesar_datos_consola(t_cliente *datos_cliente) {
-	//t_list *datos;
-	//t_list *lista_instrucciones;
-	//uint32_t tamanio_consola;
 	t_paquete *paquete = datos_cliente->paquete;
 
 	switch (paquete->codigo_operacion) {

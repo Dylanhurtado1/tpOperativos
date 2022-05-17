@@ -7,7 +7,7 @@ t_list *pids;
 
 void iniciar_planificador_largo_plazo() {
 	generador_de_id = 0;
-	procesos_admitidos_en_ready = 0;
+	//procesos_admitidos_en_ready = 0;
 	pthread_mutex_init(&mutex_new, NULL);
 	pthread_mutex_init(&mutex_exit, NULL);
 	pthread_mutex_init(&mutex_generador_id, NULL);
@@ -68,7 +68,7 @@ void transicion_admitir(void *data) {
 			pthread_mutex_lock(&mutex_new);
 			proceso = queue_pop(cola_new);
 			pthread_mutex_unlock(&mutex_new);
-			proceso->tabla_paginas = obtener_numero_tabla_de_pagina(socket_memoria);
+			proceso->tabla_paginas = obtener_entrada_tabla_de_pagina(socket_memoria);
 		//}
 
 		pthread_mutex_lock(&mutex_ready);
@@ -79,24 +79,7 @@ void transicion_admitir(void *data) {
 	}
 }
 
-
-bool es_posible_admitir_proceso() {
-	return procesos_admitidos_en_ready < kernel_config->grado_multiprogramacion;
-}
-
-void admitir_proceso() {
-	pthread_mutex_lock(&mutex_new);
-	t_pcb *proceso = (t_pcb *)queue_pop(cola_new);
-	pthread_mutex_unlock(&mutex_new);
-	proceso->tabla_paginas = obtener_numero_tabla_de_pagina(socket_memoria);
-
-	pthread_mutex_lock(&mutex_ready);
-	queue_push(cola_ready, proceso);
-	pthread_mutex_unlock(&mutex_ready);
-	procesos_admitidos_en_ready++;
-}
-
-uint32_t obtener_numero_tabla_de_pagina(int socket_fd) {
+uint32_t obtener_entrada_tabla_de_pagina(int socket_fd) {
 	uint32_t numero;
 	uint32_t fake_data = 0;
 	t_paquete *paquete = crear_paquete(AGREGAR_PROCESO_A_MEMORIA, buffer_vacio());
@@ -110,14 +93,16 @@ uint32_t obtener_numero_tabla_de_pagina(int socket_fd) {
 	return numero;
 }
 
-
-
-
 void estado_exit(void *dato) {
 	while(1) {
 		sem_wait(&sem_exit);
-		t_pcb *pcb = (t_pcb *)queue_pop(cola_exit);
-		// TODO: enviar info a memoria
+		t_pcb *pcb = queue_pop(cola_exit);
+
+		enviar_proceso_a_memoria(pcb, socket_memoria);
+		t_protocolo protocolo = esperar_respuesta_memoria(socket_memoria);
+		if(protocolo == PCB_LIBERADO) {
+			log_info(kernel_logger, "Se elimino memoria del proceso correctamente");
+		}
 
 		bool buscar_id(t_pid *pid) {
 			return pid->id == pcb->id;
@@ -125,10 +110,22 @@ void estado_exit(void *dato) {
 		t_pid *pid = list_remove_by_condition(pids, (void *)buscar_id);
 		enviar_respuesta_a_consola(pid->socket, FINALIZAR_CONSOLA_OK);
 
-		//eliminar_proceso_cola_new(pcb);
+		eliminar_proceso(pcb);
 		eliminar_pid(pid);
 		sem_post(&sem_grado_multiprogramacion);
 	}
+}
+
+void enviar_proceso_a_memoria(t_pcb *pcb, int socket_memoria) {
+	t_paquete *paquete = serializar_pcb(pcb, LIBERAR_MEMORIA_PCB);
+	enviar_paquete(paquete, socket_memoria);
+	eliminar_paquete(paquete);
+}
+
+t_protocolo esperar_respuesta_memoria(int socket_memoria) {
+	t_protocolo protocolo;
+	recibir_datos(socket_memoria, &protocolo, sizeof(t_protocolo));
+	return protocolo;
 }
 
 void enviar_respuesta_a_consola(int socket_fd, t_protocolo protocolo) {
@@ -144,5 +141,24 @@ void eliminar_pid(t_pid *pid) {
 	free(pid);
 }
 
+
+
+
+/*bool es_posible_admitir_proceso() {
+	return procesos_admitidos_en_ready < kernel_config->grado_multiprogramacion;
+}
+
+void admitir_proceso() {
+	pthread_mutex_lock(&mutex_new);
+	t_pcb *proceso = (t_pcb *)queue_pop(cola_new);
+	pthread_mutex_unlock(&mutex_new);
+	proceso->tabla_paginas = obtener_numero_tabla_de_pagina(socket_memoria);
+
+	pthread_mutex_lock(&mutex_ready);
+	queue_push(cola_ready, proceso);
+	pthread_mutex_unlock(&mutex_ready);
+	procesos_admitidos_en_ready++;
+}
+*/
 
 

@@ -19,15 +19,17 @@
 
 // Planificador Largo Plazo
 void iniciar_planificador_largo_plazo();
-void agregar_proceso_a_new(t_pcb *proceso, int socket_fd);
 t_pcb *crear_estructura_pcb(t_list *instrucciones, uint32_t tam_proceso);
+void agregar_proceso_a_new(t_pcb *proceso, int socket_fd);
 void transicion_admitir(void *data);
-bool es_posible_admitir_proceso();
-void admitir_proceso();
-void eliminar_proceso(t_pcb *proceso);
+uint32_t obtener_entrada_tabla_de_pagina(int socket_fd);
 void estado_exit(void *dato);
 void enviar_respuesta_a_consola(int socket_fd, t_protocolo protocolo);
-uint32_t obtener_numero_tabla_de_pagina(int socket_fd);
+void eliminar_proceso(t_pcb *proceso);
+void enviar_proceso_a_memoria(t_pcb *pcb, int socket_memoria);
+t_protocolo esperar_respuesta_memoria(int socket_memoria);
+//bool es_posible_admitir_proceso();
+//void admitir_proceso();
 //void iniciar_cola_new();
 //void eliminar_cola_new();
 
