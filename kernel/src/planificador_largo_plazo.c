@@ -78,6 +78,7 @@ void transicion_admitir(void *data) {
 		queue_push(cola_ready, proceso);
 		pthread_mutex_unlock(&mutex_ready);
 
+		//procesos_admitidos_en_ready++;
 		sem_post(&sem_ready);
 	}
 }
@@ -144,24 +145,5 @@ void eliminar_pid(t_pid *pid) {
 	free(pid);
 }
 
-
-
-
-/*bool es_posible_admitir_proceso() {
-	return procesos_admitidos_en_ready < kernel_config->grado_multiprogramacion;
-}
-
-void admitir_proceso() {
-	pthread_mutex_lock(&mutex_new);
-	t_pcb *proceso = (t_pcb *)queue_pop(cola_new);
-	pthread_mutex_unlock(&mutex_new);
-	proceso->tabla_paginas = obtener_numero_tabla_de_pagina(socket_memoria);
-
-	pthread_mutex_lock(&mutex_ready);
-	queue_push(cola_ready, proceso);
-	pthread_mutex_unlock(&mutex_ready);
-	procesos_admitidos_en_ready++;
-}
-*/
 
 

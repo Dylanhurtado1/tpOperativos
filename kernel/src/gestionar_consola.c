@@ -1,6 +1,5 @@
 #include "gestionar_consola.h"
 
-extern t_log *kernel_logger;
 
 void procesar_datos_consola(t_cliente *datos_cliente) {
 	t_paquete *paquete = datos_cliente->paquete;

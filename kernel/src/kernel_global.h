@@ -1,9 +1,14 @@
 #ifndef KERNEL_GLOBAL_H_
 #define KERNEL_GLOBAL_H_
 
-#include <commons/log.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include <commons/log.h>
+#include <commons/collections/list.h>
+#include <commons/collections/queue.h>
+#include "kernel_config.h"
 
 // Kernel
 t_log *kernel_logger;
@@ -46,7 +51,6 @@ pthread_t thread_blocked;
 // Planificador Mediano Plazo
 t_queue *cola_suspended_blocked;
 t_queue *cola_suspended_ready;
-
 
 
 #endif /* KERNEL_GLOBAL_H_ */

@@ -1,18 +1,14 @@
 #ifndef GESTIONAR_CONSOLA_H_
 #define GESTIONAR_CONSOLA_H_
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <commons/log.h>
-#include <commons/collections/list.h>
-#include <sockets.h>
-#include <servidor.h>
 #include <protocolo.h>
+#include <servidor.h>
 #include <comunicacion.h>
 #include <estructuras.h>
 #include <serializador.h>
+#include <print.h>
 #include "planificador.h"
-#include "print.h"
+#include "kernel_global.h"
 
 void procesar_datos_consola(t_cliente *datos_cliente);
 
