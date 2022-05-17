@@ -19,6 +19,8 @@ void iniciar_planificador_largo_plazo() {
 	pids = list_create();
 	pthread_create(&thread_exit, NULL, (void *)estado_exit, NULL);
 	pthread_create(&thread_admitir, NULL, (void *)transicion_admitir, NULL);
+	pthread_detach(thread_exit);
+	pthread_detach(thread_admitir);
 }
 
 t_pcb *crear_estructura_pcb(t_list *instrucciones, uint32_t tam_proceso) {

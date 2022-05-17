@@ -15,7 +15,5 @@
 #include "print.h"
 
 void procesar_datos_consola(t_cliente *datos_cliente);
-//void enviar_respuesta_a_consola(int socket_fd, t_protocolo protocolo);
-//uint32_t obtener_tamanio_consola(t_list *datos);
 
 #endif /* GESTIONAR_CONSOLA_H_ */

@@ -4,12 +4,6 @@
 
 void eliminar_proceso_cola_blocked(t_pcb *proceso);
 
-t_queue *cola_blocked;
-t_queue *cola_suspended_blocked;
-t_queue *cola_suspended_ready;
-extern t_kernel_config *kernel_config;
-
-
 
 void iniciar_cola_blocked(){
 	cola_blocked = queue_create();

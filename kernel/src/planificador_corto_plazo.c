@@ -13,9 +13,13 @@ void iniciar_planificador_corto_plazo() {
 	cola_ready = queue_create();
 	cola_exec = queue_create();
 	cola_blocked = queue_create();
+	lista_blocked = list_create();
 	pthread_create(&thread_ready, NULL, (void *)estado_ready, NULL);
 	pthread_create(&thread_exec, NULL, (void *)estado_exec, NULL);
 	pthread_create(&thread_blocked, NULL, (void *)estado_blocked, NULL);
+	pthread_detach(thread_ready);
+	pthread_detach(thread_exec);
+	pthread_detach(thread_blocked);
 }
 
 void estado_ready(void *data) {
@@ -90,6 +94,7 @@ void estado_blocked(void *data) {
 		queue_push(cola_ready, proceso);
 		pthread_mutex_unlock(&mutex_ready);
 		sem_post(&sem_ready);
+
 	}
 }
 
