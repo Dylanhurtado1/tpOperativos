@@ -17,12 +17,14 @@ uint32_t generador_de_id;
 uint32_t procesos_admitidos_en_ready;
 t_queue *cola_new;
 t_queue *cola_exit;
+sem_t sem_admitir;
 sem_t sem_exit;
 sem_t sem_grado_multiprogramacion;
 pthread_mutex_t mutex_generador_id;
 pthread_mutex_t mutex_new;
 pthread_mutex_t mutex_exit;
 pthread_t thread_exit;
+pthread_t thread_admitir;
 
 
 // Planificador Corto Plazo

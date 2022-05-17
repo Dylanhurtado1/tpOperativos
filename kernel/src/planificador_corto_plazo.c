@@ -1,13 +1,8 @@
 #include "planificador.h"
 
-void eliminar_proceso_cola_ready(t_pcb *proceso);
-void eliminar_proceso(t_pcb *proceso);
 void enviar_interrupcion_a_cpu(int socket_fd);
 void enviar_proceso_a_memoria(t_pcb *pcb, int socket_memoria);
 t_paquete *esperar_respuesta_memoria(int socket_memoria);
-
-bool exec = false;
-
 
 void iniciar_planificador_corto_plazo() {
 	tiempo_bloqueo = NULL;
@@ -28,35 +23,25 @@ void iniciar_planificador_corto_plazo() {
 void estado_ready(void *data) {
 	while(1) {
 		sem_wait(&sem_ready);
-		sem_wait(&sem_grado_multiprogramacion);
-		t_pcb *proceso;
-
-		//pthread_mutex_lock(&mutex_suspend_ready);
-		//if(!queue_is_empty(cola_suspend_ready)) {
-			//proceso = (t_pcb *)queue_pop(cola_suspend_ready);
-			//pthread_mutex_lock(&mutex_suspend_ready);
-		//} else {
-			pthread_mutex_lock(&mutex_new);
-			proceso = queue_pop(cola_new);
-			pthread_mutex_unlock(&mutex_new);
-			proceso->tabla_paginas = obtener_numero_tabla_de_pagina(socket_memoria);
-		//}
 
 		pthread_mutex_lock(&mutex_ready);
-		queue_push(cola_ready, proceso);
+		t_pcb *proceso = queue_pop(cola_ready);
 		pthread_mutex_unlock(&mutex_ready);
+
+		pthread_mutex_lock(&mutex_exec);
+		queue_push(cola_exec, proceso);
+		pthread_mutex_unlock(&mutex_exec);
 
 		sem_post(&sem_exec);
 	}
 }
 
-
 void estado_exec(void *data) {
 	while(1) {
 		sem_wait(&sem_exec);
-		pthread_mutex_lock(&mutex_ready);
-		t_pcb *proceso = queue_pop(cola_ready);
-		pthread_mutex_unlock(&mutex_ready);
+		pthread_mutex_lock(&mutex_exec);
+		t_pcb *proceso = queue_pop(cola_exec);
+		pthread_mutex_unlock(&mutex_exec);
 		enviar_proceso_a_cpu(proceso, socket_cpu_dispatch);
 		eliminar_proceso(proceso);
 
@@ -119,10 +104,10 @@ void agregar_proceso_a_ready(t_pcb *proceso) {
 }
 
 void ejecutar_proceso() {
-	if(hay_proceso_en_ejecucion()) {
+	/*if(hay_proceso_en_ejecucion()) {
 		log_info(kernel_logger, "Hay un proceso en ejecucion");
 		return;
-	}
+	}*/
 	t_pcb *proceso = queue_pop(cola_ready);
 	enviar_proceso_a_cpu(proceso, socket_cpu_dispatch);//todos los procesos son enviados por dispatch
 	//eliminar_proceso(proceso);
@@ -137,9 +122,9 @@ void ejecutar_proceso() {
 	procesos_admitidos_en_ready--;
 }
 
-bool hay_proceso_en_ejecucion() {
+/*bool hay_proceso_en_ejecucion() {
 	return exec;
-}
+}*/
 
 void iniciar_cola_ready() {
 	cola_ready = queue_create();
@@ -148,20 +133,6 @@ void iniciar_cola_ready() {
 
 void iniciar_cola_exec(){
 	cola_exec = queue_create();
-}
-
-void eliminar_cola_ready() {
-	queue_destroy_and_destroy_elements(cola_ready, (void *)eliminar_proceso_cola_ready);
-}
-
-void eliminar_proceso_cola_ready(t_pcb *proceso) {
-	list_destroy_and_destroy_elements(proceso->instrucciones, free);
-	free(proceso);
-}
-
-void eliminar_proceso(t_pcb *proceso) {
-	list_destroy_and_destroy_elements(proceso->instrucciones, free);
-	free(proceso);
 }
 
 void analizar_datos(t_paquete *paquete) {
@@ -232,8 +203,6 @@ bool hay_procesos_en_ready(){
 void agregar_proceso_a_blocked(t_pcb *proceso) {
 	queue_push(cola_blocked, proceso);
 }
-
-
 
 void enviar_interrupcion_a_cpu(int socket_fd){
 	log_info(kernel_logger, "Enviando interrupcion de desalojo");
