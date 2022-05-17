@@ -27,6 +27,7 @@ typedef struct {
 	uint32_t program_counter;
 	uint32_t tabla_paginas;
 	uint32_t estimacion_rafaga;
+	uint32_t tiempo_io;
 } t_pcb;
 
 typedef struct {

@@ -10,6 +10,7 @@
 
 t_paquete *serializar_instrucciones(t_list *instrucciones, t_protocolo protocolo);
 t_list *deserializar_instrucciones(t_list *datos, t_log *logger);
+uint32_t deserialzar_tamanio_consola(t_list *datos);
 t_paquete *serializar_pcb(t_pcb *proceso, t_protocolo protocolo);
 t_pcb *deserializar_pcb(t_list *datos, t_log *logger);
 t_paquete *serializar_traductor(t_traductor *traductor, t_protocolo protocolo);
