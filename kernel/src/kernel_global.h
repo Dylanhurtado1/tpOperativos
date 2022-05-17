@@ -28,7 +28,6 @@ pthread_t thread_admitir;
 
 
 // Planificador Corto Plazo
-uint32_t *tiempo_bloqueo;
 t_queue *cola_ready;
 t_queue *cola_exec;
 t_queue *cola_blocked;

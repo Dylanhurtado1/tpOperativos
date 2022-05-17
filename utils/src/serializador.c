@@ -53,6 +53,7 @@ t_paquete *serializar_pcb(t_pcb *proceso, t_protocolo protocolo) {
 	agregar_a_paquete(paquete, &(proceso->program_counter), sizeof(uint32_t));
 	agregar_a_paquete(paquete, &(proceso->tabla_paginas), sizeof(uint32_t));
 	agregar_a_paquete(paquete, &(proceso->estimacion_rafaga), sizeof(uint32_t));
+	agregar_a_paquete(paquete, &(proceso->tiempo_io), sizeof(uint32_t));
 
 	for(int i = 0; i < list_size(proceso->instrucciones); i++) {
 		t_instruccion *instruccion = (t_instruccion *)list_get(proceso->instrucciones, i);
@@ -72,9 +73,10 @@ t_pcb *deserializar_pcb(t_list *datos, t_log *logger) {
 	pcb->program_counter = *(uint32_t *)list_get(datos, 2);
 	pcb->tabla_paginas = *(uint32_t *)list_get(datos, 3);
 	pcb->estimacion_rafaga = *(uint32_t *)list_get(datos, 4);
+	pcb->tiempo_io = *(uint32_t *)list_get(datos, 5);
 
 	pcb->instrucciones = list_create();
-	for(int i = 5; i < list_size(datos); i += 3) {
+	for(int i = 6; i < list_size(datos); i += 3) {
 		t_instruccion *instruccion = malloc(sizeof(t_instruccion));
 		instruccion->identificador = *(t_identificador *)list_get(datos, i);
 		instruccion->primer_operando = *(uint32_t *)list_get(datos, i + 1);
@@ -92,6 +94,7 @@ void print_pcb(t_pcb *pcb, t_log *logger) {
 	log_info(logger, "PCB Program counter = %d", pcb->program_counter);
 	log_info(logger, "PCB Tabla de paginas = %d", pcb->tabla_paginas);
 	log_info(logger, "PCB Estimacion rafaga = %d", pcb->estimacion_rafaga);
+	log_info(logger, "PCB Tiempo I/O = %d", pcb->tiempo_io);
 	log_info(logger, "PCB cantidad de instrucciones = %d", list_size(pcb->instrucciones));
 }
 

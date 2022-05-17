@@ -24,16 +24,14 @@ void ejecutar_ciclo_de_instruccion(t_pcb *pcb, int socket_kernel) {
 
 	t_paquete *paquete;
 	if(status == 1) {
+		pcb->tiempo_io = proxima_instruccion->primer_operando;
 		paquete = serializar_pcb(pcb, BLOQUEAR_PROCESO);
-		agregar_a_paquete(paquete, &(proxima_instruccion->primer_operando), sizeof(uint32_t));
-		enviar_paquete(paquete, socket_kernel);
 	} else if(status == 2) {
 		paquete = serializar_pcb(pcb, FINALIZAR_PROCESO);
-		enviar_paquete(paquete, socket_kernel);
 	} else {
 		paquete = serializar_pcb(pcb, PROCESO_DESALOJADO);
-		enviar_paquete(paquete, socket_kernel);
 	}
+	enviar_paquete(paquete, socket_kernel);
 	eliminar_paquete(paquete);
 }
 

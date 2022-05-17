@@ -34,6 +34,7 @@ t_pcb *crear_estructura_pcb(t_list *instrucciones, uint32_t tam_proceso) {
 	pcb->instrucciones = instrucciones;
 	pcb->program_counter = 0;
 	pcb->estimacion_rafaga = kernel_config->estimacion_inicial;
+	pcb->tiempo_io = 0;
 
 	return pcb;
 }

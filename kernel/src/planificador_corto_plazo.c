@@ -3,7 +3,6 @@
 void enviar_interrupcion_a_cpu(int socket_fd);
 
 void iniciar_planificador_corto_plazo() {
-	tiempo_bloqueo = NULL;
 	pthread_mutex_init(&mutex_ready, NULL);
 	pthread_mutex_init(&mutex_blocked, NULL);
 	pthread_mutex_init(&mutex_exec, NULL);
@@ -52,9 +51,7 @@ void estado_exec(void *data) {
 		t_pcb *pcb;
 		switch(paquete->codigo_operacion) {
 			case BLOQUEAR_PROCESO:
-				log_info(kernel_logger, "Proceso ejecuto IO, enviando a cola de bloqueo...");
-				tiempo_bloqueo = (uint32_t *)list_remove(datos, list_size(datos) - 1);
-				log_info(kernel_logger, "Tiempo bloqueo = %d ms", *tiempo_bloqueo);
+				log_info(kernel_logger, "Proceso ejecuto I/O, enviando a cola de bloqueo...");
 				pcb = deserializar_pcb(datos, kernel_logger);
 
 				pthread_mutex_lock(&mutex_blocked);
@@ -85,9 +82,8 @@ void estado_blocked(void *data) {
 		pthread_mutex_lock(&mutex_blocked);
 		t_pcb *proceso = queue_pop(cola_blocked);
 		pthread_mutex_unlock(&mutex_blocked);
-		log_info(kernel_logger, "Bloqueando proceso con ID = %d...", proceso->id);
-		usleep(*tiempo_bloqueo * 1000);
-		free(tiempo_bloqueo);
+		log_info(kernel_logger, "Bloqueando %d ms proceso con ID = %d...", proceso->tiempo_io, proceso->id);
+		usleep(proceso->tiempo_io * 1000);
 		log_info(kernel_logger, "Finalizo bloqueo...");
 
 		pthread_mutex_lock(&mutex_ready);
