@@ -18,7 +18,7 @@ uint32_t obtener_entrada_tabla_de_pagina(int socket_fd);
 void estado_exit(void *dato);
 void enviar_respuesta_a_consola(int socket_fd, t_protocolo protocolo);
 void eliminar_proceso(t_pcb *proceso);
-void enviar_proceso_a_memoria(t_pcb *pcb, int socket_memoria);
+void enviar_proceso_a_memoria(t_pcb *pcb, int socket_memoria, t_protocolo protocolo);
 t_protocolo esperar_respuesta_memoria(int socket_memoria);
 
 
@@ -33,10 +33,9 @@ void enviar_interrupcion_a_cpu(int socket_fd);
 
 
 // Planificador Mediano Plazo
-void agregar_proceso_a_suspended_blocked(t_pcb *proceso);
-void iniciar_cola_suspended_blocked();
-void iniciar_cola_suspended_ready();
-void iniciar_cola_blocked();
+void iniciar_planificador_mediano_plazo();
+void transicion_suspender(t_pcb *pcb);
+void estado_suspended_ready(void *data);
 
 typedef struct {
 	int socket;

@@ -31,6 +31,7 @@ int main(void) {
 void iniciar_planificador() {
 	iniciar_planificador_largo_plazo();
 	iniciar_planificador_corto_plazo();
+	iniciar_planificador_mediano_plazo();
 }
 
 

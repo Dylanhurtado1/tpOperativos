@@ -36,7 +36,6 @@ pthread_t thread_admitir;
 t_queue *cola_ready;
 t_queue *cola_exec;
 t_queue *cola_blocked;
-//t_list *lista_blocked;
 sem_t sem_ready;
 sem_t sem_exec;
 sem_t sem_blocked;
@@ -46,13 +45,16 @@ pthread_mutex_t mutex_exec;
 pthread_t thread_ready;
 pthread_t thread_exec;
 pthread_t thread_blocked;
-//pthread_mutex_t mutex_io;
-//pthread_mutex_t mutex_suspend;
 
 
 // Planificador Mediano Plazo
 t_queue *cola_suspended_blocked;
 t_queue *cola_suspended_ready;
+//sem_t sem_suspended_blocked;
+sem_t sem_suspended_ready;
+pthread_mutex_t mutex_suspended_blocked;
+pthread_mutex_t mutex_suspended_ready;
+pthread_t thread_suspended_ready;
 
 
 #endif /* KERNEL_GLOBAL_H_ */
