@@ -37,9 +37,11 @@ void iniciar_planificador_mediano_plazo();
 void transicion_suspender(t_pcb *pcb);
 void estado_suspended_ready(void *data);
 
+
 typedef struct {
 	int socket;
 	uint32_t id;
 } t_pid;
+
 
 #endif /* PLANIFICADOR_H_ */

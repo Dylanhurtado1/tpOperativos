@@ -63,16 +63,18 @@ void transicion_admitir(void *data) {
 		sem_wait(&sem_grado_multiprogramacion);
 		t_pcb *proceso;
 
-		//pthread_mutex_lock(&mutex_suspend_ready);
-		//if(!queue_is_empty(cola_suspend_ready)) {
-			//proceso = (t_pcb *)queue_pop(cola_suspend_ready);
-			//pthread_mutex_lock(&mutex_suspend_ready);
-		//} else {
+		pthread_mutex_lock(&mutex_suspended_ready);
+		if(!queue_is_empty(cola_suspended_ready)) {
+			proceso = queue_pop(cola_suspended_ready);
+			pthread_mutex_unlock(&mutex_suspended_ready);
+			log_info(kernel_logger, "PID[%d] sale de SUSPENDED-READY", proceso->id);
+		} else {
+			pthread_mutex_unlock(&mutex_suspended_ready);
 			pthread_mutex_lock(&mutex_new);
 			proceso = queue_pop(cola_new);
 			pthread_mutex_unlock(&mutex_new);
 			proceso->tabla_paginas = obtener_entrada_tabla_de_pagina(socket_memoria);
-		//}
+		}
 
 		pthread_mutex_lock(&mutex_ready);
 		queue_push(cola_ready, proceso);
