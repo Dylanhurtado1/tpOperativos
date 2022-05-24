@@ -54,6 +54,8 @@ t_paquete *serializar_pcb(t_pcb *proceso, t_protocolo protocolo) {
 	agregar_a_paquete(paquete, &(proceso->tabla_paginas), sizeof(uint32_t));
 	agregar_a_paquete(paquete, &(proceso->estimacion_rafaga), sizeof(uint32_t));
 	agregar_a_paquete(paquete, &(proceso->tiempo_io), sizeof(uint32_t));
+	agregar_a_paquete(paquete, &(proceso->tiempo_inicio_bloqueo), sizeof(uint32_t));
+	agregar_a_paquete(paquete, &(proceso->estado), sizeof(t_estado));
 
 	for(int i = 0; i < list_size(proceso->instrucciones); i++) {
 		t_instruccion *instruccion = (t_instruccion *)list_get(proceso->instrucciones, i);
@@ -74,9 +76,11 @@ t_pcb *deserializar_pcb(t_list *datos, t_log *logger) {
 	pcb->tabla_paginas = *(uint32_t *)list_get(datos, 3);
 	pcb->estimacion_rafaga = *(uint32_t *)list_get(datos, 4);
 	pcb->tiempo_io = *(uint32_t *)list_get(datos, 5);
+	pcb->tiempo_inicio_bloqueo = *(uint32_t *)list_get(datos, 6);
+	pcb->estado = *(t_estado *)list_get(datos, 7);
 
 	pcb->instrucciones = list_create();
-	for(int i = 6; i < list_size(datos); i += 3) {
+	for(int i = 8; i < list_size(datos); i += 3) {
 		t_instruccion *instruccion = malloc(sizeof(t_instruccion));
 		instruccion->identificador = *(t_identificador *)list_get(datos, i);
 		instruccion->primer_operando = *(uint32_t *)list_get(datos, i + 1);

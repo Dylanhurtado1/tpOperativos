@@ -47,6 +47,16 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 			free(pcb);
 			list_destroy_and_destroy_elements(datos, free);
 			break;
+		case ELIMINAR_MEMORIA_PCB:
+			datos = deserealizar_paquete(paquete);
+			pcb = deserializar_pcb(datos, memoria_logger);
+			log_info(memoria_logger, "Eliminando memoria de proceso ID = %d...", pcb->id);
+			informar_memoria_liberada(datos_cliente->socket, PCB_ELIMINADO);
+
+			list_destroy_and_destroy_elements(pcb->instrucciones, free);
+			free(pcb);
+			list_destroy_and_destroy_elements(datos, free);
+			break;
 		default:
 			log_error(memoria_logger,"Protocolo invalido.");
 			break;

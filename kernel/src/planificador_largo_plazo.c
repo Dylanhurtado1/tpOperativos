@@ -63,16 +63,18 @@ void transicion_admitir(void *data) {
 		sem_wait(&sem_grado_multiprogramacion);
 		t_pcb *proceso;
 
-		//pthread_mutex_lock(&mutex_suspend_ready);
-		//if(!queue_is_empty(cola_suspend_ready)) {
-			//proceso = (t_pcb *)queue_pop(cola_suspend_ready);
-			//pthread_mutex_lock(&mutex_suspend_ready);
-		//} else {
+		pthread_mutex_lock(&mutex_suspended_ready);
+		if(!queue_is_empty(cola_suspended_ready)) {
+			proceso = queue_pop(cola_suspended_ready);
+			pthread_mutex_unlock(&mutex_suspended_ready);
+			log_info(kernel_logger, "PID[%d] sale de SUSPENDED-READY", proceso->id);
+		} else {
+			pthread_mutex_unlock(&mutex_suspended_ready);
 			pthread_mutex_lock(&mutex_new);
 			proceso = queue_pop(cola_new);
 			pthread_mutex_unlock(&mutex_new);
 			proceso->tabla_paginas = obtener_entrada_tabla_de_pagina(socket_memoria);
-		//}
+		}
 
 		pthread_mutex_lock(&mutex_ready);
 		queue_push(cola_ready, proceso);
@@ -102,10 +104,10 @@ void estado_exit(void *dato) {
 		sem_wait(&sem_exit);
 		t_pcb *pcb = queue_pop(cola_exit);
 
-		enviar_proceso_a_memoria(pcb, socket_memoria);
+		enviar_proceso_a_memoria(pcb, socket_memoria, ELIMINAR_MEMORIA_PCB);
 		t_protocolo protocolo = esperar_respuesta_memoria(socket_memoria);
-		if(protocolo == PCB_LIBERADO) {
-			log_info(kernel_logger, "Se elimino memoria del proceso correctamente");
+		if(protocolo == PCB_ELIMINADO) {
+			log_info(kernel_logger, "Se elimino memoria del proceso");
 		}
 
 		bool buscar_id(t_pid *pid) {
@@ -120,8 +122,8 @@ void estado_exit(void *dato) {
 	}
 }
 
-void enviar_proceso_a_memoria(t_pcb *pcb, int socket_memoria) {
-	t_paquete *paquete = serializar_pcb(pcb, LIBERAR_MEMORIA_PCB);
+void enviar_proceso_a_memoria(t_pcb *pcb, int socket_memoria, t_protocolo protocolo) {
+	t_paquete *paquete = serializar_pcb(pcb, protocolo);
 	enviar_paquete(paquete, socket_memoria);
 	eliminar_paquete(paquete);
 }
