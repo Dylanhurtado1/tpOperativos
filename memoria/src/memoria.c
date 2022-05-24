@@ -22,6 +22,8 @@ int main(void) {
 }
 
 void procesar_conexiones(t_cliente *datos_cliente) {
+	t_list *datos;
+	t_pcb *pcb;
 	t_paquete *paquete = datos_cliente->paquete;
 	switch (paquete->codigo_operacion) {
 		case AGREGAR_PROCESO_A_MEMORIA:
@@ -31,13 +33,35 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 			break;
 		case HANDSHAKE_INICIAL:
 			log_info(memoria_logger, "Memoria recibio handshake... enviando estructura traductora");
-			// TODO: enviar traductor: cantidad de entradas por tabla de paginas y tamanio de paginas
-			enviar_estructura_traductora(datos_cliente->socket, (t_traductor *)malloc(sizeof(t_traductor)));
+			t_traductor *traductor = crear_traductor(memoria_config->paginas_por_tabla, memoria_config->tam_pagina);
+			enviar_estructura_traductora(datos_cliente->socket, traductor);
+			eliminar_traductor(traductor);
+			break;
+		case LIBERAR_MEMORIA_PCB:
+			datos = deserealizar_paquete(paquete);
+			pcb = deserializar_pcb(datos, memoria_logger);
+			log_info(memoria_logger, "Liberando memoria de proceso ID = %d...", pcb->id);
+			informar_memoria_liberada(datos_cliente->socket, PCB_LIBERADO);
+
+			list_destroy_and_destroy_elements(pcb->instrucciones, free);
+			free(pcb);
+			list_destroy_and_destroy_elements(datos, free);
+			break;
+		case ELIMINAR_MEMORIA_PCB:
+			datos = deserealizar_paquete(paquete);
+			pcb = deserializar_pcb(datos, memoria_logger);
+			log_info(memoria_logger, "Eliminando memoria de proceso ID = %d...", pcb->id);
+			informar_memoria_liberada(datos_cliente->socket, PCB_ELIMINADO);
+
+			list_destroy_and_destroy_elements(pcb->instrucciones, free);
+			free(pcb);
+			list_destroy_and_destroy_elements(datos, free);
 			break;
 		default:
 			log_error(memoria_logger,"Protocolo invalido.");
 			break;
 	}
+	eliminar_paquete(paquete);
 }
 
 void enviar_numero_tabla_de_pagina(int socket_fd, uint32_t numero) {
@@ -45,21 +69,25 @@ void enviar_numero_tabla_de_pagina(int socket_fd, uint32_t numero) {
 }
 
 void enviar_estructura_traductora(int socket_fd, t_traductor *traductor) {
-	t_paquete *paquete = crear_paquete(HANDSHAKE_INICIAL, buffer_vacio());
-	traductor->cantidad_entradas_tabla = memoria_config->paginas_por_tabla;
-	traductor->tamanio_pagina = memoria_config->tam_pagina;
-
-	agregar_a_paquete(paquete, &(traductor->cantidad_entradas_tabla), sizeof(uint32_t));
-	agregar_a_paquete(paquete, &(traductor->tamanio_pagina), sizeof(uint32_t));
+	t_paquete *paquete = serializar_traductor(traductor, HANDSHAKE_INICIAL);
 	enviar_paquete(paquete, socket_fd);
-
 	eliminar_paquete(paquete);
-	eliminar_traductor(traductor);
+}
+
+t_traductor *crear_traductor(int entradas_tabla, int tamanio_pagina) {
+	t_traductor *traductor = (t_traductor *)malloc(sizeof(t_traductor));
+	traductor->cantidad_entradas_tabla = entradas_tabla;
+	traductor->tamanio_pagina = tamanio_pagina;
+
+	return traductor;
 }
 
 void eliminar_traductor(t_traductor *traductor) {
 	free(traductor);
 }
 
+void informar_memoria_liberada(int socket_fd, t_protocolo protocolo) {
+	enviar_datos(socket_fd, &protocolo, sizeof(t_protocolo));
+}
 
 

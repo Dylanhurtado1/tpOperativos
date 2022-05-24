@@ -1,70 +1,165 @@
 #include "planificador.h"
+#include "temporizador.h"
 
-void eliminar_proceso_cola_ready(t_pcb *proceso);
-void eliminar_proceso(t_pcb *proceso);
+uint32_t tiempo_bloqueado(uint32_t tiempo);
+uint32_t diferencia_absoluta(uint32_t tiempo_1, uint32_t tiempo_2);
+void io(uint32_t tiempo);
 
-t_queue *cola_ready;
-bool exec = false;
+void iniciar_planificador_corto_plazo() {
+	pthread_mutex_init(&mutex_ready, NULL);
+	pthread_mutex_init(&mutex_blocked, NULL);
+	pthread_mutex_init(&mutex_exec, NULL);
+	sem_init(&sem_ready, 0, 0);
+	sem_init(&sem_exec, 0, 0);
+	sem_init(&sem_blocked, 0, 0);
+	cola_ready = queue_create();
+	cola_exec = queue_create();
+	cola_blocked = queue_create();
+	pthread_create(&thread_ready, NULL, (void *)estado_ready, NULL);
+	pthread_create(&thread_exec, NULL, (void *)estado_exec, NULL);
+	pthread_create(&thread_blocked, NULL, (void *)estado_blocked, NULL);
+	pthread_detach(thread_ready);
+	pthread_detach(thread_exec);
+	pthread_detach(thread_blocked);
 
-extern int socket_cpu_dispatch;
-extern t_log *kernel_logger;
-extern uint32_t procesos_admitidos;
-
-void agregar_proceso_a_ready(t_pcb *proceso) {
-	queue_push(cola_ready, proceso);
+	iniciar_timer();
 }
 
-void ejecutar_proceso() {
-	if(hay_proceso_en_ejecucion()) {
-		log_info(kernel_logger, "Hay un proceso en ejecucion");
-		return;
+void estado_ready(void *data) {
+	while(1) {
+		sem_wait(&sem_ready);
+
+		pthread_mutex_lock(&mutex_ready);
+		t_pcb *proceso = queue_pop(cola_ready);
+		pthread_mutex_unlock(&mutex_ready);
+
+		pthread_mutex_lock(&mutex_exec);
+		queue_push(cola_exec, proceso);
+		pthread_mutex_unlock(&mutex_exec);
+
+		sem_post(&sem_exec);
 	}
-	t_pcb *proceso = queue_pop(cola_ready);
-	t_paquete *paquete = serealizar_proceso(proceso);
+}
+
+void estado_exec(void *data) {
+	while(1) {
+		sem_wait(&sem_exec);
+		pthread_mutex_lock(&mutex_exec);
+		t_pcb *proceso = queue_pop(cola_exec);
+		pthread_mutex_unlock(&mutex_exec);
+		enviar_proceso_a_cpu(proceso, socket_cpu_dispatch);
+		eliminar_proceso(proceso);
+
+		t_paquete *paquete = esperar_respuesta_cpu(socket_cpu_dispatch);
+		t_list *datos = deserealizar_paquete(paquete);
+		t_pcb *pcb;
+		switch(paquete->codigo_operacion) {
+			case BLOQUEAR_PROCESO:
+				log_info(kernel_logger, "Proceso ejecuto I/O, enviando a cola de bloqueo...");
+				pcb = deserializar_pcb(datos, kernel_logger);
+
+				pthread_mutex_lock(&mutex_blocked);
+				pcb->estado = BLOCKED;
+				pcb->tiempo_inicio_bloqueo = get_tiempo_actual();
+				queue_push(cola_blocked, pcb);
+				pthread_mutex_unlock(&mutex_blocked);
+
+				sem_post(&sem_blocked);
+				break;
+			case FINALIZAR_PROCESO:
+				log_info(kernel_logger, "Proceso ejecuto EXIT, enviando a cola de salida...");
+				pcb = deserializar_pcb(datos, kernel_logger);
+
+				pthread_mutex_lock(&mutex_exit);
+				queue_push(cola_exit, pcb);
+				pthread_mutex_unlock(&mutex_exit);
+
+				sem_post(&sem_exit);
+				break;
+			case PROCESO_DESALOJADO:
+				log_info(kernel_logger, "Proceso desalojado por interrupcion, seleccionar siguiente proceso a ejecutar...");
+				/*pcb = deserializar_pcb(datos, kernel_logger);
+				log_info(kernel_logger, "Se envia siguiente proceso...");
+				enviar_proceso_a_cpu(pcb, socket_cpu_dispatch);
+				eliminar_proceso(pcb);*/
+				break;
+		}
+		list_destroy_and_destroy_elements(datos, free);
+		eliminar_paquete(paquete);
+	}
+}
+
+void estado_blocked(void *data) {
+	while(1) {
+		sem_wait(&sem_blocked);
+		pthread_mutex_lock(&mutex_blocked);
+		t_pcb *pcb = queue_pop(cola_blocked);
+		pthread_mutex_unlock(&mutex_blocked);
+
+		uint32_t tiempo_bloqueo = tiempo_bloqueado(pcb->tiempo_inicio_bloqueo);
+
+		if(tiempo_bloqueo > kernel_config->tiempo_maximo_bloqueado) {
+			transicion_suspender(pcb);
+			io(pcb->tiempo_io);
+
+			sem_post(&sem_suspended_ready);
+		} else if(tiempo_bloqueo + pcb->tiempo_io > kernel_config->tiempo_maximo_bloqueado) {
+			io(kernel_config->tiempo_maximo_bloqueado - tiempo_bloqueo);
+			transicion_suspender(pcb);
+			io(diferencia_absoluta(tiempo_bloqueo, pcb->tiempo_io));
+
+			sem_post(&sem_suspended_ready);
+		} else {
+			log_info(kernel_logger, "Proceso quedo BLOCKED...");
+			io(pcb->tiempo_io);
+			pthread_mutex_lock(&mutex_ready);
+			queue_push(cola_ready, pcb);
+			pthread_mutex_unlock(&mutex_ready);
+
+			sem_post(&sem_ready);
+		}
+
+		log_info(kernel_logger, "[IO] -> PID = %d, tiempo io = %d, tiempo bloqueado = %d...",
+				pcb->id, pcb->tiempo_io, tiempo_bloqueo);
+	}
+}
+
+void io(uint32_t tiempo) {
+	usleep(tiempo * 1000);
+}
+
+uint32_t diferencia_absoluta(uint32_t tiempo_1, uint32_t tiempo_2) {
+	return tiempo_1 > tiempo_2 ? tiempo_1 - tiempo_2 : tiempo_2 - tiempo_1;
+}
+
+uint32_t tiempo_bloqueado(uint32_t tiempo) {
+	return get_tiempo_actual() - tiempo;
+}
+
+void enviar_proceso_a_cpu(t_pcb *pcb, int socket_cpu_dispatch) {
+	t_paquete *paquete = serializar_pcb(pcb, PCB);
 	enviar_paquete(paquete, socket_cpu_dispatch);
 	eliminar_paquete(paquete);
-	eliminar_proceso(proceso);
-	procesos_admitidos--;
-
 }
 
-bool hay_proceso_en_ejecucion() {
-	return exec;
+t_paquete *esperar_respuesta_cpu(int socket_cpu_dispatch) {
+	return recibir_paquete(socket_cpu_dispatch);
 }
 
-void iniciar_cola_ready() {
-	cola_ready = queue_create();
+
+void enviar_interrupcion_a_cpu(int socket_fd){
+	log_info(kernel_logger, "Enviando interrupcion de desalojo...");
+	t_paquete *paquete = crear_paquete(DESALOJAR_PROCESO, buffer_vacio());
+	uint32_t nada = 0;
+	agregar_a_paquete(paquete, &nada, sizeof(uint32_t));
+	enviar_paquete(paquete, socket_fd);
+	eliminar_paquete(paquete);
 }
 
-void eliminar_cola_ready() {
-	queue_destroy_and_destroy_elements(cola_ready, (void *)eliminar_proceso_cola_ready);
-}
 
-void eliminar_proceso_cola_ready(t_pcb *proceso) {
-	list_destroy_and_destroy_elements(proceso->instrucciones, free);
-	free(proceso);
-}
 
-void eliminar_proceso(t_pcb *proceso) {
-	list_destroy_and_destroy_elements(proceso->instrucciones, free);
-	free(proceso);
-}
 
-t_paquete *serealizar_proceso(t_pcb *proceso) {
-	t_paquete *paquete = crear_paquete(PCB, buffer_vacio());
-	agregar_a_paquete(paquete, &(proceso->id), sizeof(uint32_t));
-	agregar_a_paquete(paquete, &(proceso->tam_proceso), sizeof(uint32_t));
-	agregar_a_paquete(paquete, &(proceso->program_counter), sizeof(uint32_t));
-	agregar_a_paquete(paquete, &(proceso->tabla_paginas), sizeof(uint32_t));
-	agregar_a_paquete(paquete, &(proceso->estimacion_rafaga), sizeof(uint32_t));
 
-	for(int i = 0; i < list_size(proceso->instrucciones); i++) {
-		t_instruccion *instruccion = (t_instruccion *)list_get(proceso->instrucciones, i);
-		agregar_a_paquete(paquete, &(instruccion->identificador), sizeof(t_identificador));
-		agregar_a_paquete(paquete, &(instruccion->primer_operando), sizeof(uint32_t));
-		agregar_a_paquete(paquete, &(instruccion->segundo_operando), sizeof(uint32_t));
-	}
 
-	return paquete;
-}
+
 

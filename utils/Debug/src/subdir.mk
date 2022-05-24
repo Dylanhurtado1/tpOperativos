@@ -10,6 +10,8 @@ C_SRCS += \
 ../src/conexiones.c \
 ../src/errors.c \
 ../src/paquete.c \
+../src/print.c \
+../src/serializador.c \
 ../src/servidor.c \
 ../src/sockets.c 
 
@@ -20,6 +22,8 @@ OBJS += \
 ./src/conexiones.o \
 ./src/errors.o \
 ./src/paquete.o \
+./src/print.o \
+./src/serializador.o \
 ./src/servidor.o \
 ./src/sockets.o 
 
@@ -30,6 +34,8 @@ C_DEPS += \
 ./src/conexiones.d \
 ./src/errors.d \
 ./src/paquete.d \
+./src/print.d \
+./src/serializador.d \
 ./src/servidor.d \
 ./src/sockets.d 
 
