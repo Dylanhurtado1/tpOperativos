@@ -14,6 +14,16 @@ typedef enum {
 	INVALID_ID
 } t_identificador;
 
+typedef enum {
+	NEW,
+	READY,
+	EXEC,
+	BLOCKED,
+	_EXIT,
+	SUSPENDED_BLOCKED,
+	SUSPENDED_READY
+} t_estado;
+
 typedef struct {
 	t_identificador identificador;
 	uint32_t primer_operando;
@@ -28,6 +38,9 @@ typedef struct {
 	uint32_t tabla_paginas;
 	uint32_t estimacion_rafaga;
 	uint32_t tiempo_io;
+	uint32_t tiempo_inicio_bloqueo;
+	t_estado estado;
+
 } t_pcb;
 
 typedef struct {

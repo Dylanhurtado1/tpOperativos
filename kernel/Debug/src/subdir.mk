@@ -4,31 +4,31 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../src/colas.c \
 ../src/gestionar_consola.c \
 ../src/kernel.c \
 ../src/kernel_config.c \
 ../src/planificador_corto_plazo.c \
 ../src/planificador_largo_plazo.c \
-../src/planificador_mediano_plazo.c 
+../src/planificador_mediano_plazo.c \
+../src/temporizador.c 
 
 OBJS += \
-./src/colas.o \
 ./src/gestionar_consola.o \
 ./src/kernel.o \
 ./src/kernel_config.o \
 ./src/planificador_corto_plazo.o \
 ./src/planificador_largo_plazo.o \
-./src/planificador_mediano_plazo.o 
+./src/planificador_mediano_plazo.o \
+./src/temporizador.o 
 
 C_DEPS += \
-./src/colas.d \
 ./src/gestionar_consola.d \
 ./src/kernel.d \
 ./src/kernel_config.d \
 ./src/planificador_corto_plazo.d \
 ./src/planificador_largo_plazo.d \
-./src/planificador_mediano_plazo.d 
+./src/planificador_mediano_plazo.d \
+./src/temporizador.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

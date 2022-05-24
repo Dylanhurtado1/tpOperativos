@@ -1,4 +1,5 @@
 #include "planificador.h"
+#include "temporizador.h"
 
 void iniciar_planificador_corto_plazo() {
 	pthread_mutex_init(&mutex_ready, NULL);
@@ -17,6 +18,10 @@ void iniciar_planificador_corto_plazo() {
 	pthread_detach(thread_ready);
 	pthread_detach(thread_exec);
 	pthread_detach(thread_blocked);
+
+	pthread_mutex_init(&mutex_io, NULL);
+	pthread_mutex_init(&mutex_suspend, NULL);
+	iniciar_timer();
 }
 
 void estado_ready(void *data) {
@@ -87,18 +92,103 @@ void estado_blocked(void *data) {
 		sem_wait(&sem_blocked);
 		pthread_mutex_lock(&mutex_blocked);
 		t_pcb *proceso = queue_pop(cola_blocked);
+		proceso->estado = BLOCKED;
+		proceso->tiempo_inicio_bloqueo = get_tiempo_actual();
 		pthread_mutex_unlock(&mutex_blocked);
 
-		log_info(kernel_logger, "Bloqueando %d ms proceso con ID = %d...", proceso->tiempo_io, proceso->id);
-		usleep(proceso->tiempo_io * 1000);
-		log_info(kernel_logger, "Finalizo bloqueo...");
+		//log_info(kernel_logger, "Bloqueando %d ms proceso con ID = %d e inicio = %d...",
+				//proceso->tiempo_io, proceso->id, proceso->tiempo_inicio_bloqueo);
+		//usleep(proceso->tiempo_io * 1000);
+		pthread_t th_io;
+		//pthread_t th_suspend;
+		pthread_create(&th_io, NULL, (void *)io, proceso);
+		//pthread_create(&th_suspend, NULL, (void *)suspend, proceso);
+		pthread_detach(th_io);
+		//pthread_detach(th_suspend);
 
+		//log_info(kernel_logger, "Finalizo bloqueo...");
+
+		//pthread_mutex_lock(&mutex_ready);
+		//queue_push(cola_ready, proceso);
+		//pthread_mutex_unlock(&mutex_ready);
+
+		//sem_post(&sem_ready);
+	}
+}
+
+void io(t_pcb *pcb) {
+	pthread_mutex_lock(&mutex_io);
+	usleep(pcb->tiempo_io * 1000);
+	pthread_mutex_unlock(&mutex_io);
+
+	uint32_t tiempo_bloqueo = tiempo_bloqueado(pcb->tiempo_inicio_bloqueo);
+	log_info(kernel_logger, "[IO] -> ID = %d, tiempo io = %d, tiempo bloqueado = %d...",
+			pcb->id, pcb->tiempo_io, tiempo_bloqueo);
+
+	if(tiempo_bloqueo >= kernel_config->tiempo_maximo_bloqueado) {
+		pcb->estado = SUSPENDED_BLOCKED;
+		enviar_proceso_a_memoria(pcb, socket_memoria);
+		esperar_respuesta_memoria(socket_memoria);
+	}
+
+	if(pcb->estado == BLOCKED) {
+		log_info(kernel_logger, "Proceso quedo BLOCKED...");
 		pthread_mutex_lock(&mutex_ready);
-		queue_push(cola_ready, proceso);
+		queue_push(cola_ready, pcb);
 		pthread_mutex_unlock(&mutex_ready);
-
+		sem_post(&sem_ready);
+	} else if(pcb->estado == SUSPENDED_BLOCKED) {
+		log_info(kernel_logger, "Proceso quedo SUSPENDED-BLOCKED...");
+		pthread_mutex_lock(&mutex_ready);
+		queue_push(cola_ready, pcb);
+		pthread_mutex_unlock(&mutex_ready);
 		sem_post(&sem_ready);
 	}
+
+}
+
+void suspend(t_pcb *pcb) {
+	while(1) {
+		pthread_mutex_lock(&mutex_suspend);
+		if(pcb->estado == BLOCKED && tiempo_bloqueado(pcb->tiempo_inicio_bloqueo) >= kernel_config->tiempo_maximo_bloqueado) {
+			log_info(kernel_logger, "TIME BLOCK = %d...", tiempo_bloqueado(pcb->tiempo_inicio_bloqueo));
+			pcb->estado = SUSPENDED_BLOCKED;
+			//pthread_mutex_unlock(&mutex_suspend);
+			enviar_proceso_a_memoria(pcb, socket_memoria);
+			esperar_respuesta_memoria(socket_memoria);
+			//pthread_exit(NULL);
+		}
+		//pthread_mutex_lock(&mutex_suspend);
+		if(pcb->tiempo_io == 0) {
+			log_info(kernel_logger, "TIME BLOCK = %d...", tiempo_bloqueado(pcb->tiempo_inicio_bloqueo));
+			//pthread_mutex_unlock(&mutex_suspend);
+			if(pcb->estado == BLOCKED) {
+				log_info(kernel_logger, "Proceso quedo BLOCKED...");
+				pthread_mutex_lock(&mutex_ready);
+				queue_push(cola_ready, pcb);
+				pthread_mutex_unlock(&mutex_ready);
+				sem_post(&sem_ready);
+			} else if(pcb->estado == SUSPENDED_BLOCKED) {
+				log_info(kernel_logger, "Proceso quedo SUSPENDED-BLOCKED...");
+				pthread_mutex_lock(&mutex_ready);
+				queue_push(cola_ready, pcb);
+				pthread_mutex_unlock(&mutex_ready);
+				sem_post(&sem_ready);
+				//pthread_mutex_lock(&mutex_suspended_ready);
+				//queue_push(cola_suspended_ready, pcb);
+				//pthread_mutex_unlock(&mutex_suspended_ready);
+			}
+			pthread_mutex_unlock(&mutex_suspend);
+			break;
+		}
+		pthread_mutex_unlock(&mutex_suspend);
+		//usleep(10);
+	}
+	pthread_exit(NULL);
+}
+
+uint32_t tiempo_bloqueado(uint32_t tiempo) {
+	return get_tiempo_actual() - tiempo;
 }
 
 void enviar_proceso_a_cpu(t_pcb *pcb, int socket_cpu_dispatch) {

@@ -46,6 +46,8 @@ pthread_mutex_t mutex_exec;
 pthread_t thread_ready;
 pthread_t thread_exec;
 pthread_t thread_blocked;
+pthread_mutex_t mutex_io;
+pthread_mutex_t mutex_suspend;
 
 
 // Planificador Mediano Plazo

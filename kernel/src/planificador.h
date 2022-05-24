@@ -30,6 +30,9 @@ void estado_blocked(void *data);
 void enviar_proceso_a_cpu(t_pcb *pcb, int socket_cpu_dispatch);
 t_paquete *esperar_respuesta_cpu(int socket_cpu_dispatch);
 void enviar_interrupcion_a_cpu(int socket_fd);
+void io(t_pcb *pcb);
+void suspend(t_pcb *pcb);
+uint32_t tiempo_bloqueado(uint32_t tiempo);
 
 
 // Planificador Mediano Plazo
