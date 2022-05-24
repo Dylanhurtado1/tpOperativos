@@ -36,7 +36,7 @@ pthread_t thread_admitir;
 t_queue *cola_ready;
 t_queue *cola_exec;
 t_queue *cola_blocked;
-t_list *lista_blocked;
+//t_list *lista_blocked;
 sem_t sem_ready;
 sem_t sem_exec;
 sem_t sem_blocked;
@@ -46,8 +46,8 @@ pthread_mutex_t mutex_exec;
 pthread_t thread_ready;
 pthread_t thread_exec;
 pthread_t thread_blocked;
-pthread_mutex_t mutex_io;
-pthread_mutex_t mutex_suspend;
+//pthread_mutex_t mutex_io;
+//pthread_mutex_t mutex_suspend;
 
 
 // Planificador Mediano Plazo
