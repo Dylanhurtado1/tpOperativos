@@ -5,6 +5,8 @@ uint32_t tiempo_bloqueado(uint32_t tiempo);
 uint32_t diferencia_absoluta(uint32_t tiempo_1, uint32_t tiempo_2);
 void io(uint32_t tiempo);
 
+bool proceso_ejecutando;
+
 void iniciar_planificador_corto_plazo() {
 	pthread_mutex_init(&mutex_ready, NULL);
 	pthread_mutex_init(&mutex_blocked, NULL);
@@ -12,7 +14,8 @@ void iniciar_planificador_corto_plazo() {
 	sem_init(&sem_ready, 0, 0);
 	sem_init(&sem_exec, 0, 0);
 	sem_init(&sem_blocked, 0, 0);
-	cola_ready = queue_create();
+	sem_init(&sem_desalojo, 0, 0);
+	cola_ready = list_create();//queue_create();
 	cola_exec = queue_create();
 	cola_blocked = queue_create();
 	pthread_create(&thread_ready, NULL, (void *)estado_ready, NULL);
@@ -23,15 +26,27 @@ void iniciar_planificador_corto_plazo() {
 	pthread_detach(thread_blocked);
 
 	iniciar_timer();
+	proceso_ejecutando = false;
 }
 
 void estado_ready(void *data) {
 	while(1) {
 		sem_wait(&sem_ready);
 
-		pthread_mutex_lock(&mutex_ready);
-		t_pcb *proceso = queue_pop(cola_ready);
-		pthread_mutex_unlock(&mutex_ready);
+		//pthread_mutex_lock(&mutex_ready);
+		//t_pcb *proceso = queue_pop(cola_ready);
+		//pthread_mutex_unlock(&mutex_ready);
+
+		if(string_equals_ignore_case(kernel_config->algoritmo_planificacion, "SRT")) {
+			pthread_mutex_lock(&mutex_exec);
+			if(proceso_ejecutando) {
+				enviar_interrupcion_a_cpu(socket_cpu_interrupt);
+			}
+			pthread_mutex_unlock(&mutex_exec);
+			sem_wait(&sem_desalojo);
+		}
+
+		t_pcb *proceso = siguiente_a_ejecutar(kernel_config->algoritmo_planificacion);
 
 		pthread_mutex_lock(&mutex_exec);
 		queue_push(cola_exec, proceso);
@@ -46,6 +61,7 @@ void estado_exec(void *data) {
 		sem_wait(&sem_exec);
 		pthread_mutex_lock(&mutex_exec);
 		t_pcb *proceso = queue_pop(cola_exec);
+		proceso_ejecutando = true;
 		pthread_mutex_unlock(&mutex_exec);
 		enviar_proceso_a_cpu(proceso, socket_cpu_dispatch);
 		eliminar_proceso(proceso);
@@ -78,12 +94,19 @@ void estado_exec(void *data) {
 				break;
 			case PROCESO_DESALOJADO:
 				log_info(kernel_logger, "Proceso desalojado por interrupcion, seleccionar siguiente proceso a ejecutar...");
-				/*pcb = deserializar_pcb(datos, kernel_logger);
-				log_info(kernel_logger, "Se envia siguiente proceso...");
-				enviar_proceso_a_cpu(pcb, socket_cpu_dispatch);
-				eliminar_proceso(pcb);*/
+				pcb = deserializar_pcb(datos, kernel_logger);
+
+				pthread_mutex_lock(&mutex_ready);
+				list_add(cola_ready, pcb);
+				pthread_mutex_unlock(&mutex_ready);
+
+				sem_post(&sem_desalojo);
 				break;
 		}
+		pthread_mutex_lock(&mutex_exec);
+		proceso_ejecutando = false;
+		pthread_mutex_unlock(&mutex_exec);
+
 		list_destroy_and_destroy_elements(datos, free);
 		eliminar_paquete(paquete);
 	}
@@ -113,7 +136,7 @@ void estado_blocked(void *data) {
 			log_info(kernel_logger, "Proceso quedo BLOCKED...");
 			io(pcb->tiempo_io);
 			pthread_mutex_lock(&mutex_ready);
-			queue_push(cola_ready, pcb);
+			list_add(cola_ready, pcb);
 			pthread_mutex_unlock(&mutex_ready);
 
 			sem_post(&sem_ready);
@@ -146,7 +169,6 @@ t_paquete *esperar_respuesta_cpu(int socket_cpu_dispatch) {
 	return recibir_paquete(socket_cpu_dispatch);
 }
 
-
 void enviar_interrupcion_a_cpu(int socket_fd){
 	log_info(kernel_logger, "Enviando interrupcion de desalojo...");
 	t_paquete *paquete = crear_paquete(DESALOJAR_PROCESO, buffer_vacio());
@@ -156,7 +178,24 @@ void enviar_interrupcion_a_cpu(int socket_fd){
 	eliminar_paquete(paquete);
 }
 
+t_pcb *siguiente_a_ejecutar(char *algoritmo) {
+	bool menor_rafaga(void *pcb1, void *pcb2) {
+		return ((t_pcb *)pcb1)->estimacion_rafaga < ((t_pcb *)pcb2)->estimacion_rafaga;
+	}
 
+	t_pcb *pcb = NULL;
+	pthread_mutex_lock(&mutex_ready);
+	if(string_equals_ignore_case(algoritmo, "SRT")) {
+		list_sort(cola_ready, menor_rafaga);
+	}
+	else if(string_equals_ignore_case(algoritmo, "FIFO")) {
+	}
+
+	pcb = list_remove(cola_ready, 0);
+	pthread_mutex_unlock(&mutex_ready);
+
+	return pcb;
+}
 
 
 

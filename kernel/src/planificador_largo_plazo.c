@@ -77,7 +77,7 @@ void transicion_admitir(void *data) {
 		}
 
 		pthread_mutex_lock(&mutex_ready);
-		queue_push(cola_ready, proceso);
+		list_add(cola_ready, proceso);
 		pthread_mutex_unlock(&mutex_ready);
 
 		//procesos_admitidos_en_ready++;
