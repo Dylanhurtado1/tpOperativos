@@ -13,7 +13,7 @@ t_kernel_config *kernel_leer_configuracion(char *path) {
 	consola_config->ip_kernel = string_duplicate(config_get_string_value(config, "IP_KERNEL"));
 	consola_config->puerto_escucha = string_duplicate(config_get_string_value(config, "PUERTO_ESCUCHA"));
 	consola_config->algoritmo_planificacion = string_duplicate(config_get_string_value(config, "ALGORITMO_PLANIFICACION"));
-	consola_config->estimacion_inicial = config_get_int_value(config, "ESTIMACION_INICIAL");
+	consola_config->estimacion_inicial = config_get_double_value(config, "ESTIMACION_INICIAL");
 	consola_config->alfa = config_get_double_value(config, "ALFA");
 	consola_config->grado_multiprogramacion = config_get_int_value(config, "GRADO_MULTIPROGRAMACION");
 	consola_config->tiempo_maximo_bloqueado = config_get_int_value(config, "TIEMPO_MAXIMO_BLOQUEADO");

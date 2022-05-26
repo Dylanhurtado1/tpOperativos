@@ -1,11 +1,12 @@
 #include "planificador.h"
 #include "temporizador.h"
 
-uint32_t tiempo_bloqueado(uint32_t tiempo);
 uint32_t diferencia_absoluta(uint32_t tiempo_1, uint32_t tiempo_2);
 void io(uint32_t tiempo);
+double calcular_estimacion_rafaga(uint32_t tiempo_ejecucion, double tiempo_estimado);
 
 bool proceso_ejecutando;
+
 
 void iniciar_planificador_corto_plazo() {
 	pthread_mutex_init(&mutex_ready, NULL);
@@ -63,16 +64,19 @@ void estado_exec(void *data) {
 		t_pcb *proceso = queue_pop(cola_exec);
 		proceso_ejecutando = true;
 		pthread_mutex_unlock(&mutex_exec);
+		uint32_t tiempo_inicio_cpu = get_tiempo_actual();
 		enviar_proceso_a_cpu(proceso, socket_cpu_dispatch);
 		eliminar_proceso(proceso);
 
 		t_paquete *paquete = esperar_respuesta_cpu(socket_cpu_dispatch);
 		t_list *datos = deserealizar_paquete(paquete);
-		t_pcb *pcb;
+		t_pcb *pcb = deserializar_pcb(datos, kernel_logger);
+		pcb->estimacion_rafaga = calcular_estimacion_rafaga(pcb->estimacion_rafaga, tiempo_inicio_cpu);
+
 		switch(paquete->codigo_operacion) {
 			case BLOQUEAR_PROCESO:
 				log_info(kernel_logger, "Proceso ejecuto I/O, enviando a cola de bloqueo...");
-				pcb = deserializar_pcb(datos, kernel_logger);
+				//pcb = deserializar_pcb(datos, kernel_logger);
 
 				pthread_mutex_lock(&mutex_blocked);
 				pcb->estado = BLOCKED;
@@ -84,7 +88,7 @@ void estado_exec(void *data) {
 				break;
 			case FINALIZAR_PROCESO:
 				log_info(kernel_logger, "Proceso ejecuto EXIT, enviando a cola de salida...");
-				pcb = deserializar_pcb(datos, kernel_logger);
+				//pcb = deserializar_pcb(datos, kernel_logger);
 
 				pthread_mutex_lock(&mutex_exit);
 				queue_push(cola_exit, pcb);
@@ -94,7 +98,7 @@ void estado_exec(void *data) {
 				break;
 			case PROCESO_DESALOJADO:
 				log_info(kernel_logger, "Proceso desalojado por interrupcion, seleccionar siguiente proceso a ejecutar...");
-				pcb = deserializar_pcb(datos, kernel_logger);
+				//pcb = deserializar_pcb(datos, kernel_logger);
 
 				pthread_mutex_lock(&mutex_ready);
 				list_add(cola_ready, pcb);
@@ -119,17 +123,18 @@ void estado_blocked(void *data) {
 		t_pcb *pcb = queue_pop(cola_blocked);
 		pthread_mutex_unlock(&mutex_blocked);
 
-		uint32_t tiempo_bloqueo = tiempo_bloqueado(pcb->tiempo_inicio_bloqueo);
+		uint32_t tiempo_bloqueado = get_tiempo_actual() - pcb->tiempo_inicio_bloqueo;
 
-		if(tiempo_bloqueo > kernel_config->tiempo_maximo_bloqueado) {
+		if(tiempo_bloqueado > kernel_config->tiempo_maximo_bloqueado) {
 			transicion_suspender(pcb);
 			io(pcb->tiempo_io);
 
 			sem_post(&sem_suspended_ready);
-		} else if(tiempo_bloqueo + pcb->tiempo_io > kernel_config->tiempo_maximo_bloqueado) {
-			io(kernel_config->tiempo_maximo_bloqueado - tiempo_bloqueo);
+		} else if(tiempo_bloqueado + pcb->tiempo_io > kernel_config->tiempo_maximo_bloqueado) {
+			uint32_t tiempo_io_antes_suspender = kernel_config->tiempo_maximo_bloqueado - tiempo_bloqueado;
+			io(tiempo_io_antes_suspender);
 			transicion_suspender(pcb);
-			io(diferencia_absoluta(tiempo_bloqueo, pcb->tiempo_io));
+			io(diferencia_absoluta(tiempo_io_antes_suspender, pcb->tiempo_io));
 
 			sem_post(&sem_suspended_ready);
 		} else {
@@ -143,7 +148,7 @@ void estado_blocked(void *data) {
 		}
 
 		log_info(kernel_logger, "[IO] -> PID = %d, tiempo io = %d, tiempo bloqueado = %d...",
-				pcb->id, pcb->tiempo_io, tiempo_bloqueo);
+				pcb->id, pcb->tiempo_io, tiempo_bloqueado);
 	}
 }
 
@@ -155,8 +160,8 @@ uint32_t diferencia_absoluta(uint32_t tiempo_1, uint32_t tiempo_2) {
 	return tiempo_1 > tiempo_2 ? tiempo_1 - tiempo_2 : tiempo_2 - tiempo_1;
 }
 
-uint32_t tiempo_bloqueado(uint32_t tiempo) {
-	return get_tiempo_actual() - tiempo;
+double calcular_estimacion_rafaga(uint32_t tiempo_ejecucion, double tiempo_estimado) {
+	return kernel_config->alfa * tiempo_ejecucion + (1 - kernel_config->alfa) * tiempo_estimado;
 }
 
 void enviar_proceso_a_cpu(t_pcb *pcb, int socket_cpu_dispatch) {
