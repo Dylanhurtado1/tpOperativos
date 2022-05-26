@@ -1,16 +1,6 @@
 #ifndef PETICIONES_H_
 #define PETICIONES_H_
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <semaphore.h>
-#include <commons/log.h>
-#include <cliente.h>
-#include <servidor.h>
-#include <sockets.h>
-#include <protocolo.h>
-#include <estructuras.h>
-#include <serializador.h>
 #include "ciclo_instruccion.h"
 
 void peticiones_dispatch(int *socket_fd);

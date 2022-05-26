@@ -1,43 +1,31 @@
 #include "ciclo_instruccion.h"
 
-extern t_log *cpu_logger;
-extern int socket_memoria;
-extern t_cpu_config *cpu_config;
-extern t_traductor *traductor;
-extern sem_t sem_interrupt;
-extern bool desalojar_proceso;
+uint32_t tiempo_io;
+
 
 void ejecutar_ciclo_de_instruccion(t_pcb *pcb, int socket_kernel) {
-	int status;
+	t_desalojo tipo_desalojo;
 	t_instruccion *proxima_instruccion;
 
 	do{
 		proxima_instruccion = fetch(pcb);
-		bool buscar_operandos = decode(proxima_instruccion);
-		int valor_a_escribir;
-		if(buscar_operandos) {
-			valor_a_escribir = fetch_operands(proxima_instruccion->segundo_operando, socket_memoria);
+		if(decode(proxima_instruccion)) {
+			proxima_instruccion->segundo_operando = fetch_operands(proxima_instruccion, socket_memoria);
 		}
-		status = execute(proxima_instruccion, valor_a_escribir);
-		pcb->program_counter++;
-	} while(status == 0 && !check_interrupt());
+		tipo_desalojo = execute(proxima_instruccion);
+		if(check_interrupt()) {
+			tipo_desalojo = DESALOJO_INTERRUPCION;
+		}
+	} while(tipo_desalojo == CONTINUAR_EJECUCION);
 
-	t_paquete *paquete;
-	if(status == 1) {
-		pcb->tiempo_io = proxima_instruccion->primer_operando;
-		paquete = serializar_pcb(pcb, BLOQUEAR_PROCESO);
-	} else if(status == 2) {
-		paquete = serializar_pcb(pcb, FINALIZAR_PROCESO);
-	} else {
-		paquete = serializar_pcb(pcb, PROCESO_DESALOJADO);
-	}
-	enviar_paquete(paquete, socket_kernel);
-	eliminar_paquete(paquete);
+	desalojar_proceso(pcb, tipo_desalojo, socket_kernel);
+
 }
 
 t_instruccion *fetch(t_pcb *pcb) {
 	uint32_t pc = pcb->program_counter;
 	t_instruccion *instruccion = (t_instruccion *)list_get(pcb->instrucciones, pc);
+	pcb->program_counter++;
 	return instruccion;
 }
 
@@ -45,12 +33,12 @@ bool decode(t_instruccion *proxima_instruccion) {
 	return proxima_instruccion->identificador == COPY;
 }
 
-uint32_t fetch_operands(uint32_t direccion_logica, int socket_memoria) {
+uint32_t fetch_operands(t_instruccion * instruccion, int socket_memoria) {
 	// TODO: Buscar en memoria
 	return 10;
 }
 
-int execute(t_instruccion *instruccion, uint32_t valor) {
+t_desalojo execute(t_instruccion *instruccion) {
 	switch(instruccion->identificador) {
 		case NO_OP:
 			log_info(cpu_logger, "[CPU] --> Instruccion NO_OP ejecutada...");
@@ -58,7 +46,8 @@ int execute(t_instruccion *instruccion, uint32_t valor) {
 			break;
 		case IO:
 			log_info(cpu_logger, "[CPU] --> Instruccion IO ejecutada...");
-			return 1;
+			tiempo_io = instruccion->primer_operando;
+			return DESALOJO_IO;
 		case READ:
 			log_info(cpu_logger, "[CPU] --> Instruccion READ ejecutada...");
 			//direccion_logica = instruccion->primer_operando;
@@ -76,22 +65,46 @@ int execute(t_instruccion *instruccion, uint32_t valor) {
 			break;
 		case EXIT:
 			log_info(cpu_logger, "[CPU] --> Instruccion EXIT ejecutada...");
-			return 2;
+			return DESALOJO_EXIT;
 		default:
 			break;
 	}
-	return 0;
+	return CONTINUAR_EJECUCION;
 }
 
 bool check_interrupt() {
 	sem_wait(&sem_interrupt);
-	bool status = desalojar_proceso;
-	if(desalojar_proceso) {
-		desalojar_proceso = false;
+	bool status = interrupcion_desalojo;
+	if(interrupcion_desalojo) {
+		interrupcion_desalojo = false;
 	}
 	sem_post(&sem_interrupt);
 
 	return status;
 }
+
+void desalojar_proceso(t_pcb *pcb, t_desalojo tipo_desalojo, int socket_kernel) {
+	t_paquete *paquete;
+	switch(tipo_desalojo) {
+		case DESALOJO_IO:
+			//pcb->tiempo_io = proxima_instruccion->primer_operando;
+			pcb->tiempo_io = tiempo_io;
+			paquete = serializar_pcb(pcb, BLOQUEAR_PROCESO);
+			break;
+		case DESALOJO_EXIT:
+			paquete = serializar_pcb(pcb, FINALIZAR_PROCESO);
+			break;
+		case DESALOJO_INTERRUPCION:
+			paquete = serializar_pcb(pcb, PROCESO_DESALOJADO);
+			break;
+		default:
+			break;
+
+	}
+	enviar_paquete(paquete, socket_kernel);
+	eliminar_paquete(paquete);
+}
+
+
 
 

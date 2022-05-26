@@ -1,25 +1,23 @@
 #include "peticiones.h"
 
-extern t_log *cpu_logger;
-extern sem_t sem_interrupt;
-extern bool desalojar_proceso;
-
 
 void peticiones_dispatch(int *socket_dispatch) {
+	t_list *datos;
+	t_pcb *pcb;
+
 	log_info(cpu_logger, "CPU escuchando puerto dispatch");
 	int socket_kernel = esperar_cliente(*socket_dispatch);
 	while (true) {
 		t_paquete *paquete = recibir_paquete(socket_kernel);
 		switch (paquete->codigo_operacion) {
 			case PCB:
-				log_info(cpu_logger,"PCB recibida");
-				t_list *datos = deserealizar_paquete(paquete);
-				t_pcb *pcb = deserializar_pcb(datos, cpu_logger);
-				list_destroy_and_destroy_elements(datos, free);
+				datos = deserealizar_paquete(paquete);
+				pcb = deserializar_pcb(datos, cpu_logger);
+				log_info(cpu_logger,"PCB[%d] recibido, ejecutando ciclo instruccion", pcb->id);
 
 				ejecutar_ciclo_de_instruccion(pcb, socket_kernel);
 
-				log_info(cpu_logger,"Eliminando PCB...");
+				list_destroy_and_destroy_elements(datos, free);
 				eliminar_pcb(pcb);
 				break;
 			default:
@@ -39,7 +37,7 @@ void peticiones_interrupt(int *socket_interrupt) {
 			case DESALOJAR_PROCESO:
 				log_info(cpu_logger, "Interrupcion recibida, proximamente se desalojara el proceso...");
 				sem_wait(&sem_interrupt);
-				desalojar_proceso = true;
+				interrupcion_desalojo = true;
 				sem_post(&sem_interrupt);
 				break;
 			default:
