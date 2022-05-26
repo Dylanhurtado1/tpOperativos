@@ -14,7 +14,7 @@ typedef struct {
 	char *ip_kernel;
 	char *puerto_escucha;
 	char *algoritmo_planificacion;
-	int estimacion_inicial;
+	double estimacion_inicial;
 	double alfa;
 	int grado_multiprogramacion;
 	int tiempo_maximo_bloqueado;
