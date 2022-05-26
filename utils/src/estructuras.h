@@ -40,7 +40,6 @@ typedef struct {
 	uint32_t tiempo_io;
 	uint32_t tiempo_inicio_bloqueo;
 	t_estado estado;
-
 } t_pcb;
 
 typedef struct {
