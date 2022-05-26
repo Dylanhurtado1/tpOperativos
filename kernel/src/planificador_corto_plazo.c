@@ -16,7 +16,7 @@ void iniciar_planificador_corto_plazo() {
 	sem_init(&sem_exec, 0, 0);
 	sem_init(&sem_blocked, 0, 0);
 	sem_init(&sem_desalojo, 0, 0);
-	cola_ready = list_create();//queue_create();
+	cola_ready = list_create();
 	cola_exec = queue_create();
 	cola_blocked = queue_create();
 	pthread_create(&thread_ready, NULL, (void *)estado_ready, NULL);
@@ -34,17 +34,15 @@ void estado_ready(void *data) {
 	while(1) {
 		sem_wait(&sem_ready);
 
-		//pthread_mutex_lock(&mutex_ready);
-		//t_pcb *proceso = queue_pop(cola_ready);
-		//pthread_mutex_unlock(&mutex_ready);
-
 		if(string_equals_ignore_case(kernel_config->algoritmo_planificacion, "SRT")) {
 			pthread_mutex_lock(&mutex_exec);
 			if(proceso_ejecutando) {
+				pthread_mutex_unlock(&mutex_exec);
 				enviar_interrupcion_a_cpu(socket_cpu_interrupt);
+				sem_wait(&sem_desalojo);
+			} else {
+				pthread_mutex_unlock(&mutex_exec);
 			}
-			pthread_mutex_unlock(&mutex_exec);
-			sem_wait(&sem_desalojo);
 		}
 
 		t_pcb *proceso = siguiente_a_ejecutar(kernel_config->algoritmo_planificacion);
@@ -64,20 +62,25 @@ void estado_exec(void *data) {
 		t_pcb *proceso = queue_pop(cola_exec);
 		proceso_ejecutando = true;
 		pthread_mutex_unlock(&mutex_exec);
+
 		uint32_t tiempo_inicio_cpu = get_tiempo_actual();
 		enviar_proceso_a_cpu(proceso, socket_cpu_dispatch);
 		eliminar_proceso(proceso);
-
 		t_paquete *paquete = esperar_respuesta_cpu(socket_cpu_dispatch);
+		uint32_t tiempo_ejecucion = get_tiempo_actual() - tiempo_inicio_cpu;
+		pthread_mutex_lock(&mutex_exec);
+		proceso_ejecutando = false;
+		pthread_mutex_unlock(&mutex_exec);
+
 		t_list *datos = deserealizar_paquete(paquete);
 		t_pcb *pcb = deserializar_pcb(datos, kernel_logger);
-		pcb->estimacion_rafaga = calcular_estimacion_rafaga(pcb->estimacion_rafaga, tiempo_inicio_cpu);
+		pcb->estimacion_rafaga = calcular_estimacion_rafaga(tiempo_ejecucion, pcb->estimacion_rafaga);
+		log_info(kernel_logger, "PID[%d] -> tiempo ejecucion = %d, nueva estimacion = %d",
+				pcb->id, tiempo_ejecucion, pcb->estimacion_rafaga);
 
 		switch(paquete->codigo_operacion) {
 			case BLOQUEAR_PROCESO:
 				log_info(kernel_logger, "Proceso ejecuto I/O, enviando a cola de bloqueo...");
-				//pcb = deserializar_pcb(datos, kernel_logger);
-
 				pthread_mutex_lock(&mutex_blocked);
 				pcb->estado = BLOCKED;
 				pcb->tiempo_inicio_bloqueo = get_tiempo_actual();
@@ -88,8 +91,6 @@ void estado_exec(void *data) {
 				break;
 			case FINALIZAR_PROCESO:
 				log_info(kernel_logger, "Proceso ejecuto EXIT, enviando a cola de salida...");
-				//pcb = deserializar_pcb(datos, kernel_logger);
-
 				pthread_mutex_lock(&mutex_exit);
 				queue_push(cola_exit, pcb);
 				pthread_mutex_unlock(&mutex_exit);
@@ -98,18 +99,14 @@ void estado_exec(void *data) {
 				break;
 			case PROCESO_DESALOJADO:
 				log_info(kernel_logger, "Proceso desalojado por interrupcion, seleccionar siguiente proceso a ejecutar...");
-				//pcb = deserializar_pcb(datos, kernel_logger);
-
 				pthread_mutex_lock(&mutex_ready);
 				list_add(cola_ready, pcb);
 				pthread_mutex_unlock(&mutex_ready);
 
 				sem_post(&sem_desalojo);
+				sem_post(&sem_ready);
 				break;
 		}
-		pthread_mutex_lock(&mutex_exec);
-		proceso_ejecutando = false;
-		pthread_mutex_unlock(&mutex_exec);
 
 		list_destroy_and_destroy_elements(datos, free);
 		eliminar_paquete(paquete);
