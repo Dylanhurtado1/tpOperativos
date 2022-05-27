@@ -23,15 +23,15 @@ void iniciar_planificador_largo_plazo() {
 	pthread_detach(thread_admitir);
 }
 
-t_pcb *crear_estructura_pcb(t_list *instrucciones, uint32_t tam_proceso) {
+t_pcb *crear_estructura_pcb(t_consola *consola) {
 	t_pcb *pcb = malloc(sizeof(t_pcb));
 
 	pthread_mutex_lock(&mutex_generador_id);
 	pcb->id = generador_de_id;
 	generador_de_id++;
 	pthread_mutex_unlock(&mutex_generador_id);
-	pcb->tam_proceso = tam_proceso;
-	pcb->instrucciones = instrucciones;
+	pcb->tamanio_proceso = consola->tamanio;
+	pcb->instrucciones = list_duplicate(consola->instrucciones);
 	pcb->program_counter = 0;
 	pcb->estimacion_rafaga = kernel_config->estimacion_inicial;
 	pcb->tiempo_io = 0;

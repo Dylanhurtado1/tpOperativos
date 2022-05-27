@@ -11,7 +11,7 @@
 
 // Planificador Largo Plazo
 void iniciar_planificador_largo_plazo();
-t_pcb *crear_estructura_pcb(t_list *instrucciones, uint32_t tam_proceso);
+t_pcb *crear_estructura_pcb(t_consola *consola);
 void agregar_proceso_a_new(t_pcb *proceso, int socket_fd);
 void transicion_admitir(void *data);
 uint32_t obtener_entrada_tabla_de_pagina(int socket_fd);

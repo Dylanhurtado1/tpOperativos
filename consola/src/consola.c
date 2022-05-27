@@ -38,11 +38,11 @@ t_protocolo esperar_respuesta_de_kernel(int socket_kernel) {
 }
 
 void enviar_datos_a_kernel(int socket_kernel, t_list *instrucciones, uint32_t tamanio_consola) {
-	t_paquete *paquete = serializar_instrucciones(instrucciones, DATOS_CONSOLA);
-	agregar_a_paquete(paquete, &tamanio_consola, sizeof(uint32_t));
+	t_paquete *paquete = serializar_consola(instrucciones, tamanio_consola, DATOS_CONSOLA);
+	//t_paquete *paquete = serializar_instrucciones(instrucciones, DATOS_CONSOLA);
+	//agregar_a_paquete(paquete, &tamanio_consola, sizeof(uint32_t));
 
 	enviar_paquete(paquete, socket_kernel);
 	eliminar_paquete(paquete);
 }
-
 

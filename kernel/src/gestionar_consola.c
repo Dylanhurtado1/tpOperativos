@@ -7,18 +7,21 @@ void procesar_datos_consola(t_cliente *datos_cliente) {
 	switch (paquete->codigo_operacion) {
 		case DATOS_CONSOLA:
 			log_info(kernel_logger, "Procesando datos de consola");
-			t_list *datos = deserealizar_paquete(paquete);
-			t_list *instrucciones = deserializar_instrucciones(datos, kernel_logger);
-			uint32_t tamanio = deserialzar_tamanio_consola(datos);
-			print_datos_consola(kernel_logger, instrucciones, tamanio);
+			t_consola *consola = deserializar_consola(paquete);
+			print_datos_consola(kernel_logger, consola);
 
-			t_pcb *proceso = crear_estructura_pcb(instrucciones, tamanio);
+			t_pcb *proceso = crear_estructura_pcb(consola);
 			agregar_proceso_a_new(proceso, datos_cliente->socket);
 
-			list_destroy_and_destroy_elements(datos, free);
+			eliminar_consola(consola);
 			break;
 		default:
 			log_error(kernel_logger,"Protocolo invalido.");
 			break;
 	}
+}
+
+void eliminar_consola(t_consola *consola) {
+	list_destroy_and_destroy_elements(consola->instrucciones, free);
+	free(consola);
 }
