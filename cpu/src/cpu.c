@@ -1,18 +1,13 @@
 #include "cpu.h"
 
-t_log *cpu_logger;
-int socket_memoria;
-t_cpu_config *cpu_config;
-t_traductor *traductor;
-sem_t sem_interrupt;
-bool desalojar_proceso = false;
 
 int main(void) {
 	cpu_logger = log_create("cpu.log", "CPU", true, LOG_LEVEL_INFO);
 	cpu_config = cpu_leer_configuracion(PATH_CPU_CONFIG);
 	pthread_t th_dispatch;
 	pthread_t th_interrupt;
-	sem_init(&sem_interrupt, 0, 1);
+	pthread_mutex_init(&mutex_interrupt, NULL);
+	interrupcion_desalojo = false;
 
 	socket_memoria = conectar_a_modulo(cpu_config->ip_memoria, cpu_config->puerto_memoria, cpu_logger);
 
@@ -40,7 +35,7 @@ int main(void) {
 t_traductor *obtener_traductor_direcciones(int socket_fd) {
 	realizar_handshake(socket_fd);
 	t_paquete *paquete = recibir_paquete(socket_fd);
-	t_traductor *traductor = deserializar_traductor(paquete, cpu_logger);
+	t_traductor *traductor = deserializar_traductor(paquete);
 
 	eliminar_paquete(paquete);
 

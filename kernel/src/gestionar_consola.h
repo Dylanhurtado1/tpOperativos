@@ -11,5 +11,6 @@
 #include "kernel_global.h"
 
 void procesar_datos_consola(t_cliente *datos_cliente);
+void eliminar_consola(t_consola *consola);
 
 #endif /* GESTIONAR_CONSOLA_H_ */

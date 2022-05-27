@@ -19,5 +19,6 @@ void enviar_estructura_traductora(int socket_fd, t_traductor *traductor);
 t_traductor *crear_traductor(int entradas_tabla, int tamanio_pagina);
 void eliminar_traductor(t_traductor *traductor);
 void informar_memoria_liberada(int socket_fd, t_protocolo protocolo);
+void eliminar_pcb(t_pcb *pcb);
 
 #endif /* MEMORIA_H_ */

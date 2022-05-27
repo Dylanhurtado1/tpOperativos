@@ -15,6 +15,7 @@ typedef enum {
 } t_identificador;
 
 typedef enum {
+	JOB,
 	NEW,
 	READY,
 	EXEC,
@@ -31,8 +32,13 @@ typedef struct {
 } t_instruccion;
 
 typedef struct {
+	t_list *instrucciones;
+	uint32_t tamanio;
+} t_consola;
+
+typedef struct {
 	uint32_t id;
-	uint32_t tam_proceso;
+	uint32_t tamanio_proceso;
 	t_list *instrucciones;
 	uint32_t program_counter;
 	uint32_t tabla_paginas;
@@ -40,7 +46,6 @@ typedef struct {
 	uint32_t tiempo_io;
 	uint32_t tiempo_inicio_bloqueo;
 	t_estado estado;
-
 } t_pcb;
 
 typedef struct {
