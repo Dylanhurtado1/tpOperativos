@@ -73,7 +73,7 @@ void estado_exec(void *data) {
 		pthread_mutex_unlock(&mutex_exec);
 
 		t_list *datos = deserealizar_paquete(paquete);
-		t_pcb *pcb = deserializar_pcb(datos, kernel_logger);
+		t_pcb *pcb = deserializar_pcb(datos);
 		pcb->estimacion_rafaga = calcular_estimacion_rafaga(tiempo_ejecucion, pcb->estimacion_rafaga);
 		log_info(kernel_logger, "PID[%d] -> tiempo ejecucion = %d, nueva estimacion = %d",
 				pcb->id, tiempo_ejecucion, pcb->estimacion_rafaga);

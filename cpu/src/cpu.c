@@ -35,7 +35,7 @@ int main(void) {
 t_traductor *obtener_traductor_direcciones(int socket_fd) {
 	realizar_handshake(socket_fd);
 	t_paquete *paquete = recibir_paquete(socket_fd);
-	t_traductor *traductor = deserializar_traductor(paquete, cpu_logger);
+	t_traductor *traductor = deserializar_traductor(paquete);
 
 	eliminar_paquete(paquete);
 

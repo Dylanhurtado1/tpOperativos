@@ -81,7 +81,7 @@ t_paquete *serializar_pcb(t_pcb *proceso, t_protocolo protocolo) {
 	return paquete;
 }
 
-t_pcb *deserializar_pcb(t_list *datos, t_log *logger) {
+t_pcb *deserializar_pcb(t_list *datos) {
 	t_pcb *pcb = malloc(sizeof(t_pcb));
 
 	pcb->id = *(uint32_t *)list_get(datos, 0);
@@ -113,7 +113,7 @@ t_paquete *serializar_traductor(t_traductor *traductor, t_protocolo protocolo) {
 	return paquete;
 }
 
-t_traductor *deserializar_traductor(t_paquete *paquete, t_log *logger) {
+t_traductor *deserializar_traductor(t_paquete *paquete) {
 	t_list *datos = deserealizar_paquete(paquete);
 	t_traductor *traductor = malloc(sizeof(t_traductor));
 	traductor->cantidad_entradas_tabla = *(uint32_t *)list_get(datos, 0);

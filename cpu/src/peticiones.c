@@ -12,7 +12,7 @@ void peticiones_dispatch(int *socket_dispatch) {
 		switch (paquete->codigo_operacion) {
 			case PCB:
 				datos = deserealizar_paquete(paquete);
-				pcb = deserializar_pcb(datos, cpu_logger);
+				pcb = deserializar_pcb(datos);
 				log_info(cpu_logger,"PCB[%d] recibido, ejecutando ciclo instruccion", pcb->id);
 
 				ejecutar_ciclo_de_instruccion(pcb, socket_kernel);

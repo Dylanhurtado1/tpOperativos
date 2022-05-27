@@ -10,9 +10,9 @@
 t_paquete *serializar_consola(t_list *instrucciones, uint32_t tamanio_consola, t_protocolo protocolo);
 t_consola *deserializar_consola(t_paquete *paquete);
 t_paquete *serializar_pcb(t_pcb *proceso, t_protocolo protocolo);
-t_pcb *deserializar_pcb(t_list *datos, t_log *logger);
+t_pcb *deserializar_pcb(t_list *datos);
 t_paquete *serializar_traductor(t_traductor *traductor, t_protocolo protocolo);
-t_traductor *deserializar_traductor(t_paquete *paquete, t_log *logger);
+t_traductor *deserializar_traductor(t_paquete *paquete);
 
 
 #endif /* SERIALIZADOR_H_ */

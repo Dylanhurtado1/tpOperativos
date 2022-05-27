@@ -39,7 +39,7 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 			break;
 		case LIBERAR_MEMORIA_PCB:
 			datos = deserealizar_paquete(paquete);
-			pcb = deserializar_pcb(datos, memoria_logger);
+			pcb = deserializar_pcb(datos);
 			log_info(memoria_logger, "Liberando memoria de proceso ID = %d...", pcb->id);
 			informar_memoria_liberada(datos_cliente->socket, PCB_LIBERADO);
 
@@ -49,7 +49,7 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 			break;
 		case ELIMINAR_MEMORIA_PCB:
 			datos = deserealizar_paquete(paquete);
-			pcb = deserializar_pcb(datos, memoria_logger);
+			pcb = deserializar_pcb(datos);
 			log_info(memoria_logger, "Eliminando memoria de proceso ID = %d...", pcb->id);
 			informar_memoria_liberada(datos_cliente->socket, PCB_ELIMINADO);
 
