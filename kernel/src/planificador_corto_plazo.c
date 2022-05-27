@@ -72,8 +72,7 @@ void estado_exec(void *data) {
 		proceso_ejecutando = false;
 		pthread_mutex_unlock(&mutex_exec);
 
-		t_list *datos = deserealizar_paquete(paquete);
-		t_pcb *pcb = deserializar_pcb(datos);
+		t_pcb *pcb = deserializar_pcb(paquete);
 		pcb->estimacion_rafaga = calcular_estimacion_rafaga(tiempo_ejecucion, pcb->estimacion_rafaga);
 		log_info(kernel_logger, "PID[%d] -> tiempo ejecucion = %d, nueva estimacion = %d",
 				pcb->id, tiempo_ejecucion, pcb->estimacion_rafaga);
@@ -106,9 +105,11 @@ void estado_exec(void *data) {
 				sem_post(&sem_desalojo);
 				sem_post(&sem_ready);
 				break;
+			default:
+				log_error(kernel_logger, "Operacion desconocida.");
+				break;
 		}
 
-		list_destroy_and_destroy_elements(datos, free);
 		eliminar_paquete(paquete);
 	}
 }

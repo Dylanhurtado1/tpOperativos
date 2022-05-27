@@ -2,7 +2,6 @@
 
 
 void peticiones_dispatch(int *socket_dispatch) {
-	t_list *datos;
 	t_pcb *pcb;
 
 	log_info(cpu_logger, "CPU escuchando puerto dispatch");
@@ -11,17 +10,15 @@ void peticiones_dispatch(int *socket_dispatch) {
 		t_paquete *paquete = recibir_paquete(socket_kernel);
 		switch (paquete->codigo_operacion) {
 			case PCB:
-				datos = deserealizar_paquete(paquete);
-				pcb = deserializar_pcb(datos);
+				pcb = deserializar_pcb(paquete);
 				log_info(cpu_logger,"PCB[%d] recibido, ejecutando ciclo instruccion", pcb->id);
 
 				ejecutar_ciclo_de_instruccion(pcb, socket_kernel);
 
-				list_destroy_and_destroy_elements(datos, free);
 				eliminar_pcb(pcb);
 				break;
 			default:
-				log_error(cpu_logger,"Operacion desconocida.");
+				log_error(cpu_logger, "Operacion desconocida.");
 				break;
 		}
 		eliminar_paquete(paquete);
@@ -41,7 +38,7 @@ void peticiones_interrupt(int *socket_interrupt) {
 				sem_post(&sem_interrupt);
 				break;
 			default:
-				log_error(cpu_logger,"Operacion desconocida.");
+				log_error(cpu_logger, "Operacion desconocida.");
 				break;
 		}
 		eliminar_paquete(paquete);

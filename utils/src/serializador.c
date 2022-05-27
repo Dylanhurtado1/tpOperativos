@@ -35,7 +35,8 @@ t_paquete *serializar_pcb(t_pcb *pcb, t_protocolo protocolo) {
 	return paquete;
 }
 
-t_pcb *deserializar_pcb(t_list *datos) {
+t_pcb *deserializar_pcb(t_paquete *paquete) {
+	t_list *datos = deserealizar_paquete(paquete);
 	t_pcb *pcb = malloc(sizeof(t_pcb));
 
 	pcb->instrucciones = deserializar_instrucciones(datos, list_size(datos) - 8);
@@ -50,6 +51,7 @@ t_pcb *deserializar_pcb(t_list *datos) {
 	pcb->tiempo_inicio_bloqueo = *(uint32_t *)list_get(datos, offset + 6);
 	pcb->estado = *(t_estado *)list_get(datos, offset + 7);
 
+	list_destroy_and_destroy_elements(datos, free);
 	return pcb;
 }
 
