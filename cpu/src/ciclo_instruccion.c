@@ -88,7 +88,7 @@ void desalojar_proceso(t_pcb *pcb, t_desalojo tipo_desalojo, int socket_kernel) 
 	switch(tipo_desalojo) {
 		case DESALOJO_IO:
 			//pcb->tiempo_io = proxima_instruccion->primer_operando;
-			pcb->tiempo_io = tiempo_io;
+			//pcb->tiempo_io = tiempo_io;
 			paquete = serializar_pcb(pcb, BLOQUEAR_PROCESO);
 			break;
 		case DESALOJO_EXIT:
@@ -103,6 +103,9 @@ void desalojar_proceso(t_pcb *pcb, t_desalojo tipo_desalojo, int socket_kernel) 
 	}
 	enviar_paquete(paquete, socket_kernel);
 	eliminar_paquete(paquete);
+	if(tipo_desalojo == DESALOJO_IO) {
+		enviar_datos(socket_kernel, &tiempo_io, sizeof(uint32_t));
+	}
 }
 
 

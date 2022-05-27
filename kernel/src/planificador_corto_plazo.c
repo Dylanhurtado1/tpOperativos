@@ -80,6 +80,7 @@ void estado_exec(void *data) {
 		switch(paquete->codigo_operacion) {
 			case BLOQUEAR_PROCESO:
 				log_info(kernel_logger, "Proceso ejecuto I/O, enviando a cola de bloqueo...");
+				recibir_datos(socket_cpu_dispatch, &(pcb->tiempo_io), sizeof(uint32_t));
 				pthread_mutex_lock(&mutex_blocked);
 				pcb->estado = BLOCKED;
 				pcb->tiempo_inicio_bloqueo = get_tiempo_actual();
