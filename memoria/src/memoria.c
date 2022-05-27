@@ -22,7 +22,6 @@ int main(void) {
 }
 
 void procesar_conexiones(t_cliente *datos_cliente) {
-	t_list *datos;
 	t_pcb *pcb;
 	t_paquete *paquete = datos_cliente->paquete;
 	switch (paquete->codigo_operacion) {
@@ -38,27 +37,21 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 			eliminar_traductor(traductor);
 			break;
 		case LIBERAR_MEMORIA_PCB:
-			datos = deserealizar_paquete(paquete);
-			pcb = deserializar_pcb(datos, memoria_logger);
-			log_info(memoria_logger, "Liberando memoria de proceso ID = %d...", pcb->id);
+			pcb = deserializar_pcb(paquete);
+			log_info(memoria_logger, "Liberando memoria de proceso PID[%d]...", pcb->id);
 			informar_memoria_liberada(datos_cliente->socket, PCB_LIBERADO);
 
-			list_destroy_and_destroy_elements(pcb->instrucciones, free);
-			free(pcb);
-			list_destroy_and_destroy_elements(datos, free);
+			eliminar_pcb(pcb);
 			break;
 		case ELIMINAR_MEMORIA_PCB:
-			datos = deserealizar_paquete(paquete);
-			pcb = deserializar_pcb(datos, memoria_logger);
-			log_info(memoria_logger, "Eliminando memoria de proceso ID = %d...", pcb->id);
+			pcb = deserializar_pcb(paquete);
+			log_info(memoria_logger, "Eliminando memoria de proceso PID[%d]...", pcb->id);
 			informar_memoria_liberada(datos_cliente->socket, PCB_ELIMINADO);
 
-			list_destroy_and_destroy_elements(pcb->instrucciones, free);
-			free(pcb);
-			list_destroy_and_destroy_elements(datos, free);
+			eliminar_pcb(pcb);
 			break;
 		default:
-			log_error(memoria_logger,"Protocolo invalido.");
+			log_error(memoria_logger, "Protocolo invalido.");
 			break;
 	}
 	eliminar_paquete(paquete);
@@ -75,7 +68,7 @@ void enviar_estructura_traductora(int socket_fd, t_traductor *traductor) {
 }
 
 t_traductor *crear_traductor(int entradas_tabla, int tamanio_pagina) {
-	t_traductor *traductor = (t_traductor *)malloc(sizeof(t_traductor));
+	t_traductor *traductor = malloc(sizeof(t_traductor));
 	traductor->cantidad_entradas_tabla = entradas_tabla;
 	traductor->tamanio_pagina = tamanio_pagina;
 
@@ -84,6 +77,11 @@ t_traductor *crear_traductor(int entradas_tabla, int tamanio_pagina) {
 
 void eliminar_traductor(t_traductor *traductor) {
 	free(traductor);
+}
+
+void eliminar_pcb(t_pcb *pcb) {
+	list_destroy_and_destroy_elements(pcb->instrucciones, free);
+	free(pcb);
 }
 
 void informar_memoria_liberada(int socket_fd, t_protocolo protocolo) {

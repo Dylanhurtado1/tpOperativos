@@ -1,5 +1,6 @@
 #include "consola_config.h"
 
+
 t_consola_config *consola_leer_configuracion(char *path) {
 
 	t_config *config = config_create(path);

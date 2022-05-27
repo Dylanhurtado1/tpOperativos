@@ -13,4 +13,5 @@ typedef struct {
 t_consola_config *consola_leer_configuracion(char *path);
 void consola_eliminar_configuracion(t_consola_config *config);
 
+
 #endif /* CONSOLA_CONFIG_H_ */

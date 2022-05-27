@@ -1,14 +1,11 @@
 #include "parser.h"
 
-extern t_log *consola_logger;
-
-void imprimir_instrucciones(t_instruccion *instruccion);
 
 t_list *parsear_pseudocodigo(char *path) {
 	char identificador[10];
 	uint32_t primer_operando;
 	uint32_t segundo_operando;
-	t_list *lista_instrucciones = list_create();
+	t_list *instrucciones = list_create();
 
 	FILE* archivo = fopen(path, "r");
 	if (archivo == NULL) {
@@ -22,19 +19,17 @@ t_list *parsear_pseudocodigo(char *path) {
 		if(string_equals_ignore_case(identificador, "NO_OP")) {
 			for(int i = 0; i < primer_operando; i++) {
 				t_instruccion *instruccion = generar_instruccion(identificador, 0xFFFF, 0xFFFF);
-				list_add(lista_instrucciones, instruccion);
+				list_add(instrucciones, instruccion);
 			}
 		} else {
 			t_instruccion *instruccion = generar_instruccion(identificador, primer_operando, segundo_operando);
-			list_add(lista_instrucciones, instruccion);
+			list_add(instrucciones, instruccion);
 		}
 	}
 
-	list_iterate(lista_instrucciones, (void *)imprimir_instrucciones);
-
 	fclose(archivo);
 
-	return lista_instrucciones;
+	return instrucciones;
 }
 
 t_instruccion *generar_instruccion(char *identificador, uint32_t primer_operando, uint32_t segundo_operando) {
@@ -44,12 +39,6 @@ t_instruccion *generar_instruccion(char *identificador, uint32_t primer_operando
 	instruccion->segundo_operando = segundo_operando;
 
 	return instruccion;
-}
-
-
-void imprimir_instrucciones(t_instruccion *instruccion) {
-	log_info(consola_logger, "ID: %d, OP_1: %d, OP_2: %d",
-			instruccion->identificador, instruccion->primer_operando, instruccion->segundo_operando);
 }
 
 t_identificador transformar_identificador(char *identificador) {

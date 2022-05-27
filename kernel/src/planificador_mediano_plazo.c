@@ -12,16 +12,16 @@ void iniciar_planificador_mediano_plazo() {
 	pthread_detach(thread_suspended_ready);
 }
 
-void transicion_suspender(t_pcb *pcb) {
-	log_info(kernel_logger, "PID[%d] entro a SUSPENDED-BLOCKED...", pcb->id);
-	pcb->estado = SUSPENDED_BLOCKED;
-	enviar_proceso_a_memoria(pcb, socket_memoria, LIBERAR_MEMORIA_PCB);
+void transicion_suspender(t_proceso *proceso) {
+	log_info(kernel_logger, "PID[%d] ingresa a SUSPENDED-BLOCKED", proceso->pcb->id);
+	proceso->estado = SUSPENDED_BLOCKED;
+	enviar_proceso_a_memoria(proceso, socket_memoria, LIBERAR_MEMORIA_PCB);
 	t_protocolo protocolo = esperar_respuesta_memoria(socket_memoria);
 	if(protocolo != PCB_LIBERADO) {
-		log_error(kernel_logger, "No se pudo liberar la memoria del proceso");
+		log_error(kernel_logger, "No se pudo liberar la memoria de PID[%d]", proceso->pcb->id);
 	}
 	pthread_mutex_lock(&mutex_suspended_blocked);
-	queue_push(cola_suspended_blocked, pcb);
+	queue_push(cola_suspended_blocked, proceso);
 	pthread_mutex_unlock(&mutex_suspended_blocked);
 
 	sem_post(&sem_grado_multiprogramacion);
@@ -31,13 +31,14 @@ void estado_suspended_ready(void *data) {
 	while(1) {
 		sem_wait(&sem_suspended_ready);
 		pthread_mutex_lock(&mutex_suspended_blocked);
-		t_pcb *pcb = queue_pop(cola_suspended_blocked);
+		t_proceso *proceso = queue_pop(cola_suspended_blocked);
 		pthread_mutex_unlock(&mutex_suspended_blocked);
 
 		pthread_mutex_lock(&mutex_suspended_ready);
-		queue_push(cola_suspended_ready, pcb);
+		queue_push(cola_suspended_ready, proceso);
 		pthread_mutex_unlock(&mutex_suspended_ready);
 
+		log_info(kernel_logger, "PID[%d] ingresa a SUSPENDED-READY...", proceso->pcb->id);
 		sem_post(&sem_admitir);
 	}
 }
