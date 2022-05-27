@@ -1,9 +1,5 @@
 #include "planificador.h"
 
-void generar_pid(uint32_t id, int socket_fd);
-void eliminar_pid(t_pid *pid);
-
-t_list *pids;
 
 void iniciar_planificador_largo_plazo() {
 	generador_de_id = 0;
@@ -16,11 +12,21 @@ void iniciar_planificador_largo_plazo() {
 	sem_init(&sem_grado_multiprogramacion, 0, kernel_config->grado_multiprogramacion);
 	cola_new = queue_create();
 	cola_exit = queue_create();
-	pids = list_create();
 	pthread_create(&thread_exit, NULL, (void *)estado_exit, NULL);
 	pthread_create(&thread_admitir, NULL, (void *)transicion_admitir, NULL);
 	pthread_detach(thread_exit);
 	pthread_detach(thread_admitir);
+}
+
+t_proceso *crear_proceso(t_consola *consola, int socket_consola) {
+	t_proceso *proceso = malloc(sizeof(t_proceso));
+
+	proceso->socket = socket_consola;
+	proceso->pcb = crear_estructura_pcb(consola);
+	proceso->estado = JOB;
+	proceso->tiempo_io = 0;
+	proceso->tiempo_inicio_bloqueo = 0;
+	return proceso;
 }
 
 t_pcb *crear_estructura_pcb(t_consola *consola) {
@@ -39,41 +45,33 @@ t_pcb *crear_estructura_pcb(t_consola *consola) {
 	return pcb;
 }
 
-void agregar_proceso_a_new(t_pcb *proceso, int socket_fd) {
-	generar_pid(proceso->id, socket_fd);
-
+void agregar_proceso_a_new(t_proceso *proceso) {
 	pthread_mutex_lock(&mutex_new);
 	queue_push(cola_new, proceso);
 	pthread_mutex_unlock(&mutex_new);
-	log_info(kernel_logger, "Se agregó PCB a cola NEW");
+	log_info(kernel_logger, "PID[%d] ingresa a NEW...", proceso->pcb->id);
 
 	sem_post(&sem_admitir);
-}
-
-void generar_pid(uint32_t id, int socket_fd) {
-	t_pid *pid = malloc(sizeof(t_pid));
-	pid->socket = socket_fd;
-	pid->id = id;
-	list_add(pids, pid);
 }
 
 void transicion_admitir(void *data) {
 	while(1) {
 		sem_wait(&sem_admitir);
 		sem_wait(&sem_grado_multiprogramacion);
-		t_pcb *proceso;
+		t_proceso *proceso;
 
 		pthread_mutex_lock(&mutex_suspended_ready);
 		if(!queue_is_empty(cola_suspended_ready)) {
 			proceso = queue_pop(cola_suspended_ready);
 			pthread_mutex_unlock(&mutex_suspended_ready);
-			log_info(kernel_logger, "PID[%d] sale de SUSPENDED-READY", proceso->id);
+			log_info(kernel_logger, "PID[%d] ingresa a READY desde SUSPENDED-READY", proceso->pcb->id);
 		} else {
 			pthread_mutex_unlock(&mutex_suspended_ready);
 			pthread_mutex_lock(&mutex_new);
 			proceso = queue_pop(cola_new);
 			pthread_mutex_unlock(&mutex_new);
-			proceso->tabla_paginas = obtener_entrada_tabla_de_pagina(socket_memoria);
+			proceso->pcb->tabla_paginas = obtener_entrada_tabla_de_pagina(socket_memoria);
+			log_info(kernel_logger, "PID[%d] ingresa a READY desde NEW", proceso->pcb->id);
 		}
 
 		pthread_mutex_lock(&mutex_ready);
@@ -94,7 +92,6 @@ uint32_t obtener_entrada_tabla_de_pagina(int socket_fd) {
 	eliminar_paquete(paquete);
 
 	recibir_datos(socket_fd, &numero, sizeof(uint32_t));
-	log_info(kernel_logger, "Numero de tabla de paginas: %d", numero);
 
 	return numero;
 }
@@ -102,28 +99,24 @@ uint32_t obtener_entrada_tabla_de_pagina(int socket_fd) {
 void estado_exit(void *dato) {
 	while(1) {
 		sem_wait(&sem_exit);
-		t_pcb *pcb = queue_pop(cola_exit);
+		t_proceso *proceso = queue_pop(cola_exit);
+		log_info(kernel_logger, "PID[%d] ingresa a EXIT", proceso->pcb->id);
 
-		enviar_proceso_a_memoria(pcb, socket_memoria, ELIMINAR_MEMORIA_PCB);
+		enviar_proceso_a_memoria(proceso, socket_memoria, ELIMINAR_MEMORIA_PCB);
 		t_protocolo protocolo = esperar_respuesta_memoria(socket_memoria);
-		if(protocolo == PCB_ELIMINADO) {
-			log_info(kernel_logger, "Se elimino memoria del proceso");
+		if(protocolo != PCB_ELIMINADO) {
+			log_error(kernel_logger, "No se pudo eliminar memoria de PID[%d]", proceso->pcb->id);
 		}
 
-		bool buscar_id(t_pid *pid) {
-			return pid->id == pcb->id;
-		}
-		t_pid *pid = list_remove_by_condition(pids, (void *)buscar_id);
-		enviar_respuesta_a_consola(pid->socket, FINALIZAR_CONSOLA_OK);
+		enviar_respuesta_a_consola(proceso->socket, FINALIZAR_CONSOLA_OK);
 
-		eliminar_proceso(pcb);
-		eliminar_pid(pid);
+		eliminar_proceso(proceso);
 		sem_post(&sem_grado_multiprogramacion);
 	}
 }
 
-void enviar_proceso_a_memoria(t_pcb *pcb, int socket_memoria, t_protocolo protocolo) {
-	t_paquete *paquete = serializar_pcb(pcb, protocolo);
+void enviar_proceso_a_memoria(t_proceso *proceso, int socket_memoria, t_protocolo protocolo) {
+	t_paquete *paquete = serializar_pcb(proceso->pcb, protocolo);
 	enviar_paquete(paquete, socket_memoria);
 	eliminar_paquete(paquete);
 }
@@ -138,13 +131,10 @@ void enviar_respuesta_a_consola(int socket_fd, t_protocolo protocolo) {
 	enviar_datos(socket_fd, &protocolo, sizeof(t_protocolo));
 }
 
-void eliminar_proceso(t_pcb *proceso) {
-	list_destroy_and_destroy_elements(proceso->instrucciones, free);
+void eliminar_proceso(t_proceso *proceso) {
+	list_destroy_and_destroy_elements(proceso->pcb->instrucciones, free);
+	free(proceso->pcb);
 	free(proceso);
-}
-
-void eliminar_pid(t_pid *pid) {
-	free(pid);
 }
 
 

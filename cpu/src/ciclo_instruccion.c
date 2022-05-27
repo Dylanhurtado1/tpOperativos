@@ -16,7 +16,7 @@ void ejecutar_ciclo_de_instruccion(t_pcb *pcb, int socket_kernel) {
 		if(check_interrupt()) {
 			tipo_desalojo = DESALOJO_INTERRUPCION;
 		}
-	} while(tipo_desalojo == CONTINUAR_EJECUCION);
+	} while(tipo_desalojo == NO_DESALOJAR);
 
 	desalojar_proceso(pcb, tipo_desalojo, socket_kernel);
 
@@ -41,44 +41,44 @@ uint32_t fetch_operands(t_instruccion * instruccion, int socket_memoria) {
 t_desalojo execute(t_instruccion *instruccion) {
 	switch(instruccion->identificador) {
 		case NO_OP:
-			log_info(cpu_logger, "[CPU] --> Instruccion NO_OP ejecutada...");
+			log_info(cpu_logger, "Instruccion NO_OP ejecutada...");
 			usleep(cpu_config->retardo_noop * 1000);
 			break;
 		case IO:
-			log_info(cpu_logger, "[CPU] --> Instruccion IO ejecutada...");
+			log_info(cpu_logger, "Instruccion IO ejecutada...");
 			tiempo_io = instruccion->primer_operando;
 			return DESALOJO_IO;
 		case READ:
-			log_info(cpu_logger, "[CPU] --> Instruccion READ ejecutada...");
+			log_info(cpu_logger, "Instruccion READ ejecutada...");
 			//direccion_logica = instruccion->primer_operando;
 			//exec_instruccion_READ(direccion_logica);
 			break;
 		case WRITE:
-			log_info(cpu_logger, "[CPU] --> Instruccion WRITE ejecutada...");
+			log_info(cpu_logger, "Instruccion WRITE ejecutada...");
 			//direccion_logica=instruccion->primer_operando;
 			//exec_instruccion_WRITE(direccion_logica, valor);
 			break;
 		case COPY:
-			log_info(cpu_logger, "[CPU] --> Instruccion COPY ejecutada...");
+			log_info(cpu_logger, "Instruccion COPY ejecutada...");
 			//direccion_logica = instruccion->primer_operando;
 			//exec_instruccion_COPY(direccion_logica, valor);
 			break;
 		case EXIT:
-			log_info(cpu_logger, "[CPU] --> Instruccion EXIT ejecutada...");
+			log_info(cpu_logger, "Instruccion EXIT ejecutada...");
 			return DESALOJO_EXIT;
 		default:
 			break;
 	}
-	return CONTINUAR_EJECUCION;
+	return NO_DESALOJAR;
 }
 
 bool check_interrupt() {
-	sem_wait(&sem_interrupt);
+	pthread_mutex_lock(&mutex_interrupt);
 	bool status = interrupcion_desalojo;
 	if(interrupcion_desalojo) {
 		interrupcion_desalojo = false;
 	}
-	sem_post(&sem_interrupt);
+	pthread_mutex_unlock(&mutex_interrupt);
 
 	return status;
 }
@@ -87,8 +87,6 @@ void desalojar_proceso(t_pcb *pcb, t_desalojo tipo_desalojo, int socket_kernel) 
 	t_paquete *paquete;
 	switch(tipo_desalojo) {
 		case DESALOJO_IO:
-			//pcb->tiempo_io = proxima_instruccion->primer_operando;
-			//pcb->tiempo_io = tiempo_io;
 			paquete = serializar_pcb(pcb, BLOQUEAR_PROCESO);
 			break;
 		case DESALOJO_EXIT:

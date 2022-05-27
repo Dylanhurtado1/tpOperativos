@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
-#include <semaphore.h>
 #include <commons/log.h>
 #include <protocolo.h>
 #include <errors.h>
@@ -18,7 +17,7 @@ t_log *cpu_logger;
 int socket_memoria;
 t_cpu_config *cpu_config;
 t_traductor *traductor;
-sem_t sem_interrupt;
+pthread_mutex_t mutex_interrupt;
 bool interrupcion_desalojo;
 
 

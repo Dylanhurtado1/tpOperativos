@@ -6,7 +6,7 @@ int main(void) {
 	cpu_config = cpu_leer_configuracion(PATH_CPU_CONFIG);
 	pthread_t th_dispatch;
 	pthread_t th_interrupt;
-	sem_init(&sem_interrupt, 0, 1);
+	pthread_mutex_init(&mutex_interrupt, NULL);
 	interrupcion_desalojo = false;
 
 	socket_memoria = conectar_a_modulo(cpu_config->ip_memoria, cpu_config->puerto_memoria, cpu_logger);

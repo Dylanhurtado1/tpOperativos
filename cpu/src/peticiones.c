@@ -11,14 +11,14 @@ void peticiones_dispatch(int *socket_dispatch) {
 		switch (paquete->codigo_operacion) {
 			case PCB:
 				pcb = deserializar_pcb(paquete);
-				log_info(cpu_logger,"PCB[%d] recibido, ejecutando ciclo instruccion", pcb->id);
+				log_info(cpu_logger,"PCB[%d] recibido, ejecutando instrucciones", pcb->id);
 
 				ejecutar_ciclo_de_instruccion(pcb, socket_kernel);
 
 				eliminar_pcb(pcb);
 				break;
 			default:
-				log_error(cpu_logger, "Operacion desconocida.");
+				log_error(cpu_logger, "Protocolo invalido.");
 				break;
 		}
 		eliminar_paquete(paquete);
@@ -32,13 +32,13 @@ void peticiones_interrupt(int *socket_interrupt) {
 		t_paquete *paquete = recibir_paquete(socket_kernel);
 		switch (paquete->codigo_operacion) {
 			case DESALOJAR_PROCESO:
-				log_info(cpu_logger, "Interrupcion recibida, proximamente se desalojara el proceso...");
-				sem_wait(&sem_interrupt);
+				log_info(cpu_logger, "Interrupcion recibida, se desalojara proceso...");
+				pthread_mutex_lock(&mutex_interrupt);
 				interrupcion_desalojo = true;
-				sem_post(&sem_interrupt);
+				pthread_mutex_unlock(&mutex_interrupt);
 				break;
 			default:
-				log_error(cpu_logger, "Operacion desconocida.");
+				log_error(cpu_logger, "Protocolo invalido.");
 				break;
 		}
 		eliminar_paquete(paquete);

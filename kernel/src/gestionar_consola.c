@@ -8,10 +8,9 @@ void procesar_datos_consola(t_cliente *datos_cliente) {
 		case DATOS_CONSOLA:
 			log_info(kernel_logger, "Procesando datos de consola");
 			t_consola *consola = deserializar_consola(paquete);
-			print_datos_consola(kernel_logger, consola);
 
-			t_pcb *proceso = crear_estructura_pcb(consola);
-			agregar_proceso_a_new(proceso, datos_cliente->socket);
+			t_proceso *proceso = crear_proceso(consola, datos_cliente->socket);
+			agregar_proceso_a_new(proceso);
 
 			eliminar_consola(consola);
 			break;

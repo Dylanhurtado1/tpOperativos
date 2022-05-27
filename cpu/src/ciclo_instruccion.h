@@ -7,7 +7,7 @@ typedef enum {
 	DESALOJO_IO,
 	DESALOJO_EXIT,
 	DESALOJO_INTERRUPCION,
-	CONTINUAR_EJECUCION
+	NO_DESALOJAR
 } t_desalojo;
 
 void ejecutar_ciclo_de_instruccion(t_pcb *pcb, int socket_kernel);

@@ -15,6 +15,7 @@ typedef enum {
 } t_identificador;
 
 typedef enum {
+	JOB,
 	NEW,
 	READY,
 	EXEC,
