@@ -3,7 +3,6 @@
 void print_datos_consola(t_log *logger, t_consola *consola) {
 	log_info(logger, "*********** DATOS CONSOLA *********");
 	log_info(logger,"Cantidad de instrucciones = %d", list_size(consola->instrucciones));
-	//print_instrucciones(logger, instrucciones);
 	log_info(logger,"Tamanio consola = %d", consola->tamanio);
 	log_info(logger, "***********************************");
 }
