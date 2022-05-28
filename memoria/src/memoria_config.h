@@ -15,9 +15,9 @@
 typedef struct {
 	char *ip_memoria;
 	char *puerto_escucha;
-	int tam_memoria;
-	int tam_pagina;
-	int paginas_por_tabla;
+	int tamanio_memoria;
+	int tamanio_pagina;
+	int entradas_por_tabla;
 	int retardo_memoria;
 	char *algoritmo_reemplazo;
 	int marcos_por_proceso;

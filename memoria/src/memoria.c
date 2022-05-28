@@ -32,7 +32,7 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 			break;
 		case HANDSHAKE_INICIAL:
 			log_info(memoria_logger, "Memoria recibio handshake... enviando estructura traductora");
-			t_traductor *traductor = crear_traductor(memoria_config->paginas_por_tabla, memoria_config->tam_pagina);
+			t_traductor *traductor = crear_traductor(memoria_config->entradas_por_tabla, memoria_config->tamanio_pagina);
 			enviar_estructura_traductora(datos_cliente->socket, traductor);
 			eliminar_traductor(traductor);
 			break;
