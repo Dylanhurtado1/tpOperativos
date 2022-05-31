@@ -40,6 +40,7 @@ uint32_t fetch_operands(uint32_t tabla_primer_nivel, uint32_t direccion_logica) 
 }
 
 t_desalojo execute(t_instruccion *instruccion, uint32_t tabla_primer_nivel) {
+	uint32_t direccion_fisica;
 	switch(instruccion->identificador) {
 		case NO_OP:
 			log_info(cpu_logger, "Instruccion NO_OP ejecutada...");
@@ -51,13 +52,14 @@ t_desalojo execute(t_instruccion *instruccion, uint32_t tabla_primer_nivel) {
 			return DESALOJO_IO;
 		case READ:
 			log_info(cpu_logger, "Instruccion READ ejecutada...");
-			uint32_t valor = mmu_leer_memoria(tabla_primer_nivel, instruccion->primer_operando);
+			direccion_fisica = traducir_direccion_logica(tabla_primer_nivel, instruccion->primer_operando);
+			uint32_t valor = leer_memoria(direccion_fisica);
 			log_info(cpu_logger, "Valor leido de memoria = %d", valor);
 			break;
 		case WRITE:
 			log_info(cpu_logger, "Instruccion WRITE ejecutada...");
-			//direccion_logica=instruccion->primer_operando;
-			//exec_instruccion_WRITE(direccion_logica, valor);
+			direccion_fisica = traducir_direccion_logica(tabla_primer_nivel, instruccion->primer_operando);
+			escribir_memoria(direccion_fisica, instruccion->segundo_operando);
 			break;
 		case COPY:
 			log_info(cpu_logger, "Instruccion COPY ejecutada...");
