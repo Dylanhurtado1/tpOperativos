@@ -1,5 +1,5 @@
 #include "mmu.h"
-#include <math.h>
+
 
 uint32_t traducir_direccion_logica(uint32_t tabla_primer_nivel, uint32_t direccion_logica) {
 	t_traducciones traducciones = parsear_direccion_logica(direccion_logica);

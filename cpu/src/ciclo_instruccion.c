@@ -34,9 +34,8 @@ bool decode(t_instruccion *proxima_instruccion) {
 }
 
 uint32_t fetch_operands(uint32_t tabla_primer_nivel, uint32_t direccion_logica) {
-	// TODO: Buscar en memoria
-	//leer_de_memoria(tabla_primer_nivel, direccion_logica);
-	return 10;
+	uint32_t direccion_fisica = traducir_direccion_logica(tabla_primer_nivel, direccion_logica);
+	return leer_memoria(direccion_fisica);
 }
 
 t_desalojo execute(t_instruccion *instruccion, uint32_t tabla_primer_nivel) {
@@ -63,8 +62,8 @@ t_desalojo execute(t_instruccion *instruccion, uint32_t tabla_primer_nivel) {
 			break;
 		case COPY:
 			log_info(cpu_logger, "Instruccion COPY ejecutada...");
-			//direccion_logica = instruccion->primer_operando;
-			//exec_instruccion_COPY(direccion_logica, valor);
+			direccion_fisica = traducir_direccion_logica(tabla_primer_nivel, instruccion->primer_operando);
+			escribir_memoria(direccion_fisica, instruccion->segundo_operando);
 			break;
 		case EXIT:
 			log_info(cpu_logger, "Instruccion EXIT ejecutada...");
