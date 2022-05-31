@@ -7,7 +7,7 @@ void ejecutar_ciclo_de_instruccion(t_pcb *pcb, int socket_kernel) {
 	t_desalojo tipo_desalojo;
 	t_instruccion *proxima_instruccion;
 
-	do{
+	do {
 		proxima_instruccion = fetch(pcb);
 		if(decode(proxima_instruccion)) {
 			proxima_instruccion->segundo_operando = fetch_operands(pcb->tabla_paginas, proxima_instruccion->segundo_operando);
@@ -51,8 +51,8 @@ t_desalojo execute(t_instruccion *instruccion, uint32_t tabla_primer_nivel) {
 			return DESALOJO_IO;
 		case READ:
 			log_info(cpu_logger, "Instruccion READ ejecutada...");
-			//uint32_t valor = leer_de_memoria(tabla_primer_nivel, instruccion->primer_operando);
-			//log_info(cpu_logger, "Valor leido = %d", valor);
+			uint32_t valor = mmu_leer_memoria(tabla_primer_nivel, instruccion->primer_operando);
+			log_info(cpu_logger, "Valor leido de memoria = %d", valor);
 			break;
 		case WRITE:
 			log_info(cpu_logger, "Instruccion WRITE ejecutada...");

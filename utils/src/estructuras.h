@@ -53,5 +53,11 @@ typedef struct {
 	uint32_t tamanio_pagina;
 } t_traductor;
 
+typedef struct {
+	uint32_t direccion_tabla_pagina;
+	uint32_t entrada_tabla_pagina;
+} t_tabla_pagina;
+
 
 #endif /* ESTRUCTURAS_H_ */
+
