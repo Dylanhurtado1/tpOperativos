@@ -10,6 +10,8 @@ uint32_t mmu_leer_memoria(uint32_t tabla_primer_nivel, uint32_t direccion_logica
 	uint32_t direccion_fisica = numero_de_marco * traductor->tamanio_pagina + traducciones.desplazamiento;
 	uint32_t valor_memoria = obtener_valor_en_memoria(socket_memoria, direccion_fisica);
 
+	log_info(cpu_logger, "Direccion Fisica = %d", direccion_fisica);
+
 	return valor_memoria;
 }
 
@@ -19,6 +21,12 @@ t_traducciones get_traducciones(uint32_t direcion_logica) {
 	traducciones.entrada_tabla_nivel_1 =  (uint32_t)(traducciones.numero_pagina / traductor->cantidad_entradas_tabla);
 	traducciones.entrada_tabla_nivel_2 =  traducciones.numero_pagina % traductor->cantidad_entradas_tabla;
 	traducciones.desplazamiento =  direcion_logica - traducciones.numero_pagina * traductor->tamanio_pagina;
+
+	log_info(cpu_logger, "Direccion Logica = %d", direcion_logica);
+	log_info(cpu_logger, "Numero de pagina = %d", traducciones.numero_pagina);
+	log_info(cpu_logger, "Entrada tabla nivel 1 = %d", traducciones.entrada_tabla_nivel_1);
+	log_info(cpu_logger, "Entrada tabla nivel 2 = %d", traducciones.entrada_tabla_nivel_2);
+	log_info(cpu_logger, "Desplazamiento = %d", traducciones.desplazamiento);
 
 	return traducciones;
 }

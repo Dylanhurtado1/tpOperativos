@@ -28,7 +28,7 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 		case AGREGAR_PROCESO_A_MEMORIA:
 			log_info(memoria_logger, "Creando estructuras de Proceso");
 			// TODO: crear la tabla de paginas para devolver el numero a Kernel
-			enviar_numero_tabla_de_pagina(datos_cliente->socket, 2);
+			enviar_numero_tabla_de_pagina(datos_cliente->socket, 20);
 			break;
 		case HANDSHAKE_INICIAL:
 			log_info(memoria_logger, "Memoria recibio handshake... enviando estructura traductora");
@@ -49,6 +49,24 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 			informar_memoria_liberada(datos_cliente->socket, PCB_ELIMINADO);
 
 			eliminar_pcb(pcb);
+			break;
+		case TABLA_SEGUNDO_NIVEL:
+			log_info(memoria_logger, "Enviando tabla segundo nivel");
+			// TODO: buscar en tabla el valor
+			//t_tabla_pagina *tabla_pagina = deserializar_tabla_pagina(paquete);
+			enviar_numero_tabla_de_pagina(datos_cliente->socket, 4);
+			break;
+		case MARCO_DE_PAGINA:
+			log_info(memoria_logger, "Enviando tabla segundo nivel");
+			// TODO: buscar en tabla el valor
+			//t_tabla_pagina *tabla_pagina = deserializar_tabla_pagina(paquete);
+			enviar_numero_tabla_de_pagina(datos_cliente->socket, 5);
+			break;
+		case DIRECCION_FISICA:
+			log_info(memoria_logger, "Enviando tabla segundo nivel");
+			// TODO: buscar en tabla el valor
+			//t_tabla_pagina *tabla_pagina = deserializar_tabla_pagina(paquete);
+			enviar_numero_tabla_de_pagina(datos_cliente->socket, 13);
 			break;
 		default:
 			log_error(memoria_logger, "Protocolo invalido.");

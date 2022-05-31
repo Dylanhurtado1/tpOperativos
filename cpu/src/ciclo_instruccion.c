@@ -16,6 +16,7 @@ void ejecutar_ciclo_de_instruccion(t_pcb *pcb, int socket_kernel) {
 		if(check_interrupt()) {
 			tipo_desalojo = DESALOJO_INTERRUPCION;
 		}
+		pcb->program_counter++;
 	} while(tipo_desalojo == NO_DESALOJAR);
 
 	desalojar_proceso(pcb, tipo_desalojo, socket_kernel);
@@ -25,7 +26,6 @@ void ejecutar_ciclo_de_instruccion(t_pcb *pcb, int socket_kernel) {
 t_instruccion *fetch(t_pcb *pcb) {
 	uint32_t pc = pcb->program_counter;
 	t_instruccion *instruccion = (t_instruccion *)list_get(pcb->instrucciones, pc);
-	pcb->program_counter++;
 	return instruccion;
 }
 
