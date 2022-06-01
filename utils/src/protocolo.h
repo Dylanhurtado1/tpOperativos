@@ -18,7 +18,11 @@ typedef enum {
 	BLOQUEAR_PROCESO,			// Protocolo que envia CPU a Kernel e indica que debe bloquear al proceso
 	FINALIZAR_PROCESO,			// Protocolo que envia CPU a Kernel e indica que el proceso finalizo de ejecutar sus instrucciones
 	PROCESO_DESALOJADO,			// Protocolo que envia CPU a Kernel e indica que el proceso fue desalojado por interrupccion (para el calculo de SJF)
-	DESALOJAR_PROCESO           // Protocolo que usan Kernel y CPU para desalojar el proceso en ejecucion
+	DESALOJAR_PROCESO,          // Protocolo que usan Kernel y CPU para desalojar el proceso en ejecucion
+	TABLA_SEGUNDO_NIVEL,		// Protocolo que envia CPU/MMU a Memoria para pedir la direccion de la tabla de segundo nivel
+	MARCO_DE_PAGINA,			// Protocolo que envia CPU/MMU a Memoria para pedir el marco de la pagina en la tabla de segundo nivel
+	DIRECCION_FISICA,			// Protocolo que envia CPU/MMU a Memoria para pedir el valor en memoria
+	ESCRIBIR_MEMORIA			// Protocolo que envia CPU/MMU a Memoria escribir en memoria
 } t_protocolo;
 
 #endif /* PROTOCOLO_H_ */

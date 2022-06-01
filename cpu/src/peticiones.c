@@ -50,28 +50,3 @@ void eliminar_pcb(t_pcb *pcb) {
 	free(pcb);
 }
 
-void exec_instruccion_READ (int direccion_logica){
-	//int direccion_fisica = traducir_direccion(direccion_logica);
-	// traduccion y acceso a memoria para LEER
-}
-
-void exec_instruccion_WRITE (int dir_logica, int valor){
-	// traduccion y acceso a memoria para ESCRIBIR
-}
-
-void exec_instruccion_COPY (int dir_logica_destino, int dir_logica_origen){
-
-}
-
-int traducir_direccion(int dir_logica){
-	// ACA SE IMPLEMENTARIA EL PROCESO DE TRADUCCION DE DIR LOGICA A FISICA
-	/*
-	int numero_pagina = dir_logica/config_memoria->tamanio_pagina;
-	int entrada_tabla_1er_nivel = numero_pagina/config_cpu->cantidad_entradas_por_tabla;
-	int entrada_tabla_2do_nivel = numero_pagina mod (config_cpu->cantidad_entradas_por_tabla);
-	int desplazamiento = dir_logica-numero_pagina*tamanio_pagina;
-
-	// CREAR ESTRUCTURA TLB en otra funcion posiblemente
-*/
-	return 0;
-}

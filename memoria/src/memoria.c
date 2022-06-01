@@ -28,11 +28,11 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 		case AGREGAR_PROCESO_A_MEMORIA:
 			log_info(memoria_logger, "Creando estructuras de Proceso");
 			// TODO: crear la tabla de paginas para devolver el numero a Kernel
-			enviar_numero_tabla_de_pagina(datos_cliente->socket, 2);
+			enviar_numero_tabla_de_pagina(datos_cliente->socket, 20);
 			break;
 		case HANDSHAKE_INICIAL:
 			log_info(memoria_logger, "Memoria recibio handshake... enviando estructura traductora");
-			t_traductor *traductor = crear_traductor(memoria_config->paginas_por_tabla, memoria_config->tam_pagina);
+			t_traductor *traductor = crear_traductor(memoria_config->entradas_por_tabla, memoria_config->tamanio_pagina);
 			enviar_estructura_traductora(datos_cliente->socket, traductor);
 			eliminar_traductor(traductor);
 			break;
@@ -49,6 +49,32 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 			informar_memoria_liberada(datos_cliente->socket, PCB_ELIMINADO);
 
 			eliminar_pcb(pcb);
+			break;
+		case TABLA_SEGUNDO_NIVEL:
+			log_info(memoria_logger, "Enviando tabla segundo nivel");
+			// TODO: buscar tabla segundo nivel en tabla de nivel 1
+			//t_tabla_pagina *tabla_pagina = deserializar_tabla_pagina(paquete);
+			enviar_numero_tabla_de_pagina(datos_cliente->socket, 4);
+			break;
+		case MARCO_DE_PAGINA:
+			log_info(memoria_logger, "Enviando numero de marco");
+			// TODO: buscar el marco en tabla segundo nivel
+			//t_tabla_pagina *tabla_pagina = deserializar_tabla_pagina(paquete);
+			enviar_numero_tabla_de_pagina(datos_cliente->socket, 5);
+			break;
+		case DIRECCION_FISICA:
+			log_info(memoria_logger, "Enviando valor de memoria");
+			// TODO: devolver valor de memoria
+			//t_tabla_pagina *tabla_pagina = deserializar_tabla_pagina(paquete);
+			enviar_numero_tabla_de_pagina(datos_cliente->socket, 13);
+			break;
+		case ESCRIBIR_MEMORIA:
+			log_info(memoria_logger, "Escribiendo en memoria");
+			// TODO: escribir en memoria
+			t_list *datos = deserealizar_paquete(paquete);
+			log_info(memoria_logger, "Direccion fisica = %d", *(uint32_t *)list_get(datos, 0));
+			log_info(memoria_logger, "Valor = %d", *(uint32_t *)list_get(datos, 1));
+			list_destroy_and_destroy_elements(datos, free);
 			break;
 		default:
 			log_error(memoria_logger, "Protocolo invalido.");
