@@ -24,13 +24,15 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 	t_paquete *paquete = datos_cliente->paquete;
 	switch (paquete->codigo_operacion) {
 		case INICIALIZACION_DE_PROCESO:
-			log_info(memoria_logger, "Creando estructuras de Proceso");
-			// TODO: crear las tablas de paginas, archivo swap y devolver el la tabla de primer nivel
+			pcb = deserializar_pcb(paquete);
+			log_info(memoria_logger, "Inicializando estructuras de PID[%d]...", pcb->id);
+			// TODO: crear las tablas de paginas, archivo swap y devolver la tabla de primer nivel
 			enviar_numero_tabla_de_pagina(datos_cliente->socket, 20);
+			eliminar_pcb(pcb);
 			break;
 		case SUSPENSION_DE_PROCESO:
 			pcb = deserializar_pcb(paquete);
-			log_info(memoria_logger, "Liberando memoria de proceso PID[%d]...", pcb->id);
+			log_info(memoria_logger, "Liberando memoria de PID[%d]...", pcb->id);
 			// TODO: liberar memoria y escribir en SWAP lo datos necesarios
 			informar_proceso_suspendido(datos_cliente->socket, PROCESO_SUSPENDIDO);
 
@@ -38,7 +40,7 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 			break;
 		case FINALIZACION_DE_PROCESO:
 			pcb = deserializar_pcb(paquete);
-			log_info(memoria_logger, "Eliminando memoria de proceso PID[%d]...", pcb->id);
+			log_info(memoria_logger, "Eliminando memoria de PID[%d]...", pcb->id);
 			// TODO: liberar memoria y eliminar el archivo SWAP del proceso
 			informar_proceso_suspendido(datos_cliente->socket, PROCESO_FINALIZADO);
 

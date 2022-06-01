@@ -70,7 +70,7 @@ void transicion_admitir(void *data) {
 			pthread_mutex_lock(&mutex_new);
 			proceso = queue_pop(cola_new);
 			pthread_mutex_unlock(&mutex_new);
-			proceso->pcb->tabla_paginas = obtener_tabla_de_pagina(socket_memoria);
+			proceso->pcb->tabla_paginas = obtener_tabla_de_pagina(socket_memoria, proceso->pcb);
 			log_info(kernel_logger, "PID[%d] ingresa a READY desde NEW", proceso->pcb->id);
 		}
 
@@ -83,17 +83,14 @@ void transicion_admitir(void *data) {
 	}
 }
 
-uint32_t obtener_tabla_de_pagina(int socket_fd) {
-	uint32_t numero;
-	uint32_t fake_data = 0;
-	t_paquete *paquete = crear_paquete(INICIALIZACION_DE_PROCESO, buffer_vacio());
-	agregar_a_paquete(paquete, &fake_data, sizeof(uint32_t)); // TODO: problemas con paquete sin datos
-	enviar_paquete(paquete, socket_fd);
+uint32_t obtener_tabla_de_pagina(int socket_memoria, t_pcb *pcb) {
+	uint32_t tabla_de_paginas;
+	t_paquete *paquete = serializar_pcb(pcb, INICIALIZACION_DE_PROCESO);
+	enviar_paquete(paquete, socket_memoria);
 	eliminar_paquete(paquete);
+	recibir_datos(socket_memoria, &tabla_de_paginas, sizeof(uint32_t));
 
-	recibir_datos(socket_fd, &numero, sizeof(uint32_t));
-
-	return numero;
+	return tabla_de_paginas;
 }
 
 void estado_exit(void *dato) {
