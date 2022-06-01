@@ -25,7 +25,7 @@ t_proceso *crear_proceso(t_consola *consola, int socket_consola);
 t_pcb *crear_estructura_pcb(t_consola *consola);
 void agregar_proceso_a_new(t_proceso *proceso);
 void transicion_admitir(void *data);
-uint32_t obtener_entrada_tabla_de_pagina(int socket_fd);
+uint32_t obtener_tabla_de_pagina(int socket_fd);
 void estado_exit(void *dato);
 void enviar_respuesta_a_consola(int socket_fd, t_protocolo protocolo);
 void enviar_proceso_a_memoria(t_proceso *proceso, int socket_memoria, t_protocolo protocolo);

@@ -1,10 +1,3 @@
-/*
- * consola_config.h
- *
- *  Created on: 19 abr. 2022
- *      Author: utnso
- */
-
 #ifndef MEMORIA_CONFIG_H_
 #define MEMORIA_CONFIG_H_
 

@@ -89,13 +89,13 @@ void desalojar_proceso(t_pcb *pcb, t_desalojo tipo_desalojo, int socket_kernel) 
 	t_paquete *paquete;
 	switch(tipo_desalojo) {
 		case DESALOJO_IO:
-			paquete = serializar_pcb(pcb, BLOQUEAR_PROCESO);
+			paquete = serializar_pcb(pcb, DESALOJO_POR_IO);
 			break;
 		case DESALOJO_EXIT:
-			paquete = serializar_pcb(pcb, FINALIZAR_PROCESO);
+			paquete = serializar_pcb(pcb, DESALOJO_POR_EXIT);
 			break;
 		case DESALOJO_INTERRUPCION:
-			paquete = serializar_pcb(pcb, PROCESO_DESALOJADO);
+			paquete = serializar_pcb(pcb, DESALOJO_POR_IRQ);
 			break;
 		default:
 			break;

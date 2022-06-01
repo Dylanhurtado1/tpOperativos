@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
 
 	enviar_datos_a_kernel(socket_kernel, instrucciones, tamanio_consola);
 	t_protocolo respuesta = esperar_respuesta_de_kernel(socket_kernel);
-	if(respuesta != FINALIZAR_CONSOLA_OK) {
+	if(respuesta != FINALIZAR_CONSOLA) {
 		log_error(consola_logger, "Error al finalizar consola");
 	}
 

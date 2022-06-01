@@ -70,7 +70,7 @@ void transicion_admitir(void *data) {
 			pthread_mutex_lock(&mutex_new);
 			proceso = queue_pop(cola_new);
 			pthread_mutex_unlock(&mutex_new);
-			proceso->pcb->tabla_paginas = obtener_entrada_tabla_de_pagina(socket_memoria);
+			proceso->pcb->tabla_paginas = obtener_tabla_de_pagina(socket_memoria);
 			log_info(kernel_logger, "PID[%d] ingresa a READY desde NEW", proceso->pcb->id);
 		}
 
@@ -83,10 +83,10 @@ void transicion_admitir(void *data) {
 	}
 }
 
-uint32_t obtener_entrada_tabla_de_pagina(int socket_fd) {
+uint32_t obtener_tabla_de_pagina(int socket_fd) {
 	uint32_t numero;
 	uint32_t fake_data = 0;
-	t_paquete *paquete = crear_paquete(AGREGAR_PROCESO_A_MEMORIA, buffer_vacio());
+	t_paquete *paquete = crear_paquete(INICIALIZACION_DE_PROCESO, buffer_vacio());
 	agregar_a_paquete(paquete, &fake_data, sizeof(uint32_t)); // TODO: problemas con paquete sin datos
 	enviar_paquete(paquete, socket_fd);
 	eliminar_paquete(paquete);
@@ -102,13 +102,13 @@ void estado_exit(void *dato) {
 		t_proceso *proceso = queue_pop(cola_exit);
 		log_info(kernel_logger, "PID[%d] ingresa a EXIT", proceso->pcb->id);
 
-		enviar_proceso_a_memoria(proceso, socket_memoria, ELIMINAR_MEMORIA_PCB);
+		enviar_proceso_a_memoria(proceso, socket_memoria, FINALIZACION_DE_PROCESO);
 		t_protocolo protocolo = esperar_respuesta_memoria(socket_memoria);
-		if(protocolo != PCB_ELIMINADO) {
+		if(protocolo != PROCESO_FINALIZADO) {
 			log_error(kernel_logger, "No se pudo eliminar memoria de PID[%d]", proceso->pcb->id);
 		}
 
-		enviar_respuesta_a_consola(proceso->socket, FINALIZAR_CONSOLA_OK);
+		enviar_respuesta_a_consola(proceso->socket, FINALIZAR_CONSOLA);
 
 		eliminar_proceso(proceso);
 		sem_post(&sem_grado_multiprogramacion);
