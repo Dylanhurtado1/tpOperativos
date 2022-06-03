@@ -68,15 +68,14 @@ void estado_exec(void *data) {
 		enviar_proceso_a_cpu(proceso, socket_cpu_dispatch);
 		eliminar_pcb(proceso->pcb);
 		t_paquete *paquete = esperar_respuesta_cpu(socket_cpu_dispatch);
-		uint32_t tiempo_ejecucion = get_tiempo_actual() - tiempo_inicio_cpu;
+		proceso->tiempo_cpu += get_tiempo_actual() - tiempo_inicio_cpu;
 		pthread_mutex_lock(&mutex_exec);
 		proceso_ejecutando = false;
 		pthread_mutex_unlock(&mutex_exec);
 
 		proceso->pcb = deserializar_pcb(paquete);
-		proceso->pcb->estimacion_rafaga = calcular_estimacion_rafaga(tiempo_ejecucion, proceso->pcb->estimacion_rafaga);
 		log_info(kernel_logger, "PID[%d] :: tiempo ejecucion = %d, nueva estimacion = %d",
-				proceso->pcb->id, tiempo_ejecucion, proceso->pcb->estimacion_rafaga);
+				proceso->pcb->id, proceso->tiempo_cpu, proceso->pcb->estimacion_rafaga);
 
 		switch(paquete->codigo_operacion) {
 			case BLOQUEAR_PROCESO:
@@ -84,6 +83,8 @@ void estado_exec(void *data) {
 				pthread_mutex_lock(&mutex_blocked);
 				proceso->estado = BLOCKED;
 				proceso->tiempo_inicio_bloqueo = get_tiempo_actual();
+				proceso->pcb->estimacion_rafaga = calcular_estimacion_rafaga(proceso->tiempo_cpu, proceso->pcb->estimacion_rafaga);
+				proceso->tiempo_cpu = 0;
 				queue_push(cola_blocked, proceso);
 				pthread_mutex_unlock(&mutex_blocked);
 
@@ -178,11 +179,14 @@ void enviar_interrupcion_a_cpu(int socket_fd){
 }
 
 t_proceso *siguiente_a_ejecutar(char *algoritmo) {
+	t_proceso *proceso = NULL;
+
 	bool menor_rafaga(void *p1, void *p2) {
-		return ((t_proceso *)p1)->pcb->estimacion_rafaga < ((t_proceso *)p2)->pcb->estimacion_rafaga;
+		uint32_t estimacion_p1 = ((t_proceso *)p1)->pcb->estimacion_rafaga - ((t_proceso *)p1)->tiempo_cpu;
+		uint32_t estimacion_p2 = ((t_proceso *)p2)->pcb->estimacion_rafaga - ((t_proceso *)p2)->tiempo_cpu;
+		return estimacion_p1 < estimacion_p2;
 	}
 
-	t_proceso *proceso = NULL;
 	pthread_mutex_lock(&mutex_ready);
 	if(string_equals_ignore_case(algoritmo, "SRT")) {
 		list_sort(cola_ready, menor_rafaga);

@@ -26,6 +26,7 @@ t_proceso *crear_proceso(t_consola *consola, int socket_consola) {
 	proceso->estado = JOB;
 	proceso->tiempo_io = 0;
 	proceso->tiempo_inicio_bloqueo = 0;
+	proceso->tiempo_cpu = 0;
 	return proceso;
 }
 
@@ -40,7 +41,6 @@ t_pcb *crear_estructura_pcb(t_consola *consola) {
 	pcb->instrucciones = list_duplicate(consola->instrucciones);
 	pcb->program_counter = 0;
 	pcb->estimacion_rafaga = kernel_config->estimacion_inicial;
-	pcb->tiempo_io = 0;
 
 	return pcb;
 }
