@@ -19,7 +19,7 @@ void peticiones_dispatch(int *socket_dispatch) {
 				break;
 			default:
 				log_error(cpu_logger, "Protocolo invalido para solicitudes dispatch.");
-				log_error(cpu_logger, "Finalizando modulo CPU.");
+				log_error(cpu_logger, "Finalizó modulo CPU.");
 				exit(1);
 				break;
 
@@ -42,7 +42,7 @@ void peticiones_interrupt(int *socket_interrupt) {
 				break;
 			default:
 				log_error(cpu_logger, "Protocolo invalido para solicitudes interrupt.");
-				log_error(cpu_logger, "Finalizando modulo CPU.");
+				log_error(cpu_logger, "Finalizó modulo CPU.");
 				exit(1);
 				break;
 

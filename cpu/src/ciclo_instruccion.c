@@ -13,8 +13,10 @@ void ejecutar_ciclo_de_instruccion(t_pcb *pcb, int socket_kernel) {
 			proxima_instruccion->segundo_operando = fetch_operands(pcb->tabla_paginas, proxima_instruccion->segundo_operando);
 		}
 		tipo_desalojo = execute(proxima_instruccion, pcb->tabla_paginas);
-		if(check_interrupt()) {
-			tipo_desalojo = DESALOJO_INTERRUPCION;
+		if(proxima_instruccion->identificador != IO || proxima_instruccion->identificador !=EXIT){
+			if(check_interrupt()) {
+				tipo_desalojo = DESALOJO_INTERRUPCION;
+			}
 		}
 		pcb->program_counter++;
 	} while(tipo_desalojo == NO_DESALOJAR);
