@@ -18,8 +18,11 @@ void peticiones_dispatch(int *socket_dispatch) {
 				eliminar_pcb(pcb);
 				break;
 			default:
-				log_error(cpu_logger, "Protocolo invalido.");
+				log_error(cpu_logger, "Protocolo invalido para solicitudes dispatch.");
+				log_error(cpu_logger, "Finalizando modulo CPU.");
+				exit(1);
 				break;
+
 		}
 		eliminar_paquete(paquete);
 	}
@@ -38,8 +41,11 @@ void peticiones_interrupt(int *socket_interrupt) {
 				pthread_mutex_unlock(&mutex_interrupt);
 				break;
 			default:
-				log_error(cpu_logger, "Protocolo invalido.");
+				log_error(cpu_logger, "Protocolo invalido para solicitudes interrupt.");
+				log_error(cpu_logger, "Finalizando modulo CPU.");
+				exit(1);
 				break;
+
 		}
 		eliminar_paquete(paquete);
 	}
