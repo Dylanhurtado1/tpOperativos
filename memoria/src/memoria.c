@@ -2,8 +2,18 @@
 
 
 int main(void) {
+
 	memoria_logger = log_create("memoria.log", "MEMORIA", true, LOG_LEVEL_INFO);
 	memoria_config = memoria_leer_configuracion(PATH_MEMORIA_CONFIG);
+
+	// MEMORIA PRINCIPAL
+	memoria_principal = malloc(memoria_config->tamanio_memoria);   // void*
+	if (memoria_principal == NULL) {
+	    log_error(memoria_logger, "Fallo en el malloc a memoria_principal");
+	    return 0;
+	}
+	memset(memoria_principal, 0, memoria_config->tamanio_memoria);
+	pthread_mutex_init(&MUTEX_MP, NULL);
 
 	int socket_memoria = iniciar_modulo_servidor(memoria_config->ip_memoria, memoria_config->puerto_escucha, memoria_logger);
 	log_info(memoria_logger, "Memoria iniciado como servidor");
@@ -12,7 +22,9 @@ int main(void) {
 		log_error(memoria_logger, "Error al escuchar clientes... Finalizando servidor");
 	}
 
+
 	log_destroy(memoria_logger);
+	free(memoria_principal);
 	memoria_eliminar_configuracion(memoria_config);
 	cerrar_conexion(socket_memoria);
 
