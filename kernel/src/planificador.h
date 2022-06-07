@@ -16,6 +16,7 @@ typedef struct {
 	t_estado estado;
 	uint32_t tiempo_io;
 	uint32_t tiempo_inicio_bloqueo;
+	uint32_t tiempo_cpu;
 } t_proceso;
 
 
