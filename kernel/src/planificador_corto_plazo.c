@@ -37,18 +37,12 @@ void estado_ready(void *data) {
 		if(string_equals_ignore_case(kernel_config->algoritmo_planificacion, "SRT")) {
 			pthread_mutex_lock(&mutex_exec);
 			if(proceso_ejecutando) {
-				//pthread_mutex_unlock(&mutex_exec);
 				enviar_interrupcion_a_cpu(socket_cpu_interrupt);
-//				sem_wait(&sem_desalojo);
 			}
 			pthread_mutex_unlock(&mutex_exec);
-			//else {
-				//pthread_mutex_unlock(&mutex_exec);
-			//}
 		}
 
 		sem_wait(&sem_desalojo);
-		log_info(kernel_logger, "Size READY %d", list_size(cola_ready));
 		t_proceso *proceso = siguiente_a_ejecutar(kernel_config->algoritmo_planificacion);
 
 		pthread_mutex_lock(&mutex_exec);
@@ -64,7 +58,6 @@ void estado_exec(void *data) {
 		sem_wait(&sem_exec);
 		pthread_mutex_lock(&mutex_exec);
 		t_proceso *proceso = queue_pop(cola_exec);
-		log_info(kernel_logger, "Size EXEC %d", queue_size(cola_exec));
 		proceso_ejecutando = true;
 		pthread_mutex_unlock(&mutex_exec);
 		log_info(kernel_logger, "PID[%d] ingresa a EXEC", proceso->pcb->id);
@@ -79,8 +72,6 @@ void estado_exec(void *data) {
 		pthread_mutex_unlock(&mutex_exec);
 
 		proceso->pcb = deserializar_pcb(paquete);
-		log_info(kernel_logger, "PID[%d] :: tiempo ejecucion = %d, nueva estimacion = %d",
-				proceso->pcb->id, proceso->tiempo_cpu, proceso->pcb->estimacion_rafaga);
 
 		switch(paquete->codigo_operacion) {
 			case DESALOJO_POR_IO:
@@ -93,7 +84,6 @@ void estado_exec(void *data) {
 				queue_push(cola_blocked, proceso);
 				pthread_mutex_unlock(&mutex_blocked);
 
-				sem_post(&sem_desalojo);
 				sem_post(&sem_blocked);
 				break;
 			case DESALOJO_POR_EXIT:
@@ -101,7 +91,6 @@ void estado_exec(void *data) {
 				queue_push(cola_exit, proceso);
 				pthread_mutex_unlock(&mutex_exit);
 
-				sem_post(&sem_desalojo);
 				sem_post(&sem_exit);
 				break;
 			case DESALOJO_POR_IRQ:
@@ -109,7 +98,6 @@ void estado_exec(void *data) {
 				list_add(cola_ready, proceso);
 				pthread_mutex_unlock(&mutex_ready);
 
-				sem_post(&sem_desalojo);
 				sem_post(&sem_ready);
 				break;
 			default:
@@ -117,6 +105,7 @@ void estado_exec(void *data) {
 				break;
 		}
 
+		sem_post(&sem_desalojo);
 		eliminar_paquete(paquete);
 	}
 }
@@ -191,7 +180,7 @@ t_proceso *siguiente_a_ejecutar(char *algoritmo) {
 	bool menor_rafaga(void *p1, void *p2) {
 		uint32_t estimacion_p1 = ((t_proceso *)p1)->pcb->estimacion_rafaga - ((t_proceso *)p1)->tiempo_cpu;
 		uint32_t estimacion_p2 = ((t_proceso *)p2)->pcb->estimacion_rafaga - ((t_proceso *)p2)->tiempo_cpu;
-		return estimacion_p1 < estimacion_p2;
+		return estimacion_p1 <= estimacion_p2;
 	}
 
 	pthread_mutex_lock(&mutex_ready);
@@ -202,8 +191,6 @@ t_proceso *siguiente_a_ejecutar(char *algoritmo) {
 	}
 
 	proceso = list_remove(cola_ready, 0);
-	log_info(kernel_logger, "PID[%d]con menor estimacion = %d",
-			proceso->pcb->id, proceso->pcb->estimacion_rafaga - proceso->tiempo_cpu);
 	pthread_mutex_unlock(&mutex_ready);
 
 	return proceso;
