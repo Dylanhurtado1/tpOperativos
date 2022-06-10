@@ -37,21 +37,23 @@ void estado_ready(void *data) {
 		if(string_equals_ignore_case(kernel_config->algoritmo_planificacion, "SRT")) {
 			pthread_mutex_lock(&mutex_exec);
 			if(proceso_ejecutando) {
-				pthread_mutex_unlock(&mutex_exec);
+				//pthread_mutex_unlock(&mutex_exec);
 				enviar_interrupcion_a_cpu(socket_cpu_interrupt);
 //				sem_wait(&sem_desalojo);
-			} else {
-				pthread_mutex_unlock(&mutex_exec);
 			}
+			pthread_mutex_unlock(&mutex_exec);
+			//else {
+				//pthread_mutex_unlock(&mutex_exec);
+			//}
 		}
 
-		sem_wait(&sem_desalojo); //****
+		sem_wait(&sem_desalojo);
+		log_info(kernel_logger, "Size READY %d", list_size(cola_ready));
 		t_proceso *proceso = siguiente_a_ejecutar(kernel_config->algoritmo_planificacion);
 
 		pthread_mutex_lock(&mutex_exec);
 		queue_push(cola_exec, proceso);
 		pthread_mutex_unlock(&mutex_exec);
-
 
 		sem_post(&sem_exec);
 	}
@@ -62,6 +64,7 @@ void estado_exec(void *data) {
 		sem_wait(&sem_exec);
 		pthread_mutex_lock(&mutex_exec);
 		t_proceso *proceso = queue_pop(cola_exec);
+		log_info(kernel_logger, "Size EXEC %d", queue_size(cola_exec));
 		proceso_ejecutando = true;
 		pthread_mutex_unlock(&mutex_exec);
 		log_info(kernel_logger, "PID[%d] ingresa a EXEC", proceso->pcb->id);
@@ -200,6 +203,8 @@ t_proceso *siguiente_a_ejecutar(char *algoritmo) {
 	}
 
 	proceso = list_remove(cola_ready, 0);
+	log_info(kernel_logger, "PID[%d]con menor estimacion = %d",
+			proceso->pcb->id, proceso->pcb->estimacion_rafaga - proceso->tiempo_cpu);
 	pthread_mutex_unlock(&mutex_ready);
 
 	return proceso;
