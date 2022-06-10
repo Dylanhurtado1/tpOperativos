@@ -15,9 +15,9 @@ void iniciar_planificador_mediano_plazo() {
 void transicion_suspender(t_proceso *proceso) {
 	log_info(kernel_logger, "PID[%d] ingresa a SUSPENDED-BLOCKED", proceso->pcb->id);
 	proceso->estado = SUSPENDED_BLOCKED;
-	enviar_proceso_a_memoria(proceso, socket_memoria, LIBERAR_MEMORIA_PCB);
+	enviar_proceso_a_memoria(proceso, socket_memoria, SUSPENSION_DE_PROCESO);
 	t_protocolo protocolo = esperar_respuesta_memoria(socket_memoria);
-	if(protocolo != PCB_LIBERADO) {
+	if(protocolo != PROCESO_SUSPENDIDO) {
 		log_error(kernel_logger, "No se pudo liberar la memoria de PID[%d]", proceso->pcb->id);
 	}
 	pthread_mutex_lock(&mutex_suspended_blocked);

@@ -78,7 +78,7 @@ void estado_exec(void *data) {
 				proceso->pcb->id, proceso->tiempo_cpu, proceso->pcb->estimacion_rafaga);
 
 		switch(paquete->codigo_operacion) {
-			case BLOQUEAR_PROCESO:
+			case DESALOJO_POR_IO:
 				recibir_datos(socket_cpu_dispatch, &(proceso->tiempo_io), sizeof(uint32_t));
 				pthread_mutex_lock(&mutex_blocked);
 				proceso->estado = BLOCKED;
@@ -90,14 +90,14 @@ void estado_exec(void *data) {
 
 				sem_post(&sem_blocked);
 				break;
-			case FINALIZAR_PROCESO:
+			case DESALOJO_POR_EXIT:
 				pthread_mutex_lock(&mutex_exit);
 				queue_push(cola_exit, proceso);
 				pthread_mutex_unlock(&mutex_exit);
 
 				sem_post(&sem_exit);
 				break;
-			case PROCESO_DESALOJADO:
+			case DESALOJO_POR_IRQ:
 				pthread_mutex_lock(&mutex_ready);
 				list_add(cola_ready, proceso);
 				pthread_mutex_unlock(&mutex_ready);

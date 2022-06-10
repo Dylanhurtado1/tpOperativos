@@ -1,5 +1,6 @@
 #include "memoria_config.h"
 
+
 t_memoria_config *memoria_leer_configuracion(char *path) {
 
 	t_config *config = config_create(path);
