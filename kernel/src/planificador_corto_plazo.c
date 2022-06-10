@@ -15,7 +15,7 @@ void iniciar_planificador_corto_plazo() {
 	sem_init(&sem_ready, 0, 0);
 	sem_init(&sem_exec, 0, 0);
 	sem_init(&sem_blocked, 0, 0);
-	sem_init(&sem_desalojo, 0, 0);
+	sem_init(&sem_desalojo, 0, 1);
 	cola_ready = list_create();
 	cola_exec = queue_create();
 	cola_blocked = queue_create();
@@ -39,17 +39,19 @@ void estado_ready(void *data) {
 			if(proceso_ejecutando) {
 				pthread_mutex_unlock(&mutex_exec);
 				enviar_interrupcion_a_cpu(socket_cpu_interrupt);
-				sem_wait(&sem_desalojo);
+//				sem_wait(&sem_desalojo);
 			} else {
 				pthread_mutex_unlock(&mutex_exec);
 			}
 		}
 
+		sem_wait(&sem_desalojo); //****
 		t_proceso *proceso = siguiente_a_ejecutar(kernel_config->algoritmo_planificacion);
 
 		pthread_mutex_lock(&mutex_exec);
 		queue_push(cola_exec, proceso);
 		pthread_mutex_unlock(&mutex_exec);
+
 
 		sem_post(&sem_exec);
 	}
@@ -88,6 +90,7 @@ void estado_exec(void *data) {
 				queue_push(cola_blocked, proceso);
 				pthread_mutex_unlock(&mutex_blocked);
 
+				sem_post(&sem_desalojo);  //****
 				sem_post(&sem_blocked);
 				break;
 			case FINALIZAR_PROCESO:
@@ -95,14 +98,16 @@ void estado_exec(void *data) {
 				queue_push(cola_exit, proceso);
 				pthread_mutex_unlock(&mutex_exit);
 
+				sem_post(&sem_desalojo);   //***
 				sem_post(&sem_exit);
 				break;
 			case PROCESO_DESALOJADO:
+				log_info(kernel_logger, "PROCESO DESALOJADO PRUEBA");
 				pthread_mutex_lock(&mutex_ready);
 				list_add(cola_ready, proceso);
 				pthread_mutex_unlock(&mutex_ready);
 
-				sem_post(&sem_desalojo);
+				sem_post(&sem_desalojo);   //**
 				sem_post(&sem_ready);
 				break;
 			default:
