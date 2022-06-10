@@ -54,9 +54,9 @@ typedef struct {
 } t_traductor;
 
 typedef struct {
-	uint32_t direccion_tabla_pagina;
-	uint32_t entrada_tabla_pagina;
-} t_tabla_pagina;
+	uint32_t direccion;
+	uint32_t entrada;
+} t_acceso_tabla;
 
 
 #endif /* ESTRUCTURAS_H_ */

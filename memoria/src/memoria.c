@@ -33,13 +33,16 @@ int main(void) {
 
 void procesar_conexiones(t_cliente *datos_cliente) {
 	t_pcb *pcb;
+	t_acceso_tabla *tabla;
 	t_paquete *paquete = datos_cliente->paquete;
 	switch (paquete->codigo_operacion) {
 		case INICIALIZACION_DE_PROCESO:
 			pcb = deserializar_pcb(paquete);
 			log_info(memoria_logger, "Inicializando estructuras de PID[%d]...", pcb->id);
 			// TODO: crear las tablas de paginas, archivo swap y devolver la tabla de primer nivel
-			enviar_numero_tabla_de_pagina(datos_cliente->socket, 20);
+
+			uint32_t tabla_primer_nivel = crear_tablas_de_paginacion(pcb);
+			enviar_tabla_de_pagina(datos_cliente->socket, tabla_primer_nivel);
 			eliminar_pcb(pcb);
 			break;
 		case SUSPENSION_DE_PROCESO:
@@ -67,20 +70,24 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 		case ACCESO_TABLA_PRIMER_NIVEL:
 			log_info(memoria_logger, "Enviando tabla segundo nivel");
 			// TODO: buscar tabla segundo nivel en tabla de nivel 1
-			//t_tabla_pagina *tabla_pagina = deserializar_tabla_pagina(paquete);
-			enviar_numero_tabla_de_pagina(datos_cliente->socket, 4);
+			tabla = deserializar_acceso_tabla(paquete);
+			uint32_t tabla_segundo_nivel = get_tabla_segundo_nivel(tabla->direccion, tabla->entrada);
+			enviar_tabla_de_pagina(datos_cliente->socket, tabla_segundo_nivel);
+			eliminar_acceso_tabla(tabla);
 			break;
 		case ACCESO_TABLA_SEGUNDO_NIVEL:
 			log_info(memoria_logger, "Enviando numero de marco");
 			// TODO: buscar el marco en tabla segundo nivel
-			//t_tabla_pagina *tabla_pagina = deserializar_tabla_pagina(paquete);
-			enviar_numero_tabla_de_pagina(datos_cliente->socket, 5);
+			tabla = deserializar_acceso_tabla(paquete);
+			uint32_t marco = get_marco_de_pagina(tabla->direccion, tabla->entrada);
+			enviar_marco_de_pagina(datos_cliente->socket, marco);
+			eliminar_acceso_tabla(tabla);
 			break;
 		case LEER_MEMORIA:
 			log_info(memoria_logger, "Enviando valor de memoria");
 			// TODO: devolver valor de memoria
 			//t_tabla_pagina *tabla_pagina = deserializar_tabla_pagina(paquete);
-			enviar_numero_tabla_de_pagina(datos_cliente->socket, 13);
+			enviar_tabla_de_pagina(datos_cliente->socket, 13);
 			break;
 		case ESCRIBIR_MEMORIA:
 			log_info(memoria_logger, "Escribiendo en memoria");
@@ -97,7 +104,11 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 	eliminar_paquete(paquete);
 }
 
-void enviar_numero_tabla_de_pagina(int socket_fd, uint32_t numero) {
+void enviar_tabla_de_pagina(int socket_fd, uint32_t numero) {
+	enviar_datos(socket_fd, &numero, sizeof(uint32_t));
+}
+
+void enviar_marco_de_pagina(int socket_fd, uint32_t numero) {
 	enviar_datos(socket_fd, &numero, sizeof(uint32_t));
 }
 
@@ -128,4 +139,6 @@ void informar_proceso_suspendido(int socket_fd, t_protocolo protocolo) {
 	enviar_datos(socket_fd, &protocolo, sizeof(t_protocolo));
 }
 
-
+void eliminar_acceso_tabla(t_acceso_tabla *acceso_tabla) {
+	free(acceso_tabla);
+}

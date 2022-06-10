@@ -12,7 +12,7 @@ uint32_t traducir_direccion_logica(uint32_t tabla_primer_nivel, uint32_t direcci
 }
 
 uint32_t leer_memoria(uint32_t direccion_fisica) {
-	//log_info(cpu_logger, "Direccion Fisica = %d", direccion_fisica);
+	log_info(cpu_logger, "Direccion Fisica = %d", direccion_fisica);
 	uint32_t valor_memoria = obtener_valor_de_memoria(socket_memoria, direccion_fisica);
 
 	return valor_memoria;
@@ -30,18 +30,18 @@ t_traducciones parsear_direccion_logica(uint32_t direcion_logica) {
 	traducciones.entrada_tabla_nivel_2 =  traducciones.numero_pagina % traductor->cantidad_entradas_tabla;
 	traducciones.desplazamiento =  direcion_logica - traducciones.numero_pagina * traductor->tamanio_pagina;
 
-	/*log_info(cpu_logger, "Direccion Logica = %d", direcion_logica);
+	log_info(cpu_logger, "Direccion Logica = %d", direcion_logica);
 	log_info(cpu_logger, "Numero de pagina = %d", traducciones.numero_pagina);
 	log_info(cpu_logger, "Entrada tabla nivel 1 = %d", traducciones.entrada_tabla_nivel_1);
 	log_info(cpu_logger, "Entrada tabla nivel 2 = %d", traducciones.entrada_tabla_nivel_2);
-	log_info(cpu_logger, "Desplazamiento = %d", traducciones.desplazamiento);*/
+	log_info(cpu_logger, "Desplazamiento = %d", traducciones.desplazamiento);
 
 	return traducciones;
 }
 
 uint32_t obtener_tabla_segundo_nivel(int socket_memoria, uint32_t tabla_primer_nivel, uint32_t entrada_tabla_nivel_1) {
 	uint32_t tabla_segundo_nivel;
-	t_paquete *paquete = serializar_tabla_pagina(tabla_primer_nivel, entrada_tabla_nivel_1, ACCESO_TABLA_PRIMER_NIVEL);
+	t_paquete *paquete = serializar_acceso_tabla(tabla_primer_nivel, entrada_tabla_nivel_1, ACCESO_TABLA_PRIMER_NIVEL);
 	enviar_paquete(paquete, socket_memoria);
 	recibir_datos(socket_memoria, &tabla_segundo_nivel, sizeof(uint32_t));
 	eliminar_paquete(paquete);
@@ -51,7 +51,7 @@ uint32_t obtener_tabla_segundo_nivel(int socket_memoria, uint32_t tabla_primer_n
 
 uint32_t obtener_numero_de_marco(int socket_memoria, uint32_t tabla_segundo_nivel, uint32_t entrada_tabla_nivel_2) {
 	uint32_t marco_de_pagina;
-	t_paquete *paquete = serializar_tabla_pagina(tabla_segundo_nivel, entrada_tabla_nivel_2, ACCESO_TABLA_SEGUNDO_NIVEL);
+	t_paquete *paquete = serializar_acceso_tabla(tabla_segundo_nivel, entrada_tabla_nivel_2, ACCESO_TABLA_SEGUNDO_NIVEL);
 	enviar_paquete(paquete, socket_memoria);
 	recibir_datos(socket_memoria, &marco_de_pagina, sizeof(uint32_t));
 	eliminar_paquete(paquete);

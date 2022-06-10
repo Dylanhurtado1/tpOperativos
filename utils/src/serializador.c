@@ -95,19 +95,19 @@ t_traductor *deserializar_traductor(t_paquete *paquete) {
 	return traductor;
 }
 
-t_paquete *serializar_tabla_pagina(uint32_t tabla_paginas, uint32_t entrada_tabla_paginas, t_protocolo protocolo) {
+t_paquete *serializar_acceso_tabla(uint32_t direccion, uint32_t entrada, t_protocolo protocolo) {
 	t_paquete *paquete = crear_paquete(protocolo, buffer_vacio());
-	agregar_a_paquete(paquete, &tabla_paginas, sizeof(uint32_t));
-	agregar_a_paquete(paquete, &entrada_tabla_paginas, sizeof(uint32_t));
+	agregar_a_paquete(paquete, &direccion, sizeof(uint32_t));
+	agregar_a_paquete(paquete, &entrada, sizeof(uint32_t));
 	return paquete;
 }
 
-t_tabla_pagina *deserializar_tabla_pagina(t_paquete *paquete) {
+t_acceso_tabla *deserializar_acceso_tabla(t_paquete *paquete) {
 	t_list *datos = deserealizar_paquete(paquete);
-	t_tabla_pagina *tabla_paginas = malloc(sizeof(t_tabla_pagina));
+	t_acceso_tabla *tabla_paginas = malloc(sizeof(t_acceso_tabla));
 
-	tabla_paginas->direccion_tabla_pagina = *(uint32_t *)list_get(datos, 0);
-	tabla_paginas->entrada_tabla_pagina = *(uint32_t *)list_get(datos, 1);
+	tabla_paginas->direccion = *(uint32_t *)list_get(datos, 0);
+	tabla_paginas->entrada = *(uint32_t *)list_get(datos, 1);
 
 	list_destroy_and_destroy_elements(datos, free);
 	return tabla_paginas;
