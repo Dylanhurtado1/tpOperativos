@@ -56,7 +56,7 @@ typedef struct {
 typedef struct {
 	uint32_t direccion;
 	uint32_t entrada;
-} t_acceso_tabla;
+} t_tabla_acceso;
 
 
 #endif /* ESTRUCTURAS_H_ */

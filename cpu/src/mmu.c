@@ -42,7 +42,7 @@ t_traducciones parsear_direccion_logica(uint32_t direcion_logica) {
 
 uint32_t obtener_tabla_segundo_nivel(int socket_memoria, uint32_t tabla_primer_nivel, uint32_t entrada_tabla_nivel_1) {
 	uint32_t tabla_segundo_nivel;
-	t_paquete *paquete = serializar_acceso_tabla(tabla_primer_nivel, entrada_tabla_nivel_1, ACCESO_TABLA_PRIMER_NIVEL);
+	t_paquete *paquete = serializar_tabla_de_acceso(tabla_primer_nivel, entrada_tabla_nivel_1, ACCESO_TABLA_PRIMER_NIVEL);
 	enviar_paquete(paquete, socket_memoria);
 	recibir_datos(socket_memoria, &tabla_segundo_nivel, sizeof(uint32_t));
 	eliminar_paquete(paquete);
@@ -52,7 +52,7 @@ uint32_t obtener_tabla_segundo_nivel(int socket_memoria, uint32_t tabla_primer_n
 
 uint32_t obtener_numero_de_marco(int socket_memoria, uint32_t tabla_segundo_nivel, uint32_t entrada_tabla_nivel_2) {
 	uint32_t marco_de_pagina;
-	t_paquete *paquete = serializar_acceso_tabla(tabla_segundo_nivel, entrada_tabla_nivel_2, ACCESO_TABLA_SEGUNDO_NIVEL);
+	t_paquete *paquete = serializar_tabla_de_acceso(tabla_segundo_nivel, entrada_tabla_nivel_2, ACCESO_TABLA_SEGUNDO_NIVEL);
 	enviar_paquete(paquete, socket_memoria);
 	recibir_datos(socket_memoria, &marco_de_pagina, sizeof(uint32_t));
 	eliminar_paquete(paquete);
