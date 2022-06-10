@@ -190,7 +190,7 @@ t_proceso *siguiente_a_ejecutar(char *algoritmo) {
 	else if(string_equals_ignore_case(algoritmo, "FIFO")) {
 	}
 
-	proceso = list_remove(cola_ready, 0);
+	proceso = (t_proceso *)list_remove(cola_ready, 0);
 	pthread_mutex_unlock(&mutex_ready);
 
 	return proceso;
