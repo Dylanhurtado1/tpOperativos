@@ -1,10 +1,3 @@
-/*
- * consola_config.h
- *
- *  Created on: 19 abr. 2022
- *      Author: utnso
- */
-
 #ifndef MEMORIA_CONFIG_H_
 #define MEMORIA_CONFIG_H_
 
@@ -27,5 +20,6 @@ typedef struct {
 
 t_memoria_config *memoria_leer_configuracion(char *path);
 void memoria_eliminar_configuracion(t_memoria_config *config);
+
 
 #endif /* MEMORIA_CONFIG_H_ */
