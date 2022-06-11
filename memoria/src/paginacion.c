@@ -10,7 +10,7 @@ uint32_t crear_tablas_de_paginacion(t_pcb *pcb) {
 	for(int i = 0; i < cantidad_entradas; i++) {
 		t_pagina_segundo_nivel *entrada_segundo_nivel = malloc(sizeof(t_pagina_segundo_nivel));
 		entrada_segundo_nivel->pid = pcb->id;
-		entrada_segundo_nivel->marco = 10;
+		entrada_segundo_nivel->marco = 10; // TODO: solo se agrego 10 para pruebas
 		entrada_segundo_nivel->presencia = 0;
 		entrada_segundo_nivel->usado = 0;
 		entrada_segundo_nivel->modificado = 0;

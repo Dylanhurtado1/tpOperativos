@@ -2,15 +2,12 @@
 
 
 int main(void) {
-	cpu_logger = log_create("cpu.log", "CPU", true, LOG_LEVEL_INFO);
-	cpu_config = cpu_leer_configuracion(PATH_CPU_CONFIG);
 	pthread_t th_dispatch;
 	pthread_t th_interrupt;
-	pthread_mutex_init(&mutex_interrupt, NULL);
-	interrupcion_desalojo = false;
+
+	init();
 
 	socket_memoria = conectar_a_modulo(cpu_config->ip_memoria, cpu_config->puerto_memoria, cpu_logger);
-
 	traductor = obtener_traductor_direcciones(socket_memoria);
 
 	int socket_dispatch = iniciar_modulo_servidor(cpu_config->ip_cpu, cpu_config->puerto_escucha_dispatch, cpu_logger);
@@ -30,6 +27,14 @@ int main(void) {
 	cerrar_conexion(socket_interrupt);
 
 	return EXIT_SUCCESS;
+}
+
+void init() {
+	pthread_mutex_init(&mutex_interrupt, NULL);
+	interrupcion_desalojo = false;
+	tlb = list_create();
+	cpu_logger = log_create("cpu.log", "CPU", true, LOG_LEVEL_INFO);
+	cpu_config = cpu_leer_configuracion(PATH_CPU_CONFIG);
 }
 
 t_traductor *obtener_traductor_direcciones(int socket_fd) {

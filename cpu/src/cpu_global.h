@@ -19,6 +19,7 @@ t_cpu_config *cpu_config;
 t_traductor *traductor;
 pthread_mutex_t mutex_interrupt;
 bool interrupcion_desalojo;
+t_list *tlb;
 
 
 #endif /* CPU_GLOBAL_H_ */

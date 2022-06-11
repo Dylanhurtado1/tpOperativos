@@ -17,7 +17,6 @@ void ejecutar_ciclo_de_instruccion(t_pcb *pcb, int socket_kernel) {
 	if(tipo_desalojo == CONTINUAR_EJECUTANDO) {
 		desalojar_proceso(socket_kernel, pcb, DESALOJO_POR_IRQ);
 	}
-
 }
 
 t_instruccion *fetch(t_pcb *pcb) {
