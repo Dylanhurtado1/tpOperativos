@@ -3,9 +3,9 @@
 
 void peticiones_dispatch(int *socket_dispatch) {
 	t_pcb *pcb;
-
 	log_info(cpu_logger, "CPU escuchando puerto dispatch");
 	int socket_kernel = esperar_cliente(*socket_dispatch);
+
 	while (true) {
 		t_paquete *paquete = recibir_paquete(socket_kernel);
 		switch (paquete->codigo_operacion) {
@@ -14,6 +14,7 @@ void peticiones_dispatch(int *socket_dispatch) {
 				log_info(cpu_logger,"PCB[%d] recibido, ejecutando instrucciones", pcb->id);
 
 				ejecutar_ciclo_de_instruccion(pcb, socket_kernel);
+				tlb_eliminar_entradas();
 
 				eliminar_pcb(pcb);
 				break;
@@ -29,6 +30,7 @@ void peticiones_dispatch(int *socket_dispatch) {
 void peticiones_interrupt(int *socket_interrupt) {
 	log_info(cpu_logger, "CPU escuchando puerto interrupt");
 	int socket_kernel = esperar_cliente(*socket_interrupt);
+
 	while (true) {
 		t_paquete *paquete = recibir_paquete(socket_kernel);
 		switch (paquete->codigo_operacion) {
