@@ -8,21 +8,24 @@ C_SRCS += \
 ../src/cpu.c \
 ../src/cpu_config.c \
 ../src/mmu.c \
-../src/peticiones.c 
+../src/peticiones.c \
+../src/tlb.c 
 
 OBJS += \
 ./src/ciclo_instruccion.o \
 ./src/cpu.o \
 ./src/cpu_config.o \
 ./src/mmu.o \
-./src/peticiones.o 
+./src/peticiones.o \
+./src/tlb.o 
 
 C_DEPS += \
 ./src/ciclo_instruccion.d \
 ./src/cpu.d \
 ./src/cpu_config.d \
 ./src/mmu.d \
-./src/peticiones.d 
+./src/peticiones.d \
+./src/tlb.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
