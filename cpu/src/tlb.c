@@ -71,7 +71,7 @@ void tlb_eliminar_entrada(t_tlb *entrada) {
 
 void print_tlb() {
 	void print(t_tlb *entrada) {
-		log_info(cpu_logger, "Pagina = %d, marco = %d, indice = %d", entrada->pagina, entrada->marco, entrada->indice_usado);
+		log_info(cpu_logger, "TLB :: Pagina %d, marco %d, indice %d", entrada->pagina, entrada->marco, entrada->indice_usado);
 	}
 	list_iterate(tlb, (void *)print);
 }
