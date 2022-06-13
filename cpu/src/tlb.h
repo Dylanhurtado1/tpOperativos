@@ -6,6 +6,7 @@
 typedef struct {
 	uint32_t pagina;
 	uint32_t marco;
+	uint32_t indice_usado;
 } t_tlb;
 
 bool tlb_existe_pagina(uint32_t pagina);
