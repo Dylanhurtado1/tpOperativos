@@ -23,11 +23,11 @@ uint32_t crear_tablas_de_paginacion(t_pcb *pcb) {
 }
 
 uint32_t get_tabla_segundo_nivel(uint32_t tabla_primer_nivel, uint32_t entrada_tabla) {
-	return tabla_primer_nivel + (entrada_tabla - 1) * memoria_config->entradas_por_tabla;
+	return tabla_primer_nivel + entrada_tabla * memoria_config->entradas_por_tabla;
 }
 
 uint32_t get_marco_de_pagina(uint32_t tabla_segundo_nivel, uint32_t entrada_tabla) {
-	uint32_t indice = tabla_segundo_nivel + (entrada_tabla - 1);
+	uint32_t indice = tabla_segundo_nivel + entrada_tabla;
 	t_pagina_segundo_nivel *pagina = (t_pagina_segundo_nivel *)list_get(tablas_de_paginacion, indice);
 	// TODO: validar pagina en memoria con bit presencia en 1 si esta.
 
