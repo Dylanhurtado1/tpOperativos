@@ -3,13 +3,13 @@
 uint32_t indice_tabla_primer_nivel = 0;
 
 
-uint32_t crear_tablas_de_paginacion(t_pcb *pcb) {
+uint32_t crear_tablas_de_paginacion(uint32_t pid) {
 	uint32_t tabla_primer_nivel = indice_tabla_primer_nivel;
 	uint32_t cantidad_entradas_maximas = memoria_config->entradas_por_tabla * memoria_config->entradas_por_tabla;
 
 	for(int i = 0; i < cantidad_entradas_maximas; i++) {
 		t_pagina_segundo_nivel *entrada_segundo_nivel = malloc(sizeof(t_pagina_segundo_nivel));
-		entrada_segundo_nivel->pid = pcb->id;
+		entrada_segundo_nivel->pid = pid;
 		entrada_segundo_nivel->marco = 0xFF;
 		entrada_segundo_nivel->presencia = 0;
 		entrada_segundo_nivel->uso = 0;
@@ -35,7 +35,7 @@ uint32_t get_marco_de_pagina(uint32_t tabla_segundo_nivel, uint32_t entrada_tabl
 			asignar_marco_libre(pagina);
 		} else {
 			// TODO: evaluar que datos se necesitan
-			reemplazar_marco(pagina, memoria_config->algoritmo_reemplazo);
+			reemplazar_marco(indice, pagina, memoria_config->algoritmo_reemplazo);
 
 			//asignar_marco_libre(pagina); // <-- solo para debug, elimnar al implementar los algoritmos
 		}
@@ -86,7 +86,7 @@ void asignar_marco_libre(t_pagina_segundo_nivel *pagina) {
 	marco_libre->libre = 0;
 }
 
-void reemplazar_marco(t_pagina_segundo_nivel *pagina_a_agregar, char *algoritmo_reemplazo) {
+void reemplazar_marco(uint32_t numero_pagina, t_pagina_segundo_nivel *pagina_a_agregar, char *algoritmo_reemplazo) {
 	if(string_equals_ignore_case(algoritmo_reemplazo, "CLOCK")) {
 		// TODO: implementar algoritmo
 	} else if(string_equals_ignore_case(algoritmo_reemplazo, "CLOCK-M")) {

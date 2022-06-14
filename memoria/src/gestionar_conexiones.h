@@ -3,6 +3,7 @@
 
 #include "memoria_global.h"
 #include "paginacion.h"
+#include "swap.h"
 
 void procesar_conexiones(t_cliente *datos_cliente);
 void enviar_direccion_tabla_de_pagina(int socket_fd, uint32_t direccion);

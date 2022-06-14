@@ -12,8 +12,8 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 		case INICIALIZACION_DE_PROCESO:
 			pcb = deserializar_pcb(paquete);
 			log_info(memoria_logger, "Inicializando estructuras de PID[%d]...", pcb->id);
-			uint32_t tabla_primer_nivel = crear_tablas_de_paginacion(pcb);
-			// TODO: crear archivo swap
+			swap_crear_archivo(pcb->id, pcb->tamanio_proceso);
+			uint32_t tabla_primer_nivel = crear_tablas_de_paginacion(pcb->id);
 			enviar_direccion_tabla_de_pagina(datos_cliente->socket, tabla_primer_nivel);
 
 			eliminar_pcb(pcb);
@@ -29,7 +29,8 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 		case FINALIZACION_DE_PROCESO:
 			pcb = deserializar_pcb(paquete);
 			log_info(memoria_logger, "Eliminando memoria de PID[%d]...", pcb->id);
-			// TODO: liberar memoria y eliminar el archivo SWAP del proceso
+			// TODO: liberar memoria
+			swap_eliminar_archivo(pcb->id);
 			informar_estado_proceso(datos_cliente->socket, PROCESO_FINALIZADO);
 
 			eliminar_pcb(pcb);
