@@ -8,6 +8,7 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 
 	t_paquete *paquete = datos_cliente->paquete;
 	switch (paquete->codigo_operacion) {
+		// KERNEL
 		case INICIALIZACION_DE_PROCESO:
 			pcb = deserializar_pcb(paquete);
 			log_info(memoria_logger, "Inicializando estructuras de PID[%d]...", pcb->id);
@@ -33,7 +34,7 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 
 			eliminar_pcb(pcb);
 			break;
-
+		// CPU
 		case HANDSHAKE_INICIAL:
 			log_info(memoria_logger, "Memoria recibio handshake, enviando estructura traductora...");
 			t_traductor *traductor = crear_traductor(memoria_config->entradas_por_tabla, memoria_config->tamanio_pagina);

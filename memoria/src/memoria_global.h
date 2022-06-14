@@ -15,6 +15,7 @@ t_log *memoria_logger;
 t_memoria_config *memoria_config;
 void *memoria_principal;
 t_list *tablas_de_paginacion;
+t_list *marcos_memoria;
 
 
 #endif /* MEMORIA_GLOBAL_H_ */
