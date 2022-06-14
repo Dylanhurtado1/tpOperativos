@@ -3,13 +3,13 @@
 uint32_t indice_tabla_primer_nivel = 0;
 
 
-uint32_t crear_tablas_de_paginacion(t_pcb *pcb) {
+uint32_t crear_tablas_de_paginacion(uint32_t pid) {
 	uint32_t tabla_primer_nivel = indice_tabla_primer_nivel;
 	uint32_t cantidad_entradas_maximas = memoria_config->entradas_por_tabla * memoria_config->entradas_por_tabla;
 
 	for(int i = 0; i < cantidad_entradas_maximas; i++) {
 		t_pagina_segundo_nivel *entrada_segundo_nivel = malloc(sizeof(t_pagina_segundo_nivel));
-		entrada_segundo_nivel->pid = pcb->id;
+		entrada_segundo_nivel->pid = pid;
 		entrada_segundo_nivel->marco = 0xFF;
 		entrada_segundo_nivel->presencia = 0;
 		entrada_segundo_nivel->uso = 0;

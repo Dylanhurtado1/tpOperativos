@@ -17,7 +17,7 @@ typedef struct {
 	uint32_t numero;
 } t_marco;
 
-uint32_t crear_tablas_de_paginacion(t_pcb *pcb);
+uint32_t crear_tablas_de_paginacion(uint32_t pid);
 uint32_t get_tabla_segundo_nivel(uint32_t tabla_primer_nivel, uint32_t entrada_tabla);
 uint32_t get_marco_de_pagina(uint32_t tabla_segundo_nivel, uint32_t entrada_tabla);
 

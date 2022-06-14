@@ -13,7 +13,7 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 			pcb = deserializar_pcb(paquete);
 			log_info(memoria_logger, "Inicializando estructuras de PID[%d]...", pcb->id);
 			swap_crear_archivo(pcb->id, pcb->tamanio_proceso);
-			uint32_t tabla_primer_nivel = crear_tablas_de_paginacion(pcb);
+			uint32_t tabla_primer_nivel = crear_tablas_de_paginacion(pcb->id);
 			enviar_direccion_tabla_de_pagina(datos_cliente->socket, tabla_primer_nivel);
 
 			eliminar_pcb(pcb);
