@@ -7,19 +7,22 @@ C_SRCS += \
 ../src/gestionar_conexiones.c \
 ../src/memoria.c \
 ../src/memoria_config.c \
-../src/paginacion.c 
+../src/paginacion.c \
+../src/swap.c 
 
 OBJS += \
 ./src/gestionar_conexiones.o \
 ./src/memoria.o \
 ./src/memoria_config.o \
-./src/paginacion.o 
+./src/paginacion.o \
+./src/swap.o 
 
 C_DEPS += \
 ./src/gestionar_conexiones.d \
 ./src/memoria.d \
 ./src/memoria_config.d \
-./src/paginacion.d 
+./src/paginacion.d \
+./src/swap.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

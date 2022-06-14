@@ -27,4 +27,5 @@ void init() {
 	//memset(memoria_principal, 0, memoria_config->tamanio_memoria);
 	tablas_de_paginacion = list_create();
 	iniciar_marcos_memoria();
+	archivos_swap = list_create();
 }

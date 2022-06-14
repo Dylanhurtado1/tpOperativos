@@ -25,7 +25,7 @@ void iniciar_marcos_memoria();
 bool page_fault(t_pagina_segundo_nivel *pagina);
 uint32_t cantidad_marcos_asignados(uint32_t pid);
 void asignar_marco_libre(t_pagina_segundo_nivel *pagina);
-void reemplazar_marco(t_pagina_segundo_nivel *pagina_a_agregar, char *algoritmo_reemplazo);
+void reemplazar_marco(uint32_t numero_pagina, t_pagina_segundo_nivel *pagina_a_agregar, char *algoritmo_reemplazo);
 
 
 #endif /* PAGINACION_H_ */
