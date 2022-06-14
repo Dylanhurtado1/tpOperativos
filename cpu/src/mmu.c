@@ -6,7 +6,7 @@ uint32_t traducir_direccion_logica(uint32_t tabla_primer_nivel, uint32_t direcci
 	uint32_t numero_de_marco;
 	t_traducciones traducciones = parsear_direccion_logica(direccion_logica);
 
-	if(tlb_existe_pagina(traducciones.numero_pagina)) {
+	if(tlb_hit(traducciones.numero_pagina)) {
 		numero_de_marco = tlb_marco_de_pagina(traducciones.numero_pagina);
 	} else {
 		tabla_segundo_nivel = acceder_tablas_en_memoria(tabla_primer_nivel, traducciones.entrada_tabla_nivel_1, ACCESO_TABLA_PRIMER_NIVEL);
