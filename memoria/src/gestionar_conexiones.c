@@ -5,6 +5,7 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 	t_pcb *pcb;
 	t_tabla_acceso *tabla;
 	t_list *datos;
+	uint32_t direccion_fisica;
 
 	t_paquete *paquete = datos_cliente->paquete;
 	switch (paquete->codigo_operacion) {
@@ -21,7 +22,8 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 		case SUSPENSION_DE_PROCESO:
 			pcb = deserializar_pcb(paquete);
 			log_info(memoria_logger, "Liberando memoria de PID[%d]...", pcb->id);
-			// TODO: liberar memoria y escribir en SWAP lo datos necesarios
+			liberar_espacio_en_memoria(pcb->id);
+			// TODO: escribir en SWAP lo datos necesarios
 			informar_estado_proceso(datos_cliente->socket, PROCESO_SUSPENDIDO);
 
 			eliminar_pcb(pcb);
@@ -29,7 +31,7 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 		case FINALIZACION_DE_PROCESO:
 			pcb = deserializar_pcb(paquete);
 			log_info(memoria_logger, "Eliminando memoria de PID[%d]...", pcb->id);
-			// TODO: liberar memoria
+			liberar_espacio_en_memoria(pcb->id);
 			swap_eliminar_archivo(pcb->id);
 			informar_estado_proceso(datos_cliente->socket, PROCESO_FINALIZADO);
 
@@ -62,18 +64,23 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 		case LEER_MEMORIA:
 			log_info(memoria_logger, "Enviando valor de memoria...");
 			datos = deserealizar_paquete(paquete);
-			log_info(memoria_logger, "Direccion fisica a leer = %d", *(uint32_t *)list_get(datos, 0));
-			// TODO: leer valor de memoria y devolverlo
-			enviar_valor_leido_de_memoria(datos_cliente->socket, 13);
+			direccion_fisica = *(uint32_t *)list_get(datos, 0);
+			log_info(memoria_logger, "Direccion fisica a leer = %d", direccion_fisica);
+
+			uint32_t valor_de_memoria = leer_memoria_principal(direccion_fisica);
+			enviar_valor_leido_de_memoria(datos_cliente->socket, valor_de_memoria);
 
 			list_destroy_and_destroy_elements(datos, free);
 			break;
 		case ESCRIBIR_MEMORIA:
 			log_info(memoria_logger, "Escribiendo valor en memoria...");
 			datos = deserealizar_paquete(paquete);
-			log_info(memoria_logger, "Direccion fisica a escribir = %d", *(uint32_t *)list_get(datos, 0));
-			log_info(memoria_logger, "Valor = %d", *(uint32_t *)list_get(datos, 1));
-			// TODO: escribir valor en memoria
+			direccion_fisica = *(uint32_t *)list_get(datos, 0);
+			uint32_t valor_a_escribir = *(uint32_t *)list_get(datos, 1);
+			log_info(memoria_logger, "Direccion fisica a escribir = %d", direccion_fisica);
+			log_info(memoria_logger, "Valor = %d", valor_a_escribir);
+
+			escribir_memoria_principal(direccion_fisica, valor_a_escribir);
 
 			list_destroy_and_destroy_elements(datos, free);
 			break;
@@ -125,4 +132,18 @@ void informar_estado_proceso(int socket_fd, t_protocolo protocolo) {
 
 void eliminar_tabla_de_acceso(t_tabla_acceso *acceso_tabla) {
 	free(acceso_tabla);
+}
+
+uint32_t leer_memoria_principal(uint32_t direccion) {
+	uint32_t valor;
+	memcpy(&valor, memoria_principal + direccion, sizeof(uint32_t));
+	return valor;
+}
+
+void escribir_memoria_principal(uint32_t direccion, uint32_t valor) {
+	memcpy(memoria_principal + direccion, &valor, sizeof(uint32_t));
+}
+
+void eliminar_memoria_principal() {
+	free(memoria_principal);
 }

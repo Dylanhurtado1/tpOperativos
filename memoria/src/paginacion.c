@@ -60,6 +60,21 @@ void iniciar_marcos_memoria() {
 	}
 }
 
+void liberar_espacio_en_memoria(uint32_t pid) {
+	bool esta_asignado(t_marco *marco) {
+		return marco->pid == pid;
+	}
+
+	void liberar_marco(t_marco *marco) {
+		marco->pid = 0xFF;
+		marco->libre = 1;
+	}
+
+	t_list *marcos_asignados = list_filter(marcos_memoria, (void *)esta_asignado);
+	list_iterate(marcos_memoria, (void *)liberar_marco);
+
+	list_destroy(marcos_asignados);
+}
 
 bool page_fault(t_pagina_segundo_nivel *pagina) {
 	return pagina->presencia == 0;

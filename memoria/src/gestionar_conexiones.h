@@ -16,5 +16,8 @@ void informar_estado_proceso(int socket_fd, t_protocolo protocolo);
 void eliminar_pcb(t_pcb *pcb);
 void eliminar_tabla_de_acceso(t_tabla_acceso *acceso_tabla);
 
+uint32_t leer_memoria_principal(uint32_t direccion);
+void escribir_memoria_principal(uint32_t direccion, uint32_t valor);
+
 
 #endif /* GESTIONAR_CONEXIONES_H_ */
