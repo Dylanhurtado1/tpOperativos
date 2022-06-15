@@ -22,7 +22,8 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 		case SUSPENSION_DE_PROCESO:
 			pcb = deserializar_pcb(paquete);
 			log_info(memoria_logger, "Liberando memoria de PID[%d]...", pcb->id);
-			// TODO: liberar memoria y escribir en SWAP lo datos necesarios
+			liberar_espacio_en_memoria(pcb->id);
+			// TODO: escribir en SWAP lo datos necesarios
 			informar_estado_proceso(datos_cliente->socket, PROCESO_SUSPENDIDO);
 
 			eliminar_pcb(pcb);
@@ -30,7 +31,7 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 		case FINALIZACION_DE_PROCESO:
 			pcb = deserializar_pcb(paquete);
 			log_info(memoria_logger, "Eliminando memoria de PID[%d]...", pcb->id);
-			// TODO: liberar memoria
+			liberar_espacio_en_memoria(pcb->id);
 			swap_eliminar_archivo(pcb->id);
 			informar_estado_proceso(datos_cliente->socket, PROCESO_FINALIZADO);
 
@@ -135,7 +136,6 @@ void eliminar_tabla_de_acceso(t_tabla_acceso *acceso_tabla) {
 
 uint32_t leer_memoria_principal(uint32_t direccion) {
 	uint32_t valor;
-	// TODO: imprimir las direcciones que esta accediendo
 	memcpy(&valor, memoria_principal + direccion, sizeof(uint32_t));
 	return valor;
 }
