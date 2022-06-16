@@ -2,6 +2,7 @@
 #define PAGINACION_H_
 
 #include "memoria_global.h"
+#include "swap.h"
 
 typedef struct {
 	uint32_t pid;

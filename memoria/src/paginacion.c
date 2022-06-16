@@ -1,5 +1,7 @@
 #include "paginacion.h"
 
+static uint32_t calcular_offset_pagina(uint32_t indice_pagina);
+
 uint32_t indice_tabla_primer_nivel = 0;
 
 
@@ -27,23 +29,26 @@ uint32_t get_tabla_segundo_nivel(uint32_t tabla_primer_nivel, uint32_t entrada_t
 }
 
 uint32_t get_marco_de_pagina(uint32_t tabla_segundo_nivel, uint32_t entrada_tabla) {
-	uint32_t indice = tabla_segundo_nivel + entrada_tabla;
-	t_pagina_segundo_nivel *pagina = (t_pagina_segundo_nivel *)list_get(tablas_de_paginacion, indice);
+	uint32_t indice_pagina = tabla_segundo_nivel + entrada_tabla;
+	t_pagina_segundo_nivel *pagina = (t_pagina_segundo_nivel *)list_get(tablas_de_paginacion, indice_pagina);
 
 	if(page_fault(pagina)) {
+		void *buffer = malloc(memoria_config->tamanio_pagina);
+		swap_leer_pagina(pagina->pid, buffer, calcular_offset_pagina(indice_pagina), memoria_config->tamanio_pagina);
 		if(cantidad_marcos_asignados(pagina->pid) < memoria_config->marcos_por_proceso) {
 			asignar_marco_libre(pagina);
 		} else {
 			// TODO: evaluar que datos se necesitan
-			reemplazar_marco(indice, pagina, memoria_config->algoritmo_reemplazo);
+			reemplazar_marco(indice_pagina, pagina, memoria_config->algoritmo_reemplazo);
 
 			//asignar_marco_libre(pagina); // <-- solo para debug, elimnar al implementar los algoritmos
 		}
+		free(buffer);
 		pagina->presencia = 1;
 		pagina->uso = 1;
 	}
 	log_info(memoria_logger, "Page %d = [Frame %d | P %d | U %d | M %d]",
-			indice, pagina->marco, pagina->presencia, pagina->uso, pagina->modificado);
+			indice_pagina, pagina->marco, pagina->presencia, pagina->uso, pagina->modificado);
 
 	return pagina->marco;
 }
@@ -109,4 +114,8 @@ void reemplazar_marco(uint32_t numero_pagina, t_pagina_segundo_nivel *pagina_a_a
 	}
 }
 
+uint32_t calcular_offset_pagina(uint32_t indice_pagina) {
+	uint32_t numero_pagina = indice_pagina % (memoria_config->entradas_por_tabla * memoria_config->entradas_por_tabla);
+	return numero_pagina * memoria_config->tamanio_pagina;
+}
 
