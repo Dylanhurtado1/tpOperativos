@@ -1,7 +1,8 @@
 #include "tlb.h"
 
 static void reemplazar_entrada_tlb(t_tlb *entrada_a_agregar, char *algoritmo_reemplazo);
-static void tlb_eliminar_entrada(t_tlb *entrada);
+static void eliminar_entrada_tlb(t_tlb *entrada);
+static void eliminar_pagina_swapeada(uint32_t marco);
 static void print_tlb();
 
 uint32_t indice_menos_usado = 0;
@@ -35,6 +36,7 @@ void tlb_agregar_entrada(uint32_t pagina, uint32_t marco) {
 	entrada->indice_usado = indice_menos_usado;
 	indice_menos_usado++;
 
+	//eliminar_pagina_swapeada(marco); TODO: habilitar al implementar Memoria por completo
 	if(list_size(tlb) < cpu_config->entradas_tlb) {
 		list_add(tlb, entrada);
 	} else {
@@ -44,14 +46,14 @@ void tlb_agregar_entrada(uint32_t pagina, uint32_t marco) {
 }
 
 void tlb_eliminar_entradas() {
-	list_clean_and_destroy_elements(tlb, free);
+	list_clean_and_destroy_elements(tlb, (void *)eliminar_entrada_tlb);
 	indice_menos_usado = 0;
 }
 
 
 void reemplazar_entrada_tlb(t_tlb *entrada_a_agregar, char *algoritmo_reemplazo) {
 	if(string_equals_ignore_case(algoritmo_reemplazo, "FIFO")) {
-		list_remove_and_destroy_element(tlb, 0, (void *)tlb_eliminar_entrada);
+		list_remove_and_destroy_element(tlb, 0, (void *)eliminar_entrada_tlb);
 		list_add(tlb, entrada_a_agregar);
 	} else if(string_equals_ignore_case(algoritmo_reemplazo, "LRU")) {
 		void *menos_usado(void *e1, void *e2) {
@@ -61,12 +63,19 @@ void reemplazar_entrada_tlb(t_tlb *entrada_a_agregar, char *algoritmo_reemplazo)
 		aux->pagina = entrada_a_agregar->pagina;
 		aux->marco = entrada_a_agregar->marco;
 		aux->indice_usado = entrada_a_agregar->indice_usado;
-		tlb_eliminar_entrada(entrada_a_agregar);
+		eliminar_entrada_tlb(entrada_a_agregar);
 	}
 }
 
-void tlb_eliminar_entrada(t_tlb *entrada) {
+void eliminar_entrada_tlb(t_tlb *entrada) {
 	free(entrada);
+}
+
+void eliminar_pagina_swapeada(uint32_t marco) {
+	bool existe_marco(void *entrada) {
+		return ((t_tlb *)entrada)->marco == marco;
+	}
+	list_remove_and_destroy_by_condition(tlb, (void *)existe_marco, (void *)eliminar_entrada_tlb);
 }
 
 void print_tlb() {
