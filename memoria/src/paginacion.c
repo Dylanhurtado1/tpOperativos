@@ -3,7 +3,6 @@
 static uint32_t calcular_offset_pagina(uint32_t indice_pagina);
 static void cargar_espacio_en_memoria(void *buffer, uint32_t offset, uint32_t size);
 
-
 uint32_t indice_tabla_primer_nivel = 0;
 
 
@@ -124,5 +123,21 @@ void reemplazar_pagina(uint32_t numero_pagina, t_pagina_segundo_nivel *pagina_a_
 uint32_t calcular_offset_pagina(uint32_t indice_pagina) {
 	uint32_t numero_pagina = indice_pagina % (memoria_config->entradas_por_tabla * memoria_config->entradas_por_tabla);
 	return numero_pagina * memoria_config->tamanio_pagina;
+}
+
+void actualizar_pagina_modificada(uint32_t direccion_fisica) {
+	uint32_t numero_marco = (uint32_t)(direccion_fisica / memoria_config->tamanio_pagina);
+
+	bool es_numero_marco(t_marco *marco) {
+		return marco->numero == numero_marco;
+	}
+	t_marco *marco_modificado = list_find(marcos_memoria, (void *)es_numero_marco);
+
+	bool marco_asignado(t_pagina_segundo_nivel *pagina) {
+		return pagina->marco == marco_modificado->numero && pagina->pid == marco_modificado->pid;
+	}
+	t_pagina_segundo_nivel *pagina_modificada = list_find(tablas_de_paginacion, (void *)marco_asignado);
+
+	pagina_modificada->modificado = 1;
 }
 

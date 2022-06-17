@@ -81,6 +81,7 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 			log_info(memoria_logger, "Valor = %d", valor_a_escribir);
 
 			escribir_memoria_principal(direccion_fisica, valor_a_escribir);
+			actualizar_pagina_modificada(direccion_fisica);
 
 			list_destroy_and_destroy_elements(datos, free);
 			break;
