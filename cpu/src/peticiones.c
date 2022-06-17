@@ -14,7 +14,7 @@ void peticiones_dispatch(int *socket_dispatch) {
 				log_info(cpu_logger,"PCB[%d] recibido, ejecutando instrucciones", pcb->id);
 
 				ejecutar_ciclo_de_instruccion(pcb, socket_kernel);
-				tlb_eliminar_entradas();
+				tlb_limpiar_cache();
 
 				eliminar_pcb(pcb);
 				break;

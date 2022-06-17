@@ -2,6 +2,7 @@
 #define PAGINACION_H_
 
 #include "memoria_global.h"
+#include "swap.h"
 
 typedef struct {
 	uint32_t pid;
@@ -26,7 +27,8 @@ bool page_fault(t_pagina_segundo_nivel *pagina);
 uint32_t cantidad_marcos_asignados(uint32_t pid);
 void asignar_marco_libre(t_pagina_segundo_nivel *pagina);
 void liberar_espacio_en_memoria(uint32_t pid);
-void reemplazar_marco(uint32_t numero_pagina, t_pagina_segundo_nivel *pagina_a_agregar, char *algoritmo_reemplazo);
+void reemplazar_pagina(t_pagina_segundo_nivel *pagina_a_agregar, uint32_t incide_pagina, char *algoritmo_reemplazo);
+void actualizar_pagina_modificada(uint32_t direccion_fisica);
 
 
 #endif /* PAGINACION_H_ */
