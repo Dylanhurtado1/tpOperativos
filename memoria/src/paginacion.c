@@ -1,6 +1,8 @@
 #include "paginacion.h"
 
 static uint32_t calcular_offset_pagina(uint32_t indice_pagina);
+static void cargar_espacio_en_memoria(void *buffer, uint32_t offset, uint32_t size);
+
 
 uint32_t indice_tabla_primer_nivel = 0;
 
@@ -43,6 +45,7 @@ uint32_t get_marco_de_pagina(uint32_t tabla_segundo_nivel, uint32_t entrada_tabl
 
 			//asignar_marco_libre(pagina); // <-- solo para debug, elimnar al implementar los algoritmos
 		}
+		cargar_espacio_en_memoria(buffer, pagina->marco * memoria_config->tamanio_pagina, memoria_config->tamanio_pagina);
 		free(buffer);
 		pagina->presencia = 1;
 		pagina->uso = 1;
@@ -79,6 +82,10 @@ void liberar_espacio_en_memoria(uint32_t pid) {
 	list_iterate(marcos_memoria, (void *)liberar_marco);
 
 	list_destroy(marcos_asignados);
+}
+
+void cargar_espacio_en_memoria(void *buffer, uint32_t offset, uint32_t size) {
+	memcpy(memoria_principal + offset, buffer, size);
 }
 
 bool page_fault(t_pagina_segundo_nivel *pagina) {
