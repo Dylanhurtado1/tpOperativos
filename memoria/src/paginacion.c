@@ -41,7 +41,7 @@ uint32_t get_marco_de_pagina(uint32_t tabla_segundo_nivel, uint32_t entrada_tabl
 			asignar_marco_libre(pagina);
 		} else {
 			// TODO: evaluar que datos se necesitan
-			reemplazar_marco(indice_pagina, pagina, memoria_config->algoritmo_reemplazo);
+			reemplazar_pagina(indice_pagina, pagina, memoria_config->algoritmo_reemplazo);
 
 			//asignar_marco_libre(pagina); // <-- solo para debug, elimnar al implementar los algoritmos
 		}
@@ -113,7 +113,7 @@ void asignar_marco_libre(t_pagina_segundo_nivel *pagina) {
 	marco_libre->libre = 0;
 }
 
-void reemplazar_marco(uint32_t numero_pagina, t_pagina_segundo_nivel *pagina_a_agregar, char *algoritmo_reemplazo) {
+void reemplazar_pagina(uint32_t numero_pagina, t_pagina_segundo_nivel *pagina_a_agregar, char *algoritmo_reemplazo) {
 	if(string_equals_ignore_case(algoritmo_reemplazo, "CLOCK")) {
 		// TODO: implementar algoritmo
 	} else if(string_equals_ignore_case(algoritmo_reemplazo, "CLOCK-M")) {

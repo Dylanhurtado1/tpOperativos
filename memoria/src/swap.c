@@ -1,6 +1,7 @@
 #include "swap.h"
 
 static void agregar_swap(uint32_t pid, char *path, FILE *fd);
+static t_swap *buscar_swap(uint32_t pid);
 
 
 void swap_crear_archivo(uint32_t pid, uint32_t tamanio_archivo) {
@@ -35,20 +36,14 @@ void swap_eliminar_archivo(uint32_t pid) {
 }
 
 void swap_leer_pagina(uint32_t pid, void *buffer, uint32_t offset, uint32_t size) {
-	bool swap_id(t_swap *swap) {
-		return swap->pid == pid;
-	}
-	t_swap *swap = list_find(archivos_swap, (void *)swap_id);
+	t_swap *swap = buscar_swap(pid);
 
 	fseek(swap->fd, offset, SEEK_SET);
 	fread(buffer, size, 1, swap->fd);
 }
 
 void swap_escribir_pagina(uint32_t pid, void *buffer, uint32_t offset, uint32_t size) {
-	bool swap_id(t_swap *swap) {
-		return swap->pid == pid;
-	}
-	t_swap *swap = list_find(archivos_swap, (void *)swap_id);
+	t_swap *swap = buscar_swap(pid);
 
 	fseek(swap->fd, offset, SEEK_SET);
 	fwrite(buffer, size, 1, swap->fd);
@@ -63,4 +58,9 @@ static void agregar_swap(uint32_t pid, char *path, FILE *fd) {
 	list_add(archivos_swap, swap);
 }
 
-
+static t_swap *buscar_swap(uint32_t pid) {
+	bool swap_id(t_swap *swap) {
+		return swap->pid == pid;
+	}
+	return list_find(archivos_swap, (void *)swap_id);
+}
