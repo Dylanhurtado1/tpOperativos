@@ -23,9 +23,7 @@ int main(void) {
 void init() {
 	memoria_logger = log_create("memoria.log", "MEMORIA", true, LOG_LEVEL_INFO);
 	memoria_config = memoria_leer_configuracion(PATH_MEMORIA_CONFIG);
-	memoria_principal = malloc(memoria_config->tamanio_memoria);
-	memset(memoria_principal, 0, memoria_config->tamanio_memoria);
+	iniciar_memoria_principal(memoria_config->tamanio_memoria, memoria_config->tamanio_pagina);
 	tablas_de_paginacion = list_create();
-	iniciar_marcos_memoria();
 	archivos_swap = list_create();
 }
