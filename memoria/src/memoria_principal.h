@@ -2,7 +2,6 @@
 #define MEMORIA_PRINCIPAL_H_
 
 #include "memoria_global.h"
-#include "paginacion.h"
 
 typedef struct {
 	uint32_t pid;
