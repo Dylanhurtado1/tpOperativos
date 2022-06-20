@@ -6,10 +6,8 @@
 
 #define PATH_CPU_CONFIG "/home/utnso/tp-2022-1c-lo-importante-es-aprobar/cpu/cpu.config"
 
-void init();
 t_traductor *obtener_traductor_direcciones(int socket_fd);
 void realizar_handshake(int socket_fd);
-void eliminar_traductor_direcciones(t_traductor *traductor);
 
 
 #endif /* CPU_H_ */

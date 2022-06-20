@@ -9,6 +9,7 @@ C_SRCS += \
 ../src/comunicacion.c \
 ../src/conexiones.c \
 ../src/errors.c \
+../src/estructuras.c \
 ../src/paquete.c \
 ../src/print.c \
 ../src/serializador.c \
@@ -21,6 +22,7 @@ OBJS += \
 ./src/comunicacion.o \
 ./src/conexiones.o \
 ./src/errors.o \
+./src/estructuras.o \
 ./src/paquete.o \
 ./src/print.o \
 ./src/serializador.o \
@@ -33,6 +35,7 @@ C_DEPS += \
 ./src/comunicacion.d \
 ./src/conexiones.d \
 ./src/errors.d \
+./src/estructuras.d \
 ./src/paquete.d \
 ./src/print.d \
 ./src/serializador.d \

@@ -1,6 +1,14 @@
 #include "memoria.h"
 
 
+void init() {
+	memoria_logger = log_create("memoria.log", "MEMORIA", true, LOG_LEVEL_INFO);
+	memoria_config = memoria_leer_configuracion(PATH_MEMORIA_CONFIG);
+	iniciar_memoria_principal(memoria_config->tamanio_memoria, memoria_config->tamanio_pagina);
+	tablas_de_paginacion = list_create();
+	archivos_swap = list_create();
+}
+
 int main(void) {
 
 	init();
@@ -20,10 +28,3 @@ int main(void) {
 	return EXIT_SUCCESS;
 }
 
-void init() {
-	memoria_logger = log_create("memoria.log", "MEMORIA", true, LOG_LEVEL_INFO);
-	memoria_config = memoria_leer_configuracion(PATH_MEMORIA_CONFIG);
-	iniciar_memoria_principal(memoria_config->tamanio_memoria, memoria_config->tamanio_pagina);
-	tablas_de_paginacion = list_create();
-	archivos_swap = list_create();
-}

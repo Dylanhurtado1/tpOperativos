@@ -9,4 +9,5 @@
 void iniciar_timer();
 uint32_t get_tiempo_actual();
 
+
 #endif /* TEMPORIZADOR_H_ */

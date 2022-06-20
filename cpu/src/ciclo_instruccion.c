@@ -30,8 +30,8 @@ bool decode(t_instruccion *proxima_instruccion) {
 }
 
 uint32_t fetch_operands(uint32_t tabla_primer_nivel, uint32_t direccion_logica) {
-	uint32_t direccion_fisica = traducir_direccion_logica(tabla_primer_nivel, direccion_logica);
-	return leer_memoria(direccion_fisica);
+	uint32_t direccion_fisica = mmu_traducir_direccion_logica(tabla_primer_nivel, direccion_logica);
+	return mmu_leer_memoria(direccion_fisica);
 }
 
 t_desalojo execute(t_instruccion *instruccion, t_pcb *pcb, int socket_kernel) {
@@ -48,19 +48,19 @@ t_desalojo execute(t_instruccion *instruccion, t_pcb *pcb, int socket_kernel) {
 			return PROCESO_DESALOJADO;
 		case READ:
 			log_info(cpu_logger, "Instruccion READ ejecutada...");
-			direccion_fisica = traducir_direccion_logica(pcb->tabla_paginas, instruccion->primer_operando);
-			uint32_t valor = leer_memoria(direccion_fisica);
+			direccion_fisica = mmu_traducir_direccion_logica(pcb->tabla_paginas, instruccion->primer_operando);
+			uint32_t valor = mmu_leer_memoria(direccion_fisica);
 			log_info(cpu_logger, "Valor leido de memoria = %d", valor);
 			break;
 		case WRITE:
 			log_info(cpu_logger, "Instruccion WRITE ejecutada...");
-			direccion_fisica = traducir_direccion_logica(pcb->tabla_paginas, instruccion->primer_operando);
-			escribir_memoria(direccion_fisica, instruccion->segundo_operando);
+			direccion_fisica = mmu_traducir_direccion_logica(pcb->tabla_paginas, instruccion->primer_operando);
+			mmu_escribir_memoria(direccion_fisica, instruccion->segundo_operando);
 			break;
 		case COPY:
 			log_info(cpu_logger, "Instruccion COPY ejecutada...");
-			direccion_fisica = traducir_direccion_logica(pcb->tabla_paginas, instruccion->primer_operando);
-			escribir_memoria(direccion_fisica, instruccion->segundo_operando);
+			direccion_fisica = mmu_traducir_direccion_logica(pcb->tabla_paginas, instruccion->primer_operando);
+			mmu_escribir_memoria(direccion_fisica, instruccion->segundo_operando);
 			break;
 		case EXIT:
 			log_info(cpu_logger, "Instruccion EXIT ejecutada...");

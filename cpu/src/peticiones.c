@@ -49,8 +49,3 @@ void peticiones_interrupt(int *socket_interrupt) {
 	}
 }
 
-void eliminar_pcb(t_pcb *pcb) {
-	list_destroy_and_destroy_elements(pcb->instrucciones, free);
-	free(pcb);
-}
-

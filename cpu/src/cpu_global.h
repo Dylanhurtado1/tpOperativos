@@ -1,13 +1,11 @@
 #ifndef CPU_GLOBAL_H_
 #define CPU_GLOBAL_H_
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <commons/log.h>
 #include <protocolo.h>
-#include <errors.h>
 #include <estructuras.h>
 #include <conexiones.h>
 #include <serializador.h>

@@ -8,6 +8,10 @@
 #include <commons/log.h>
 #include <commons/collections/list.h>
 #include <commons/collections/queue.h>
+#include <protocolo.h>
+#include <estructuras.h>
+#include <serializador.h>
+#include <conexiones.h>
 #include "kernel_config.h"
 
 // Kernel
