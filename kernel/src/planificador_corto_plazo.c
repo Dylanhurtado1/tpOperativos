@@ -37,7 +37,7 @@ void estado_ready(void *data) {
 		if(string_equals_ignore_case(kernel_config->algoritmo_planificacion, "SRT")) {
 			pthread_mutex_lock(&mutex_exec);
 			if(proceso_ejecutando) {
-				enviar_interrupcion_a_cpu(socket_cpu_interrupt);
+				enviar_interrupcion_a_cpu(socket_cpu_interrupt, DESALOJAR_PROCESO);
 			}
 			pthread_mutex_unlock(&mutex_exec);
 		}
@@ -154,12 +154,8 @@ t_paquete *esperar_respuesta_cpu(int socket_cpu_dispatch) {
 	return recibir_paquete(socket_cpu_dispatch);
 }
 
-void enviar_interrupcion_a_cpu(int socket_fd){
-	t_paquete *paquete = crear_paquete(DESALOJAR_PROCESO, buffer_vacio());
-	uint32_t nada = 0;
-	agregar_a_paquete(paquete, &nada, sizeof(uint32_t));
-	enviar_paquete(paquete, socket_fd);
-	eliminar_paquete(paquete);
+void enviar_interrupcion_a_cpu(int socket_fd, t_protocolo protocolo) {
+	enviar_datos(socket_fd, &protocolo, sizeof(t_protocolo));
 }
 
 t_proceso *siguiente_a_ejecutar(char *algoritmo) {

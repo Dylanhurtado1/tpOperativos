@@ -73,16 +73,6 @@ void transicion_admitir(void *data) {
 	}
 }
 
-uint32_t obtener_tabla_de_pagina(int socket_memoria, t_pcb *pcb) {
-	uint32_t tabla_de_paginas;
-	t_paquete *paquete = serializar_pcb(pcb, INICIALIZACION_DE_PROCESO);
-	enviar_paquete(paquete, socket_memoria);
-	eliminar_paquete(paquete);
-	recibir_datos(socket_memoria, &tabla_de_paginas, sizeof(uint32_t));
-
-	return tabla_de_paginas;
-}
-
 void estado_exit(void *dato) {
 	while(1) {
 		sem_wait(&sem_exit);
@@ -100,6 +90,16 @@ void estado_exit(void *dato) {
 		eliminar_proceso(proceso);
 		sem_post(&sem_grado_multiprogramacion);
 	}
+}
+
+uint32_t obtener_tabla_de_pagina(int socket_memoria, t_pcb *pcb) {
+	uint32_t tabla_de_paginas;
+	t_paquete *paquete = serializar_pcb(pcb, INICIALIZACION_DE_PROCESO);
+	enviar_paquete(paquete, socket_memoria);
+	eliminar_paquete(paquete);
+	recibir_datos(socket_memoria, &tabla_de_paginas, sizeof(uint32_t));
+
+	return tabla_de_paginas;
 }
 
 void enviar_proceso_a_memoria(t_proceso *proceso, int socket_memoria, t_protocolo protocolo) {
