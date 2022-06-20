@@ -28,12 +28,13 @@ void peticiones_dispatch(int *socket_dispatch) {
 }
 
 void peticiones_interrupt(int *socket_interrupt) {
+	t_protocolo protocolo;
 	log_info(cpu_logger, "CPU escuchando puerto interrupt");
 	int socket_kernel = esperar_cliente(*socket_interrupt);
 
 	while (true) {
-		t_paquete *paquete = recibir_paquete(socket_kernel);
-		switch (paquete->codigo_operacion) {
+		recibir_datos(socket_kernel, &protocolo, sizeof(t_protocolo));
+		switch (protocolo) {
 			case DESALOJAR_PROCESO:
 				log_info(cpu_logger, "Interrupcion recibida, se desalojara proceso...");
 				pthread_mutex_lock(&mutex_interrupt);
@@ -45,12 +46,6 @@ void peticiones_interrupt(int *socket_interrupt) {
 				abort();
 				break;
 		}
-		eliminar_paquete(paquete);
 	}
-}
-
-void eliminar_pcb(t_pcb *pcb) {
-	list_destroy_and_destroy_elements(pcb->instrucciones, free);
-	free(pcb);
 }
 

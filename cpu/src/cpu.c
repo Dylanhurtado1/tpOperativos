@@ -1,6 +1,14 @@
 #include "cpu.h"
 
 
+void init() {
+	pthread_mutex_init(&mutex_interrupt, NULL);
+	interrupcion_desalojo = false;
+	tlb = list_create();
+	cpu_logger = log_create("cpu.log", "CPU", true, LOG_LEVEL_INFO);
+	cpu_config = cpu_leer_configuracion(PATH_CPU_CONFIG);
+}
+
 int main(void) {
 	pthread_t th_dispatch;
 	pthread_t th_interrupt;
@@ -29,14 +37,6 @@ int main(void) {
 	return EXIT_SUCCESS;
 }
 
-void init() {
-	pthread_mutex_init(&mutex_interrupt, NULL);
-	interrupcion_desalojo = false;
-	tlb = list_create();
-	cpu_logger = log_create("cpu.log", "CPU", true, LOG_LEVEL_INFO);
-	cpu_config = cpu_leer_configuracion(PATH_CPU_CONFIG);
-}
-
 t_traductor *obtener_traductor_direcciones(int socket_fd) {
 	realizar_handshake(socket_fd);
 	t_paquete *paquete = recibir_paquete(socket_fd);
@@ -54,10 +54,4 @@ void realizar_handshake(int socket_fd) {
 	enviar_paquete(paquete, socket_fd);
 	eliminar_paquete(paquete);
 }
-
-void eliminar_traductor_direcciones(t_traductor *traductor) {
-	free(traductor);
-}
-
-
 

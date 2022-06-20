@@ -19,8 +19,3 @@ void procesar_datos_consola(t_cliente *datos_cliente) {
 			break;
 	}
 }
-
-void eliminar_consola(t_consola *consola) {
-	list_destroy_and_destroy_elements(consola->instrucciones, free);
-	free(consola);
-}

@@ -1,5 +1,6 @@
 #include "cpu_config.h"
 
+
 t_cpu_config *cpu_leer_configuracion(char *path) {
 
 	t_config *config = config_create(path);

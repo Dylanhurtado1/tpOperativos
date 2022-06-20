@@ -1,5 +1,7 @@
 #include "parser.h"
 
+static t_identificador transformar_identificador(char *identificador);
+
 
 t_list *parsear_pseudocodigo(char *path) {
 	char identificador[10];
@@ -18,11 +20,11 @@ t_list *parsear_pseudocodigo(char *path) {
 		fscanf(archivo, "%s %u %u", identificador, &primer_operando, &segundo_operando);
 		if(string_equals_ignore_case(identificador, "NO_OP")) {
 			for(int i = 0; i < primer_operando; i++) {
-				t_instruccion *instruccion = generar_instruccion(identificador, 0xFFFF, 0xFFFF);
+				t_instruccion *instruccion = crear_instruccion(transformar_identificador(identificador), 0xFFFF, 0xFFFF);
 				list_add(instrucciones, instruccion);
 			}
 		} else {
-			t_instruccion *instruccion = generar_instruccion(identificador, primer_operando, segundo_operando);
+			t_instruccion *instruccion = crear_instruccion(transformar_identificador(identificador), primer_operando, segundo_operando);
 			list_add(instrucciones, instruccion);
 		}
 	}
@@ -30,15 +32,6 @@ t_list *parsear_pseudocodigo(char *path) {
 	fclose(archivo);
 
 	return instrucciones;
-}
-
-t_instruccion *generar_instruccion(char *identificador, uint32_t primer_operando, uint32_t segundo_operando) {
-	t_instruccion *instruccion = malloc(sizeof(t_instruccion));
-	instruccion->identificador = transformar_identificador(identificador);
-	instruccion->primer_operando = primer_operando;
-	instruccion->segundo_operando = segundo_operando;
-
-	return instruccion;
 }
 
 t_identificador transformar_identificador(char *identificador) {
@@ -62,10 +55,6 @@ t_identificador transformar_identificador(char *identificador) {
 	}
 
 	return INVALID_ID;
-}
-
-void eliminar_instrucciones(t_list *instrucciones) {
-	list_destroy_and_destroy_elements(instrucciones, free);
 }
 
 

@@ -40,10 +40,10 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 		// CPU
 		case HANDSHAKE_INICIAL:
 			log_info(memoria_logger, "Memoria recibio handshake, enviando estructura traductora...");
-			t_traductor *traductor = crear_traductor(memoria_config->entradas_por_tabla, memoria_config->tamanio_pagina);
+			t_traductor *traductor = crear_traductor_direcciones(memoria_config->entradas_por_tabla, memoria_config->tamanio_pagina);
 			enviar_estructura_traductora(datos_cliente->socket, traductor);
 
-			eliminar_traductor(traductor);
+			eliminar_traductor_direcciones(traductor);
 			break;
 		case ACCESO_TABLA_PRIMER_NIVEL:
 			log_info(memoria_logger, "Enviando tabla segundo nivel...");
@@ -110,27 +110,8 @@ void enviar_estructura_traductora(int socket_fd, t_traductor *traductor) {
 	eliminar_paquete(paquete);
 }
 
-t_traductor *crear_traductor(int entradas_tabla, int tamanio_pagina) {
-	t_traductor *traductor = malloc(sizeof(t_traductor));
-	traductor->cantidad_entradas_tabla = entradas_tabla;
-	traductor->tamanio_pagina = tamanio_pagina;
-
-	return traductor;
-}
-
-void eliminar_traductor(t_traductor *traductor) {
-	free(traductor);
-}
-
-void eliminar_pcb(t_pcb *pcb) {
-	list_destroy_and_destroy_elements(pcb->instrucciones, free);
-	free(pcb);
-}
-
 void informar_estado_proceso(int socket_fd, t_protocolo protocolo) {
 	enviar_datos(socket_fd, &protocolo, sizeof(t_protocolo));
 }
 
-void eliminar_tabla_de_acceso(t_tabla_acceso *acceso_tabla) {
-	free(acceso_tabla);
-}
+

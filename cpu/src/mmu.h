@@ -11,11 +11,9 @@ typedef struct {
 	uint32_t desplazamiento;
 } t_traducciones;
 
-uint32_t traducir_direccion_logica(uint32_t tabla_primer_nivel, uint32_t direccion_logica);
-uint32_t leer_memoria(uint32_t direccion_fisica);
-void escribir_memoria(uint32_t direccion_fisica, uint32_t valor);
-t_traducciones parsear_direccion_logica(uint32_t direcion_logica);
-uint32_t acceder_tablas_en_memoria(uint32_t direccion_tabla, uint32_t entrada_tabla, t_protocolo protocolo);
+uint32_t mmu_traducir_direccion_logica(uint32_t tabla_primer_nivel, uint32_t direccion_logica);
+uint32_t mmu_leer_memoria(uint32_t direccion_fisica);
+void mmu_escribir_memoria(uint32_t direccion_fisica, uint32_t valor);
 
 
 #endif /* MMU_H_ */

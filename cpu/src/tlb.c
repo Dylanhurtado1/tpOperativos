@@ -51,7 +51,7 @@ void tlb_limpiar_cache() {
 }
 
 
-void reemplazar_entrada_tlb(t_tlb *entrada_a_agregar, char *algoritmo_reemplazo) {
+static void reemplazar_entrada_tlb(t_tlb *entrada_a_agregar, char *algoritmo_reemplazo) {
 	if(string_equals_ignore_case(algoritmo_reemplazo, "FIFO")) {
 		list_remove_and_destroy_element(tlb, 0, (void *)eliminar_entrada_tlb);
 		list_add(tlb, entrada_a_agregar);
@@ -67,18 +67,18 @@ void reemplazar_entrada_tlb(t_tlb *entrada_a_agregar, char *algoritmo_reemplazo)
 	}
 }
 
-void eliminar_entrada_tlb(t_tlb *entrada) {
+static void eliminar_entrada_tlb(t_tlb *entrada) {
 	free(entrada);
 }
 
-void eliminar_pagina_swapeada(uint32_t marco) {
+static void eliminar_pagina_swapeada(uint32_t marco) {
 	bool existe_marco(void *entrada) {
 		return ((t_tlb *)entrada)->marco == marco;
 	}
 	list_remove_and_destroy_by_condition(tlb, (void *)existe_marco, (void *)eliminar_entrada_tlb);
 }
 
-void print_tlb() {
+static void print_tlb() {
 	void print(t_tlb *entrada) {
 		log_info(cpu_logger, "TLB = [Page %d | Frame %d | t_uso %d]", entrada->pagina, entrada->marco, entrada->ultima_referencia);
 	}

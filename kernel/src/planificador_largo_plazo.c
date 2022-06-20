@@ -22,27 +22,17 @@ t_proceso *crear_proceso(t_consola *consola, int socket_consola) {
 	t_proceso *proceso = malloc(sizeof(t_proceso));
 
 	proceso->socket = socket_consola;
-	proceso->pcb = crear_estructura_pcb(consola);
 	proceso->estado = JOB;
 	proceso->tiempo_io = 0;
 	proceso->tiempo_inicio_bloqueo = 0;
 	proceso->tiempo_cpu = 0;
-	return proceso;
-}
-
-t_pcb *crear_estructura_pcb(t_consola *consola) {
-	t_pcb *pcb = malloc(sizeof(t_pcb));
 
 	pthread_mutex_lock(&mutex_generador_id);
-	pcb->id = generador_de_id;
+	proceso->pcb = crear_pcb(generador_de_id, consola->tamanio, consola->instrucciones, 0, kernel_config->estimacion_inicial);
 	generador_de_id++;
 	pthread_mutex_unlock(&mutex_generador_id);
-	pcb->tamanio_proceso = consola->tamanio;
-	pcb->instrucciones = list_duplicate(consola->instrucciones);
-	pcb->program_counter = 0;
-	pcb->estimacion_rafaga = kernel_config->estimacion_inicial;
 
-	return pcb;
+	return proceso;
 }
 
 void agregar_proceso_a_new(t_proceso *proceso) {
@@ -83,16 +73,6 @@ void transicion_admitir(void *data) {
 	}
 }
 
-uint32_t obtener_tabla_de_pagina(int socket_memoria, t_pcb *pcb) {
-	uint32_t tabla_de_paginas;
-	t_paquete *paquete = serializar_pcb(pcb, INICIALIZACION_DE_PROCESO);
-	enviar_paquete(paquete, socket_memoria);
-	eliminar_paquete(paquete);
-	recibir_datos(socket_memoria, &tabla_de_paginas, sizeof(uint32_t));
-
-	return tabla_de_paginas;
-}
-
 void estado_exit(void *dato) {
 	while(1) {
 		sem_wait(&sem_exit);
@@ -112,6 +92,16 @@ void estado_exit(void *dato) {
 	}
 }
 
+uint32_t obtener_tabla_de_pagina(int socket_memoria, t_pcb *pcb) {
+	uint32_t tabla_de_paginas;
+	t_paquete *paquete = serializar_pcb(pcb, INICIALIZACION_DE_PROCESO);
+	enviar_paquete(paquete, socket_memoria);
+	eliminar_paquete(paquete);
+	recibir_datos(socket_memoria, &tabla_de_paginas, sizeof(uint32_t));
+
+	return tabla_de_paginas;
+}
+
 void enviar_proceso_a_memoria(t_proceso *proceso, int socket_memoria, t_protocolo protocolo) {
 	t_paquete *paquete = serializar_pcb(proceso->pcb, protocolo);
 	enviar_paquete(paquete, socket_memoria);
@@ -129,10 +119,7 @@ void enviar_respuesta_a_consola(int socket_fd, t_protocolo protocolo) {
 }
 
 void eliminar_proceso(t_proceso *proceso) {
-	list_destroy_and_destroy_elements(proceso->pcb->instrucciones, free);
-	free(proceso->pcb);
+	eliminar_pcb(proceso->pcb);
 	free(proceso);
 }
-
-
 

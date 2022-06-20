@@ -1,10 +1,12 @@
 #include "paginacion.h"
 
+static bool page_fault(t_pagina_segundo_nivel *pagina);
 static bool pagina_modificada(t_pagina_segundo_nivel *pagina);
 static bool pagina_presente(t_pagina_segundo_nivel *pagina);
 static uint32_t calcular_offset_pagina(uint32_t indice_pagina);
 static uint32_t calcular_offset_marco(uint32_t numero_marco);
 static void asignar_marco_libre(t_pagina_segundo_nivel *pagina);
+static void reemplazar_pagina(t_pagina_segundo_nivel *pagina_a_agregar, uint32_t incide_pagina, char *algoritmo_reemplazo);
 
 uint32_t indice_tabla_primer_nivel = 0;
 
@@ -56,11 +58,36 @@ uint32_t get_marco_de_pagina(uint32_t tabla_segundo_nivel, uint32_t entrada_tabl
 	return pagina->marco;
 }
 
-bool page_fault(t_pagina_segundo_nivel *pagina) {
+void actualizar_pagina_modificada(uint32_t direccion_fisica) {
+	uint32_t numero_marco = (uint32_t)(direccion_fisica / memoria_config->tamanio_pagina);
+
+	bool igual_numero_marco(t_marco *marco) {
+		return marco->numero == numero_marco;
+	}
+	t_marco *marco_modificado = list_find(marcos_memoria, (void *)igual_numero_marco);
+
+	bool marco_asignado(t_pagina_segundo_nivel *pagina) {
+		return pagina->marco == marco_modificado->numero && pagina->pid == marco_modificado->pid;
+	}
+	t_pagina_segundo_nivel *pagina_modificada = list_find(tablas_de_paginacion, (void *)marco_asignado);
+
+	pagina_modificada->modificado = 1;
+}
+
+
+static bool page_fault(t_pagina_segundo_nivel *pagina) {
 	return pagina->presencia == 0;
 }
 
-void reemplazar_pagina(t_pagina_segundo_nivel *pagina_a_agregar, uint32_t incide_pagina, char *algoritmo_reemplazo) {
+static bool pagina_modificada(t_pagina_segundo_nivel *pagina) {
+	return pagina->modificado == 1;
+}
+
+static bool pagina_presente(t_pagina_segundo_nivel *pagina) {
+	return pagina->presencia == 1;
+}
+
+static void reemplazar_pagina(t_pagina_segundo_nivel *pagina_a_agregar, uint32_t incide_pagina, char *algoritmo_reemplazo) {
 	t_pagina_segundo_nivel *pagina_victima;
 
 	bool pagina_cargada(t_pagina_segundo_nivel *pagina) {
@@ -89,36 +116,11 @@ void reemplazar_pagina(t_pagina_segundo_nivel *pagina_a_agregar, uint32_t incide
 	//pagina_victima->modificado = 0; // TODO: bit que se limpia en el algoritmo?
 }
 
-void actualizar_pagina_modificada(uint32_t direccion_fisica) {
-	uint32_t numero_marco = (uint32_t)(direccion_fisica / memoria_config->tamanio_pagina);
-
-	bool igual_numero_marco(t_marco *marco) {
-		return marco->numero == numero_marco;
-	}
-	t_marco *marco_modificado = list_find(marcos_memoria, (void *)igual_numero_marco);
-
-	bool marco_asignado(t_pagina_segundo_nivel *pagina) {
-		return pagina->marco == marco_modificado->numero && pagina->pid == marco_modificado->pid;
-	}
-	t_pagina_segundo_nivel *pagina_modificada = list_find(tablas_de_paginacion, (void *)marco_asignado);
-
-	pagina_modificada->modificado = 1;
-}
-
-
 static void asignar_marco_libre(t_pagina_segundo_nivel *pagina) {
 	t_marco *marco = buscar_marco_libre();
 	pagina->marco = marco->numero;
 	marco->pid = pagina->pid;
 	marco->libre = 0;
-}
-
-static bool pagina_modificada(t_pagina_segundo_nivel *pagina) {
-	return pagina->modificado == 1;
-}
-
-static bool pagina_presente(t_pagina_segundo_nivel *pagina) {
-	return pagina->presencia == 1;
 }
 
 static uint32_t calcular_offset_pagina(uint32_t indice_pagina) {
