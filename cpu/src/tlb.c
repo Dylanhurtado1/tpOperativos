@@ -3,6 +3,7 @@
 static void reemplazar_entrada_tlb(t_tlb *entrada_a_agregar, char *algoritmo_reemplazo);
 static void eliminar_entrada_tlb(t_tlb *entrada);
 static void eliminar_pagina_swapeada(uint32_t marco);
+static bool existe_marco(uint32_t marco);
 static void print_tlb();
 
 uint32_t indice_ultima_referencia = 0;
@@ -36,7 +37,10 @@ void tlb_agregar_entrada(uint32_t pagina, uint32_t marco) {
 	entrada->ultima_referencia = indice_ultima_referencia;
 	indice_ultima_referencia++;
 
-	//eliminar_pagina_swapeada(marco); TODO: habilitar al implementar Memoria por completo
+	if(existe_marco(marco)) {
+		eliminar_pagina_swapeada(marco);
+	}
+
 	if(list_size(tlb) < cpu_config->entradas_tlb) {
 		list_add(tlb, entrada);
 	} else {
@@ -71,11 +75,18 @@ static void eliminar_entrada_tlb(t_tlb *entrada) {
 	free(entrada);
 }
 
-static void eliminar_pagina_swapeada(uint32_t marco) {
-	bool existe_marco(void *entrada) {
-		return ((t_tlb *)entrada)->marco == marco;
+static bool existe_marco(uint32_t marco) {
+	bool numero_marco(t_tlb *entrada) {
+		return entrada->marco == marco;
 	}
-	list_remove_and_destroy_by_condition(tlb, (void *)existe_marco, (void *)eliminar_entrada_tlb);
+	return list_any_satisfy(tlb, (void *)numero_marco);
+}
+
+static void eliminar_pagina_swapeada(uint32_t marco) {
+	bool numero_marco(t_tlb *entrada) {
+		return entrada->marco == marco;
+	}
+	list_remove_and_destroy_by_condition(tlb, (void *)numero_marco, (void *)eliminar_entrada_tlb);
 }
 
 static void print_tlb() {
