@@ -23,6 +23,7 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 			pcb = deserializar_pcb(paquete);
 			log_info(memoria_logger, "Liberando memoria de PID[%d]...", pcb->id);
 			liberar_espacio_de_usuario(pcb->id);
+			// TODO: es necesario reiniciar puntero al liberar espacio?
 			// TODO: escribir en SWAP lo datos necesarios
 			informar_estado_proceso(datos_cliente->socket, PROCESO_SUSPENDIDO);
 
@@ -32,7 +33,9 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 			pcb = deserializar_pcb(paquete);
 			log_info(memoria_logger, "Eliminando memoria de PID[%d]...", pcb->id);
 			liberar_espacio_de_usuario(pcb->id);
+			// TODO: es necesario reiniciar puntero al liberar espacio?
 			swap_eliminar_archivo(pcb->id);
+			// TODO: eliminar puntero? Ver si es necesario
 			informar_estado_proceso(datos_cliente->socket, PROCESO_FINALIZADO);
 
 			eliminar_pcb(pcb);
@@ -81,7 +84,7 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 			log_info(memoria_logger, "Valor = %d", valor_a_escribir);
 
 			escribir_memoria_principal(direccion_fisica, valor_a_escribir);
-			actualizar_pagina_modificada(direccion_fisica);
+			actualizar_pagina_modificada(marco_modificado(direccion_fisica));
 
 			list_destroy_and_destroy_elements(datos, free);
 			break;
