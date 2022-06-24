@@ -119,6 +119,12 @@ static void reemplazar_pagina(t_pagina_segundo_nivel *pagina_a_agregar, uint32_t
 	}
 	t_list *paginas_en_memoria = list_filter(tablas_de_paginacion, (void *)pagina_cargada);
 
+	bool por_numero_marco(void *p1, void *p2) {
+		return ((t_pagina_segundo_nivel *)p1)->marco < ((t_pagina_segundo_nivel *)p2)->marco;
+	}
+
+	list_sort(paginas_en_memoria, (void *)por_numero_marco);
+
 	print_paginas_memoria(paginas_en_memoria);
 
 	bool mismo_pid(t_algoritmo *clock) {
@@ -142,6 +148,7 @@ static void reemplazar_pagina(t_pagina_segundo_nivel *pagina_a_agregar, uint32_t
 
 static t_pagina_segundo_nivel *buscar_pagina_victima(t_list *paginas_cargadas, uint32_t *puntero_a_pagina, char *algoritmo_reemplazo) {
 	t_pagina_segundo_nivel *victima = NULL;
+
 	bool pagina_en_uso(t_pagina_segundo_nivel *pagina) {
 		return pagina->uso == 1;
 	}
