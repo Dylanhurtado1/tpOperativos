@@ -23,6 +23,7 @@ uint32_t crear_tablas_de_paginacion(uint32_t pid);
 uint32_t get_tabla_segundo_nivel(uint32_t tabla_primer_nivel, uint32_t entrada_tabla);
 uint32_t get_marco_de_pagina(uint32_t tabla_segundo_nivel, uint32_t entrada_tabla);
 void actualizar_pagina_modificada(t_marco *marco_modificado);
+void liberar_paginas_cargadas(uint32_t pid);
 bool page_fault(t_pagina_segundo_nivel *pagina);
 bool pagina_modificada(t_pagina_segundo_nivel *pagina);
 bool pagina_presente(t_pagina_segundo_nivel *pagina);
