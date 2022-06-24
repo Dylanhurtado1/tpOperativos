@@ -1,7 +1,5 @@
 #include "paginacion.h"
 
-static uint32_t calcular_offset_pagina(uint32_t indice_pagina);
-static uint32_t calcular_offset_marco(uint32_t numero_marco);
 static void asignar_marco_libre(t_pagina_segundo_nivel *pagina);
 static void reemplazar_pagina(t_pagina_segundo_nivel *pagina_a_agregar, t_puntero_clock *puntero, char *algoritmo_reemplazo);
 static t_list *paginas_cargadas_en_memoria(uint32_t pid);
@@ -52,10 +50,7 @@ uint32_t get_marco_de_pagina(uint32_t tabla_segundo_nivel, uint32_t entrada_tabl
 			// TODO: evaluar que datos se necesitan
 			reemplazar_pagina(pagina, puntero, memoria_config->algoritmo_reemplazo);
 		}
-		void *buffer = malloc(memoria_config->tamanio_pagina);
-		swap_leer_pagina(pagina->pid, buffer, calcular_offset_pagina(pagina->numero_pagina), memoria_config->tamanio_pagina);
-		cargar_marco_en_memoria(buffer, calcular_offset_marco(pagina->marco), memoria_config->tamanio_pagina);
-		free(buffer);
+		swap_out(pagina->pid, pagina->numero_pagina, pagina->marco);
 
 		pagina->presencia = 1;
 	}
@@ -82,10 +77,7 @@ void liberar_paginas_cargadas(uint32_t pid) {
 
 	void liberar_pagina(t_pagina_segundo_nivel *pagina) {
 		if(pagina_modificada(pagina)) {
-			void *buffer = malloc(memoria_config->tamanio_pagina);
-			leer_marco_de_memoria(buffer, calcular_offset_marco(pagina->marco), memoria_config->tamanio_pagina);
-			swap_escribir_pagina(pagina->pid, buffer, calcular_offset_pagina(pagina->numero_pagina), memoria_config->tamanio_pagina);
-			free(buffer);
+			swap_in(pagina->pid, pagina->numero_pagina, pagina->marco);
 			pagina->modificado = 0;
 		}
 		pagina->presencia = 0;
@@ -120,10 +112,7 @@ static void reemplazar_pagina(t_pagina_segundo_nivel *pagina_a_agregar, t_punter
 	t_pagina_segundo_nivel *pagina_victima = buscar_pagina_victima(paginas_en_memoria, puntero, algoritmo_reemplazo);
 
 	if(pagina_modificada(pagina_victima)) {
-		void *buffer = malloc(memoria_config->tamanio_pagina);
-		leer_marco_de_memoria(buffer, calcular_offset_marco(pagina_victima->marco), memoria_config->tamanio_pagina);
-		swap_escribir_pagina(pagina_victima->pid, buffer, calcular_offset_pagina(pagina_victima->numero_pagina), memoria_config->tamanio_pagina);
-		free(buffer);
+		swap_in(pagina_victima->pid, pagina_victima->numero_pagina, pagina_victima->marco);
 		pagina_victima->modificado = 0;
 	}
 	pagina_a_agregar->marco = pagina_victima->marco;
@@ -187,14 +176,6 @@ static void asignar_marco_libre(t_pagina_segundo_nivel *pagina) {
 	pagina->marco = marco->numero;
 	marco->pid = pagina->pid;
 	marco->libre = 0;
-}
-
-static uint32_t calcular_offset_pagina(uint32_t numero_pagina) {
-	return numero_pagina * memoria_config->tamanio_pagina;
-}
-
-static uint32_t calcular_offset_marco(uint32_t numero_marco) {
-	return numero_marco * memoria_config->tamanio_pagina;
 }
 
 static void crear_puntero_proceso(uint32_t pid) {
