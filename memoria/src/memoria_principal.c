@@ -64,6 +64,11 @@ t_marco *buscar_marco_libre() {
 	return list_find(marcos_memoria, (void *)marco_libre);
 }
 
+t_marco *marco_modificado(uint32_t direccion_escrita) {
+	uint32_t numero_marco = (uint32_t)(direccion_escrita / memoria_config->tamanio_pagina);
+	return list_get(marcos_memoria, numero_marco);
+}
+
 
 static void crear_marcos_memoria(uint32_t cantidad_marcos) {
 	marcos_memoria = list_create();

@@ -18,6 +18,7 @@ void cargar_marco_en_memoria(void *buffer, uint32_t offset, uint32_t size);
 void leer_marco_de_memoria(void *buffer, uint32_t offset, uint32_t size);
 uint32_t cantidad_marcos_asignados(uint32_t pid);
 t_marco *buscar_marco_libre();
+t_marco *marco_modificado(uint32_t direccion_escrita);
 
 
 #endif /* MEMORIA_PRINCIPAL_H_ */

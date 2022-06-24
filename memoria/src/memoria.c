@@ -7,6 +7,7 @@ void init() {
 	iniciar_memoria_principal(memoria_config->tamanio_memoria, memoria_config->tamanio_pagina);
 	tablas_de_paginacion = list_create();
 	archivos_swap = list_create();
+	punteros_clock = list_create();
 }
 
 int main(void) {
