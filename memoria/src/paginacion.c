@@ -40,6 +40,8 @@ uint32_t get_marco_de_pagina(uint32_t tabla_segundo_nivel, uint32_t entrada_tabl
 	uint32_t indice_pagina = tabla_segundo_nivel + entrada_tabla;
 	t_pagina_segundo_nivel *pagina = (t_pagina_segundo_nivel *)list_get(tablas_de_paginacion, indice_pagina);
 
+	log_info(memoria_logger, "Devolviendo MARCO de PAGE = %d", pagina->numero_pagina);
+
 	if(page_fault(pagina)) {
 		t_puntero_clock *puntero = buscar_puntero(pagina->pid);
 		if(cantidad_marcos_asignados(pagina->pid) < memoria_config->marcos_por_proceso) {
@@ -47,7 +49,6 @@ uint32_t get_marco_de_pagina(uint32_t tabla_segundo_nivel, uint32_t entrada_tabl
 
 			puntero->indice_marco = 0;
 		} else {
-			// TODO: evaluar que datos se necesitan
 			reemplazar_pagina(pagina, puntero, memoria_config->algoritmo_reemplazo);
 		}
 		swap_out(pagina->pid, pagina->numero_pagina, pagina->marco);
@@ -56,9 +57,6 @@ uint32_t get_marco_de_pagina(uint32_t tabla_segundo_nivel, uint32_t entrada_tabl
 	}
 
 	pagina->uso = 1;
-
-	log_info(memoria_logger, "Page pedido %d = [Frame %d | P %d | U %d | M %d]",
-			pagina->numero_pagina, pagina->marco, pagina->presencia, pagina->uso, pagina->modificado);
 
 	return pagina->marco;
 }
@@ -122,6 +120,7 @@ static void reemplazar_pagina(t_pagina_segundo_nivel *pagina_a_agregar, t_punter
 }
 
 void print_paginas_memoria(t_list *paginas_en_memoria) { // TODO: solo para debug
+	log_info(memoria_logger, "*** Paginas antes del reemplazo ***");
 	void print(t_pagina_segundo_nivel *pagina) {
 		log_info(memoria_logger, "Page %d = [Frame %d | P %d | U %d | M %d]",
 				pagina->numero_pagina, pagina->marco, pagina->presencia, pagina->uso, pagina->modificado);
