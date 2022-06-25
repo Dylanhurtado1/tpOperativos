@@ -133,11 +133,7 @@ static t_list *paginas_cargadas_en_memoria(uint32_t pid) {
 	bool esta_cargada(t_pagina_segundo_nivel *pagina) {
 		return pagina_presente(pagina) && pagina->pid == pid;
 	}
-	t_list *paginas = list_filter(tablas_de_paginacion, (void *)esta_cargada);
-
-	print_paginas_memoria(paginas);
-
-	return paginas;
+	return list_filter(tablas_de_paginacion, (void *)esta_cargada);
 }
 
 static t_pagina_segundo_nivel *buscar_pagina_victima(t_list *paginas_cargadas, t_puntero_clock *puntero, char *algoritmo_reemplazo) {
@@ -147,18 +143,18 @@ static t_pagina_segundo_nivel *buscar_pagina_victima(t_list *paginas_cargadas, t
 		return ((t_pagina_segundo_nivel *)p1)->marco < ((t_pagina_segundo_nivel *)p2)->marco;
 	}
 	list_sort(paginas_cargadas, (void *)por_numero_marco);
+	print_paginas_memoria(paginas_cargadas);
 
 	if(string_equals_ignore_case(algoritmo_reemplazo, "CLOCK")) {
 		do {
 			for(int i = puntero->indice_marco; i < list_size(paginas_cargadas); i++) {
 				t_pagina_segundo_nivel *pagina = list_get(paginas_cargadas, i);
-				if(pagina_en_uso(pagina)) {
-					pagina->uso = 0;
-				} else {
+				if(!pagina_en_uso(pagina)) {
 					puntero->indice_marco = (i + 1) % list_size(paginas_cargadas);
 					victima = pagina;
 					break;
 				}
+				pagina->uso = 0;
 			}
 			if(victima == NULL) {
 				puntero->indice_marco = 0;
