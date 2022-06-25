@@ -135,11 +135,6 @@ static t_list *paginas_cargadas_en_memoria(uint32_t pid) {
 	}
 	t_list *paginas = list_filter(tablas_de_paginacion, (void *)esta_cargada);
 
-	bool por_numero_marco(void *p1, void *p2) {
-		return ((t_pagina_segundo_nivel *)p1)->marco < ((t_pagina_segundo_nivel *)p2)->marco;
-	}
-	list_sort(paginas, (void *)por_numero_marco);
-
 	print_paginas_memoria(paginas);
 
 	return paginas;
@@ -147,6 +142,11 @@ static t_list *paginas_cargadas_en_memoria(uint32_t pid) {
 
 static t_pagina_segundo_nivel *buscar_pagina_victima(t_list *paginas_cargadas, t_puntero_clock *puntero, char *algoritmo_reemplazo) {
 	t_pagina_segundo_nivel *victima = NULL;
+
+	bool por_numero_marco(void *p1, void *p2) {
+		return ((t_pagina_segundo_nivel *)p1)->marco < ((t_pagina_segundo_nivel *)p2)->marco;
+	}
+	list_sort(paginas_cargadas, (void *)por_numero_marco);
 
 	if(string_equals_ignore_case(algoritmo_reemplazo, "CLOCK")) {
 		do {
@@ -165,7 +165,35 @@ static t_pagina_segundo_nivel *buscar_pagina_victima(t_list *paginas_cargadas, t
 			}
 		} while(victima == NULL);
 	} else if(string_equals_ignore_case(algoritmo_reemplazo, "CLOCK-M")) {
-		// TODO: implementar algoritmo
+		int paso = 1;
+		int paginas_recorridas = 0;
+		uint32_t aux_indice = puntero->indice_marco;
+		do {
+			for(int i = aux_indice; i < list_size(paginas_cargadas) && paginas_recorridas < list_size(paginas_cargadas); i++) {
+				t_pagina_segundo_nivel *pagina = list_get(paginas_cargadas, i);
+				switch(paso) {
+					case 1:
+						victima = !pagina_en_uso(pagina) && !pagina_modificada(pagina) ? pagina : NULL;
+						break;
+					case 2:
+						victima = !pagina_en_uso(pagina) && pagina_modificada(pagina) ? pagina : NULL;
+						pagina->uso = 0;
+						break;
+				}
+				if(victima != NULL) {
+					puntero->indice_marco = (i + 1) % list_size(paginas_cargadas);
+					break;
+				}
+				paginas_recorridas++;
+			}
+			aux_indice = 0;
+
+			if(victima == NULL && paginas_recorridas >= list_size(paginas_cargadas)) {
+				paso = paso == 1 ? 2 : 1;
+				paginas_recorridas = 0;
+				aux_indice = puntero->indice_marco;
+			}
+		} while(victima == NULL);
 	}
 
 	return victima;
@@ -192,5 +220,4 @@ static t_puntero_clock *buscar_puntero(uint32_t pid) {
 	}
 	return list_find(punteros_clock, (void *)mismo_pid);
 }
-
 
