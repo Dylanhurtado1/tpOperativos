@@ -15,7 +15,7 @@ t_log *memoria_logger;
 t_memoria_config *memoria_config;
 void *memoria_principal;
 t_list *tablas_de_paginacion;
-t_list *marcos_memoria;
+t_list *bitmap_marcos;
 t_list *archivos_swap;
 t_list *punteros_clock;
 pthread_mutex_t mutex_swap;

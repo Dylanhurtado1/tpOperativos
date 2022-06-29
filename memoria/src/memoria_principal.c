@@ -35,8 +35,8 @@ void liberar_espacio_de_usuario(uint32_t pid) {
 		marco->libre = 1;
 	}
 
-	t_list *marcos_asignados = list_filter(marcos_memoria, (void *)marco_id);
-	list_iterate(marcos_memoria, (void *)liberar_marco);
+	t_list *marcos_asignados = list_filter(bitmap_marcos, (void *)marco_id);
+	list_iterate(bitmap_marcos, (void *)liberar_marco);
 
 	list_destroy(marcos_asignados);
 }
@@ -53,7 +53,7 @@ uint32_t cantidad_marcos_asignados(uint32_t pid) {
 	bool marco_id(t_marco *marco) {
 		return marco->pid == pid;
 	}
-	t_list *marcos_asignados = list_filter(marcos_memoria, (void *)marco_id);
+	t_list *marcos_asignados = list_filter(bitmap_marcos, (void *)marco_id);
 	uint32_t cantidad_marcos = list_size(marcos_asignados);
 	list_destroy(marcos_asignados);
 
@@ -61,23 +61,23 @@ uint32_t cantidad_marcos_asignados(uint32_t pid) {
 }
 
 t_marco *buscar_marco_libre() {
-	return list_find(marcos_memoria, (void *)marco_libre);
+	return list_find(bitmap_marcos, (void *)marco_libre);
 }
 
 t_marco *marco_modificado(uint32_t direccion_escrita) {
 	uint32_t numero_marco = (uint32_t)(direccion_escrita / memoria_config->tamanio_pagina);
-	return list_get(marcos_memoria, numero_marco);
+	return list_get(bitmap_marcos, numero_marco);
 }
 
 
 static void crear_marcos_memoria(uint32_t cantidad_marcos) {
-	marcos_memoria = list_create();
+	bitmap_marcos = list_create();
 	for(int i = 0; i < cantidad_marcos; i++) {
 		t_marco *marco = malloc(sizeof(t_marco));
 		marco->pid = 0xFF;
 		marco->libre = 1;
 		marco->numero = i;
-		list_add(marcos_memoria, marco);
+		list_add(bitmap_marcos, marco);
 	}
 }
 
