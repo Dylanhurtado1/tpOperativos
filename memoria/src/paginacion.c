@@ -88,7 +88,7 @@ void liberar_paginas_cargadas(uint32_t pid) {
 }
 
 bool page_fault(t_pagina *pagina) {
-	return pagina->presencia == 0;
+	return !pagina_presente(pagina);
 }
 
 bool pagina_modificada(t_pagina *pagina) {
