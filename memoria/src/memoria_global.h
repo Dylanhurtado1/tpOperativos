@@ -18,5 +18,7 @@ t_list *tablas_de_paginacion;
 t_list *marcos_memoria;
 t_list *archivos_swap;
 t_list *punteros_clock;
+pthread_mutex_t mutex_swap;
+
 
 #endif /* MEMORIA_GLOBAL_H_ */

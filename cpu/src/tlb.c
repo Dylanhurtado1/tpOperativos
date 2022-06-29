@@ -2,7 +2,7 @@
 
 static void reemplazar_entrada_tlb(t_tlb *entrada_a_agregar, char *algoritmo_reemplazo);
 static void eliminar_entrada_tlb(t_tlb *entrada);
-static void eliminar_pagina_swapeada(uint32_t marco);
+static void limpiar_entrada_swapeada(uint32_t marco);
 static bool existe_marco(uint32_t marco);
 static void print_tlb();
 
@@ -38,7 +38,7 @@ void tlb_agregar_entrada(uint32_t pagina, uint32_t marco) {
 	indice_ultima_referencia++;
 
 	if(existe_marco(marco)) {
-		eliminar_pagina_swapeada(marco);
+		limpiar_entrada_swapeada(marco);
 	}
 
 	if(list_size(tlb) < cpu_config->entradas_tlb) {
@@ -82,7 +82,7 @@ static bool existe_marco(uint32_t marco) {
 	return list_any_satisfy(tlb, (void *)numero_marco);
 }
 
-static void eliminar_pagina_swapeada(uint32_t marco) {
+static void limpiar_entrada_swapeada(uint32_t marco) {
 	bool numero_marco(t_tlb *entrada) {
 		return entrada->marco == marco;
 	}

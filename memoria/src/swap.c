@@ -2,6 +2,7 @@
 
 static void agregar_swap(uint32_t pid, char *path, FILE *fd);
 static t_swap *buscar_swap(uint32_t pid);
+static void retardo_acceso(uint32_t tiempo);
 
 
 void swap_crear_archivo(uint32_t pid, uint32_t tamanio_archivo) {
@@ -36,17 +37,23 @@ void swap_eliminar_archivo(uint32_t pid) {
 }
 
 void swap_leer_pagina(uint32_t pid, void *buffer, uint32_t offset, uint32_t size) {
+	pthread_mutex_lock(&mutex_swap);
 	t_swap *swap = buscar_swap(pid);
 
 	fseek(swap->fd, offset, SEEK_SET);
 	fread(buffer, size, 1, swap->fd);
+	retardo_acceso(memoria_config->retardo_swap);
+	pthread_mutex_unlock(&mutex_swap);
 }
 
 void swap_escribir_pagina(uint32_t pid, void *buffer, uint32_t offset, uint32_t size) {
+	pthread_mutex_lock(&mutex_swap);
 	t_swap *swap = buscar_swap(pid);
 
 	fseek(swap->fd, offset, SEEK_SET);
 	fwrite(buffer, size, 1, swap->fd);
+	retardo_acceso(memoria_config->retardo_swap);
+	pthread_mutex_unlock(&mutex_swap);
 }
 
 void swap_out(uint32_t pid, uint32_t pagina, uint32_t marco) {
@@ -78,3 +85,8 @@ static t_swap *buscar_swap(uint32_t pid) {
 	}
 	return list_find(archivos_swap, (void *)swap_id);
 }
+
+static void retardo_acceso(uint32_t tiempo) {
+	usleep(tiempo * 1000);
+}
+
