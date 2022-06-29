@@ -49,14 +49,14 @@ void swap_escribir_pagina(uint32_t pid, void *buffer, uint32_t offset, uint32_t 
 	fwrite(buffer, size, 1, swap->fd);
 }
 
-void swap_in(uint32_t pid, uint32_t pagina, uint32_t marco) {
+void swap_out(uint32_t pid, uint32_t pagina, uint32_t marco) {
 	void *buffer = malloc(memoria_config->tamanio_pagina);
 	leer_marco_de_memoria(buffer, marco * memoria_config->tamanio_pagina, memoria_config->tamanio_pagina);
 	swap_escribir_pagina(pid, buffer, pagina * memoria_config->tamanio_pagina, memoria_config->tamanio_pagina);
 	free(buffer);
 }
 
-void swap_out(uint32_t pid, uint32_t pagina, uint32_t marco) {
+void swap_in(uint32_t pid, uint32_t pagina, uint32_t marco) {
 	void *buffer = malloc(memoria_config->tamanio_pagina);
 	swap_leer_pagina(pid, buffer, pagina * memoria_config->tamanio_pagina, memoria_config->tamanio_pagina);
 	cargar_marco_en_memoria(buffer, marco * memoria_config->tamanio_pagina, memoria_config->tamanio_pagina);

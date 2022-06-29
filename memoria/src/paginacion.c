@@ -51,7 +51,7 @@ uint32_t get_marco_de_pagina(uint32_t tabla_segundo_nivel, uint32_t entrada_tabl
 		} else {
 			reemplazar_pagina(pagina, puntero, memoria_config->algoritmo_reemplazo);
 		}
-		swap_out(pagina->pid, pagina->numero_pagina, pagina->marco);
+		swap_in(pagina->pid, pagina->numero_pagina, pagina->marco);
 
 		pagina->presencia = 1;
 	}
@@ -75,7 +75,7 @@ void liberar_paginas_cargadas(uint32_t pid) {
 
 	void liberar_pagina(t_pagina_segundo_nivel *pagina) {
 		if(pagina_modificada(pagina)) {
-			swap_in(pagina->pid, pagina->numero_pagina, pagina->marco);
+			swap_out(pagina->pid, pagina->numero_pagina, pagina->marco);
 			pagina->modificado = 0;
 		}
 		pagina->presencia = 0;
@@ -110,7 +110,7 @@ static void reemplazar_pagina(t_pagina_segundo_nivel *pagina_a_agregar, t_punter
 	t_pagina_segundo_nivel *pagina_victima = buscar_pagina_victima(paginas_en_memoria, puntero, algoritmo_reemplazo);
 
 	if(pagina_modificada(pagina_victima)) {
-		swap_in(pagina_victima->pid, pagina_victima->numero_pagina, pagina_victima->marco);
+		swap_out(pagina_victima->pid, pagina_victima->numero_pagina, pagina_victima->marco);
 		pagina_victima->modificado = 0;
 	}
 	pagina_a_agregar->marco = pagina_victima->marco;
