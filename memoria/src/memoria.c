@@ -8,6 +8,7 @@ void init() {
 	tablas_de_paginacion = list_create();
 	archivos_swap = list_create();
 	punteros_clock = list_create();
+	pthread_mutex_init(&mutex_swap, NULL);
 }
 
 int main(void) {
