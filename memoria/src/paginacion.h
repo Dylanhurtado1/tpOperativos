@@ -12,6 +12,7 @@ typedef struct {
 	uint8_t uso;
 	uint8_t modificado;
 	uint8_t numero_pagina;
+	uint8_t instante_carga_frame;
 } t_pagina;
 
 typedef struct {

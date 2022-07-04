@@ -8,6 +8,7 @@ static void crear_puntero_proceso(uint32_t pid);
 static t_puntero_clock *buscar_puntero(uint32_t pid);
 
 uint32_t indice_tabla_primer_nivel = 0;
+uint32_t indice_instante_carga_frame = 0;
 
 
 uint32_t crear_tablas_de_paginacion(uint32_t pid) {
@@ -48,6 +49,8 @@ uint32_t get_marco_de_pagina(uint32_t tabla_segundo_nivel, uint32_t entrada_tabl
 			asignar_marco_libre(pagina);
 
 			puntero->indice_marco = 0;
+			pagina->instante_carga_frame = indice_instante_carga_frame;
+			indice_instante_carga_frame++;
 		} else {
 			reemplazar_pagina(pagina, puntero, memoria_config->algoritmo_reemplazo);
 		}
@@ -114,6 +117,7 @@ static void reemplazar_pagina(t_pagina *pagina_a_agregar, t_puntero_clock *punte
 		pagina_victima->modificado = 0;
 	}
 	pagina_a_agregar->marco = pagina_victima->marco;
+	pagina_a_agregar->instante_carga_frame = pagina_victima->instante_carga_frame;
 	pagina_victima->presencia = 0;
 
 	list_destroy(paginas_en_memoria);
@@ -141,7 +145,10 @@ static t_pagina *buscar_pagina_victima(t_list *paginas_cargadas, t_puntero_clock
 	bool por_numero_marco(void *p1, void *p2) {
 		return ((t_pagina *)p1)->marco < ((t_pagina *)p2)->marco;
 	}
-	list_sort(paginas_cargadas, (void *)por_numero_marco);
+	bool por_instante_carga(void *p1, void *p2) {
+		return ((t_pagina *)p1)->instante_carga_frame < ((t_pagina *)p2)->instante_carga_frame;
+	}
+	list_sort(paginas_cargadas, (void *)por_instante_carga);
 	print_paginas_memoria(paginas_cargadas);
 
 	if(string_equals_ignore_case(algoritmo_reemplazo, "CLOCK")) {
