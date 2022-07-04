@@ -19,4 +19,5 @@ typedef struct {
 t_cpu_config *cpu_leer_configuracion(char *path);
 void cpu_eliminar_configuracion(t_cpu_config *config);
 
+
 #endif /* CPU_CONFIG_H_ */

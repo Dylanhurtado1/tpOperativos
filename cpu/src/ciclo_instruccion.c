@@ -1,31 +1,27 @@
 #include "ciclo_instruccion.h"
 
-uint32_t tiempo_io;
-
 
 void ejecutar_ciclo_de_instruccion(t_pcb *pcb, int socket_kernel) {
 	t_desalojo tipo_desalojo;
 	t_instruccion *proxima_instruccion;
 
-	do{
+	do {
 		proxima_instruccion = fetch(pcb);
 		if(decode(proxima_instruccion)) {
-			proxima_instruccion->segundo_operando = fetch_operands(proxima_instruccion, socket_memoria);
+			proxima_instruccion->segundo_operando = fetch_operands(pcb->tabla_paginas, proxima_instruccion->segundo_operando);
 		}
-		tipo_desalojo = execute(proxima_instruccion);
-		if(check_interrupt()) {
-			tipo_desalojo = DESALOJO_INTERRUPCION;
-		}
-	} while(tipo_desalojo == NO_DESALOJAR);
+		pcb->program_counter++;
+		tipo_desalojo = execute(proxima_instruccion, pcb, socket_kernel);
+	} while(!check_interrupt() && tipo_desalojo == CONTINUAR_EJECUTANDO);
 
-	desalojar_proceso(pcb, tipo_desalojo, socket_kernel);
-
+	if(tipo_desalojo == CONTINUAR_EJECUTANDO) {
+		desalojar_proceso(socket_kernel, pcb, DESALOJO_POR_IRQ);
+	}
 }
 
 t_instruccion *fetch(t_pcb *pcb) {
 	uint32_t pc = pcb->program_counter;
 	t_instruccion *instruccion = (t_instruccion *)list_get(pcb->instrucciones, pc);
-	pcb->program_counter++;
 	return instruccion;
 }
 
@@ -33,12 +29,13 @@ bool decode(t_instruccion *proxima_instruccion) {
 	return proxima_instruccion->identificador == COPY;
 }
 
-uint32_t fetch_operands(t_instruccion * instruccion, int socket_memoria) {
-	// TODO: Buscar en memoria
-	return 10;
+uint32_t fetch_operands(uint32_t tabla_primer_nivel, uint32_t direccion_logica) {
+	uint32_t direccion_fisica = mmu_traducir_direccion_logica(tabla_primer_nivel, direccion_logica);
+	return mmu_leer_memoria(direccion_fisica);
 }
 
-t_desalojo execute(t_instruccion *instruccion) {
+t_desalojo execute(t_instruccion *instruccion, t_pcb *pcb, int socket_kernel) {
+	uint32_t direccion_fisica;
 	switch(instruccion->identificador) {
 		case NO_OP:
 			log_info(cpu_logger, "Instruccion NO_OP ejecutada...");
@@ -46,30 +43,33 @@ t_desalojo execute(t_instruccion *instruccion) {
 			break;
 		case IO:
 			log_info(cpu_logger, "Instruccion IO ejecutada...");
-			tiempo_io = instruccion->primer_operando;
-			return DESALOJO_IO;
+			desalojar_proceso(socket_kernel, pcb, DESALOJO_POR_IO);
+			enviar_tiempo_io(socket_kernel, instruccion->primer_operando);
+			return PROCESO_DESALOJADO;
 		case READ:
 			log_info(cpu_logger, "Instruccion READ ejecutada...");
-			//direccion_logica = instruccion->primer_operando;
-			//exec_instruccion_READ(direccion_logica);
+			direccion_fisica = mmu_traducir_direccion_logica(pcb->tabla_paginas, instruccion->primer_operando);
+			uint32_t valor = mmu_leer_memoria(direccion_fisica);
+			log_info(cpu_logger, "Valor leido de memoria = %d", valor);
 			break;
 		case WRITE:
 			log_info(cpu_logger, "Instruccion WRITE ejecutada...");
-			//direccion_logica=instruccion->primer_operando;
-			//exec_instruccion_WRITE(direccion_logica, valor);
+			direccion_fisica = mmu_traducir_direccion_logica(pcb->tabla_paginas, instruccion->primer_operando);
+			mmu_escribir_memoria(direccion_fisica, instruccion->segundo_operando);
 			break;
 		case COPY:
 			log_info(cpu_logger, "Instruccion COPY ejecutada...");
-			//direccion_logica = instruccion->primer_operando;
-			//exec_instruccion_COPY(direccion_logica, valor);
+			direccion_fisica = mmu_traducir_direccion_logica(pcb->tabla_paginas, instruccion->primer_operando);
+			mmu_escribir_memoria(direccion_fisica, instruccion->segundo_operando);
 			break;
 		case EXIT:
 			log_info(cpu_logger, "Instruccion EXIT ejecutada...");
-			return DESALOJO_EXIT;
+			desalojar_proceso(socket_kernel, pcb, DESALOJO_POR_EXIT);
+			return PROCESO_DESALOJADO;
 		default:
 			break;
 	}
-	return NO_DESALOJAR;
+	return CONTINUAR_EJECUTANDO;
 }
 
 bool check_interrupt() {
@@ -83,29 +83,14 @@ bool check_interrupt() {
 	return status;
 }
 
-void desalojar_proceso(t_pcb *pcb, t_desalojo tipo_desalojo, int socket_kernel) {
-	t_paquete *paquete;
-	switch(tipo_desalojo) {
-		case DESALOJO_IO:
-			paquete = serializar_pcb(pcb, BLOQUEAR_PROCESO);
-			break;
-		case DESALOJO_EXIT:
-			paquete = serializar_pcb(pcb, FINALIZAR_PROCESO);
-			break;
-		case DESALOJO_INTERRUPCION:
-			paquete = serializar_pcb(pcb, PROCESO_DESALOJADO);
-			break;
-		default:
-			break;
-
-	}
+void desalojar_proceso(int socket_kernel, t_pcb *pcb, t_protocolo protocolo) {
+	t_paquete *paquete = serializar_pcb(pcb, protocolo);
 	enviar_paquete(paquete, socket_kernel);
 	eliminar_paquete(paquete);
-	if(tipo_desalojo == DESALOJO_IO) {
-		enviar_datos(socket_kernel, &tiempo_io, sizeof(uint32_t));
-	}
 }
 
-
+void enviar_tiempo_io(int socket_kernel, uint32_t tiempo) {
+	enviar_datos(socket_kernel, &tiempo, sizeof(uint32_t));
+}
 
 

@@ -3,9 +3,10 @@
 t_paquete *serializar_instrucciones(t_list *instrucciones, t_protocolo protocolo);
 t_list *deserializar_instrucciones(t_list *datos, uint32_t longitud_datos);
 
-t_paquete *serializar_consola(t_list *instrucciones, uint32_t tamanio_consola, t_protocolo protocolo) {
-	t_paquete *paquete = serializar_instrucciones(instrucciones, protocolo);
-	agregar_a_paquete(paquete, &tamanio_consola, sizeof(uint32_t));
+
+t_paquete *serializar_consola(t_consola *consola, t_protocolo protocolo) {
+	t_paquete *paquete = serializar_instrucciones(consola->instrucciones, protocolo);
+	agregar_a_paquete(paquete, &(consola->tamanio), sizeof(uint32_t));
 
 	return paquete;
 }
@@ -49,25 +50,6 @@ t_pcb *deserializar_pcb(t_paquete *paquete) {
 	return pcb;
 }
 
-t_paquete *serializar_traductor(t_traductor *traductor, t_protocolo protocolo) {
-	t_paquete *paquete = crear_paquete(protocolo, buffer_vacio());
-	agregar_a_paquete(paquete, &(traductor->cantidad_entradas_tabla), sizeof(uint32_t));
-	agregar_a_paquete(paquete, &(traductor->tamanio_pagina), sizeof(uint32_t));
-
-	return paquete;
-}
-
-t_traductor *deserializar_traductor(t_paquete *paquete) {
-	t_list *datos = deserealizar_paquete(paquete);
-	t_traductor *traductor = malloc(sizeof(t_traductor));
-
-	traductor->cantidad_entradas_tabla = *(uint32_t *)list_get(datos, 0);
-	traductor->tamanio_pagina = *(uint32_t *)list_get(datos, 1);
-
-	list_destroy_and_destroy_elements(datos, free);
-	return traductor;
-}
-
 t_paquete *serializar_instrucciones(t_list *instrucciones, t_protocolo protocolo) {
 	t_paquete *paquete = crear_paquete(protocolo, buffer_vacio());
 
@@ -94,4 +76,43 @@ t_list *deserializar_instrucciones(t_list *datos, uint32_t longitud_datos) {
 
 	return instrucciones;
 }
+
+t_paquete *serializar_traductor(t_traductor *traductor, t_protocolo protocolo) {
+	t_paquete *paquete = crear_paquete(protocolo, buffer_vacio());
+	agregar_a_paquete(paquete, &(traductor->cantidad_entradas_tabla), sizeof(uint32_t));
+	agregar_a_paquete(paquete, &(traductor->tamanio_pagina), sizeof(uint32_t));
+
+	return paquete;
+}
+
+t_traductor *deserializar_traductor(t_paquete *paquete) {
+	t_list *datos = deserealizar_paquete(paquete);
+	t_traductor *traductor = malloc(sizeof(t_traductor));
+
+	traductor->cantidad_entradas_tabla = *(uint32_t *)list_get(datos, 0);
+	traductor->tamanio_pagina = *(uint32_t *)list_get(datos, 1);
+
+	list_destroy_and_destroy_elements(datos, free);
+	return traductor;
+}
+
+t_paquete *serializar_tabla_de_acceso(t_tabla_acceso *tabla_acceso, t_protocolo protocolo) {
+	t_paquete *paquete = crear_paquete(protocolo, buffer_vacio());
+	agregar_a_paquete(paquete, &(tabla_acceso->direccion), sizeof(uint32_t));
+	agregar_a_paquete(paquete, &(tabla_acceso->entrada), sizeof(uint32_t));
+	return paquete;
+}
+
+t_tabla_acceso *deserializar_tabla_de_acceso(t_paquete *paquete) {
+	t_list *datos = deserealizar_paquete(paquete);
+	t_tabla_acceso *tabla_paginas = malloc(sizeof(t_tabla_acceso));
+
+	tabla_paginas->direccion = *(uint32_t *)list_get(datos, 0);
+	tabla_paginas->entrada = *(uint32_t *)list_get(datos, 1);
+
+	list_destroy_and_destroy_elements(datos, free);
+	return tabla_paginas;
+}
+
+
 

@@ -1,16 +1,21 @@
 #include "cpu.h"
 
 
-int main(void) {
-	cpu_logger = log_create("cpu.log", "CPU", true, LOG_LEVEL_INFO);
-	cpu_config = cpu_leer_configuracion(PATH_CPU_CONFIG);
-	pthread_t th_dispatch;
-	pthread_t th_interrupt;
+void init() {
 	pthread_mutex_init(&mutex_interrupt, NULL);
 	interrupcion_desalojo = false;
+	tlb = list_create();
+	cpu_logger = log_create("cpu.log", "CPU", true, LOG_LEVEL_INFO);
+	cpu_config = cpu_leer_configuracion(PATH_CPU_CONFIG);
+}
+
+int main(void) {
+	pthread_t th_dispatch;
+	pthread_t th_interrupt;
+
+	init();
 
 	socket_memoria = conectar_a_modulo(cpu_config->ip_memoria, cpu_config->puerto_memoria, cpu_logger);
-
 	traductor = obtener_traductor_direcciones(socket_memoria);
 
 	int socket_dispatch = iniciar_modulo_servidor(cpu_config->ip_cpu, cpu_config->puerto_escucha_dispatch, cpu_logger);
@@ -49,10 +54,4 @@ void realizar_handshake(int socket_fd) {
 	enviar_paquete(paquete, socket_fd);
 	eliminar_paquete(paquete);
 }
-
-void eliminar_traductor_direcciones(t_traductor *traductor) {
-	free(traductor);
-}
-
-
 

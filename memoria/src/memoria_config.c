@@ -1,11 +1,5 @@
-/*
- * consola_config.c
- *
- *  Created on: 19 abr. 2022
- *      Author: utnso
- */
-
 #include "memoria_config.h"
+
 
 t_memoria_config *memoria_leer_configuracion(char *path) {
 
@@ -14,9 +8,9 @@ t_memoria_config *memoria_leer_configuracion(char *path) {
 
 	consola_config->ip_memoria = string_duplicate(config_get_string_value(config, "IP_MEMORIA"));
 	consola_config->puerto_escucha = string_duplicate(config_get_string_value(config, "PUERTO_ESCUCHA"));
-	consola_config->tam_memoria = config_get_int_value(config, "TAM_MEMORIA");
-	consola_config->tam_pagina = config_get_int_value(config, "TAM_PAGINA");
-	consola_config->paginas_por_tabla = config_get_int_value(config, "PAGINAS_POR_TABLA");
+	consola_config->tamanio_memoria = config_get_int_value(config, "TAM_MEMORIA");
+	consola_config->tamanio_pagina = config_get_int_value(config, "TAM_PAGINA");
+	consola_config->entradas_por_tabla = config_get_int_value(config, "ENTRADAS_POR_TABLA");
 	consola_config->retardo_memoria = config_get_int_value(config, "RETARDO_MEMORIA");
 	consola_config->algoritmo_reemplazo = string_duplicate(config_get_string_value(config, "ALGORITMO_REEMPLAZO"));
 	consola_config->marcos_por_proceso = config_get_int_value(config, "MARCOS_POR_PROCESO");
