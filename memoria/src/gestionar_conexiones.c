@@ -34,7 +34,7 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 			pcb = deserializar_pcb(paquete);
 			log_info(memoria_logger, "Eliminando memoria de PID[%d]...", pcb->id);
 			liberar_espacio_de_usuario(pcb->id);
-			//liberar_paginas_cargadas(pcb->id); TODO: es necesario?
+			liberar_paginas_cargadas(pcb->id);
 			swap_eliminar_archivo(pcb->id);
 			informar_estado_proceso(datos_cliente->socket, PROCESO_FINALIZADO);
 
