@@ -47,7 +47,7 @@ all: clean run
 
 memcheck: 
 	$(MAKE) build ARG=$(PROCESO)
-	$(LD) valgrind --leak-check=full --show-leak-kinds=all --log-file="$@-$(PROCESO).log" $(PROCESO)/Debug/$(PROCESO) $(PATH_I) $(TAMANIO)
+	$(LD) valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --log-file="$@-$(PROCESO).log" $(PROCESO)/Debug/$(PROCESO) $(PATH_I) $(TAMANIO)
 
 
 helgrind:
