@@ -93,7 +93,7 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 			log_error(memoria_logger, "Protocolo invalido.");
 			break;
 	}
-	eliminar_paquete(paquete);
+	//eliminar_paquete(paquete);
 }
 
 void enviar_direccion_tabla_primer_nivel(int socket_fd, uint32_t direccion) {
