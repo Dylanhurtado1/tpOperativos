@@ -1,5 +1,15 @@
 #include "cpu.h"
 
+pthread_t th_dispatch;
+pthread_t th_interrupt;
+
+
+void sigint_handler(int sig_num) {
+    log_info(cpu_logger, "Finalizando modulo CPU...");
+
+	pthread_cancel(th_interrupt);
+	pthread_cancel(th_dispatch);
+}
 
 void init() {
 	pthread_mutex_init(&mutex_interrupt, NULL);
@@ -7,12 +17,10 @@ void init() {
 	tlb = list_create();
 	cpu_logger = log_create("cpu.log", "CPU", true, LOG_LEVEL_INFO);
 	cpu_config = cpu_leer_configuracion(PATH_CPU_CONFIG);
+	signal(SIGINT, sigint_handler);
 }
 
 int main(void) {
-	pthread_t th_dispatch;
-	pthread_t th_interrupt;
-
 	init();
 
 	socket_memoria = conectar_a_modulo(cpu_config->ip_memoria, cpu_config->puerto_memoria, cpu_logger);
@@ -27,7 +35,9 @@ int main(void) {
 	pthread_join(th_dispatch, NULL);
 	pthread_join(th_interrupt, NULL);
 
-	log_destroy(cpu_logger);
+    tlb_limpiar_cache();
+    list_destroy(tlb);
+    log_destroy(cpu_logger);
 	cpu_eliminar_configuracion(cpu_config);
 	eliminar_traductor_direcciones(traductor);
 	cerrar_conexion(socket_memoria);
