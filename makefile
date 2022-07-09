@@ -15,7 +15,7 @@ lib:
 
 $(TARGET_1): lib
 	-cd $@/Debug && make all
-	-cd $@/Debug && $(LD) ./$@ $(PATH_INSTRUCCIONES) 4
+	-cd $@/Debug && $(LD) ./$@ $(PATH_I) $(TAMANIO)
 
 $(TARGET_2): lib
 	-cd $@/Debug && make all
