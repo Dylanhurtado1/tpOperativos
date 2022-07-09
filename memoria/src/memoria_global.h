@@ -19,6 +19,7 @@ t_list *bitmap_marcos;
 t_list *archivos_swap;
 t_list *punteros_clock;
 pthread_mutex_t mutex_swap;
+pthread_mutex_t mutex_memoria;
 
 
 #endif /* MEMORIA_GLOBAL_H_ */
