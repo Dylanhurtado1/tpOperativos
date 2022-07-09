@@ -84,8 +84,9 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 			log_info(memoria_logger, "Valor = %d", valor_a_escribir);
 
 			escribir_memoria_principal(direccion_fisica, valor_a_escribir);
-			// TODO: ver si se escribe en memoria correctamente o no y enviar respuesta acorde a CPU
 			actualizar_pagina_modificada(marco_modificado(direccion_fisica));
+
+			informar_escritura_realizada(datos_cliente->socket, MEMORIA_MODIFICADA_OK);
 
 			list_destroy_and_destroy_elements(datos, free);
 			break;
@@ -124,6 +125,11 @@ void enviar_numero_marco_de_pagina(int socket_fd, uint32_t numero) {
 void enviar_valor_leido_de_memoria(int socket_fd, uint32_t valor) {
 	retardo_respuesta(memoria_config->retardo_memoria);
 	enviar_datos(socket_fd, &valor, sizeof(uint32_t));
+}
+
+void informar_escritura_realizada(int socket_fd, t_protocolo protocolo) {
+	retardo_respuesta(memoria_config->retardo_memoria);
+	enviar_datos(socket_fd, &protocolo, sizeof(t_protocolo));
 }
 
 

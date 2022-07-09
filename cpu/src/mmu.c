@@ -41,6 +41,13 @@ void mmu_escribir_memoria(uint32_t direccion_fisica, uint32_t valor) {
 	agregar_a_paquete(paquete, &valor, sizeof(uint32_t));
 	enviar_paquete(paquete, socket_memoria);
 	eliminar_paquete(paquete);
+
+	t_protocolo protocolo;
+	recibir_datos(socket_memoria, &protocolo, sizeof(t_protocolo));
+
+	if(protocolo != MEMORIA_MODIFICADA_OK) {
+		log_error(cpu_logger, "No se escribio memoria correctamente");
+	}
 }
 
 
