@@ -3,7 +3,7 @@
 
 void init(char *config_path) {
 	//memoria_logger = log_create("memoria.log", "MEMORIA", true, LOG_LEVEL_INFO);
-	memoria_config = memoria_leer_configuracion(PATH_MEMORIA_CONFIG);
+	memoria_config = memoria_leer_configuracion(config_path);
 	iniciar_memoria_principal(memoria_config->tamanio_memoria, memoria_config->tamanio_pagina);
 	tablas_de_paginacion = list_create();
 	archivos_swap = list_create();
