@@ -17,6 +17,7 @@ void init() {
 	tlb = list_create();
 	cpu_logger = log_create("cpu.log", "CPU", true, LOG_LEVEL_INFO);
 	cpu_config = cpu_leer_configuracion(PATH_CPU_CONFIG);
+	ultimo_en_ejecutar = 0xFF;
 	signal(SIGINT, sigint_handler);
 }
 
