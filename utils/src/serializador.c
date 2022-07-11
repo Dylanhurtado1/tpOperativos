@@ -22,15 +22,15 @@ t_consola *deserializar_consola(t_paquete *paquete) {
 	return consola;
 }
 
-t_paquete *serializar_pcb(t_pcb *pcb, t_protocolo protocolo) {
-	t_paquete *paquete = serializar_instrucciones(pcb->instrucciones, protocolo);
+t_paquete *serializar_pcb(t_pcb *pcb, t_protocolo protocolo) {//segun un pcb de un proceso y un protocolo
+	t_paquete *paquete = serializar_instrucciones(pcb->instrucciones, protocolo);//devuelve un paquete con todas las instrucciones a realizar
 	agregar_a_paquete(paquete, &(pcb->id), sizeof(uint32_t));
 	agregar_a_paquete(paquete, &(pcb->tamanio_proceso), sizeof(uint32_t));
 	agregar_a_paquete(paquete, &(pcb->program_counter), sizeof(uint32_t));
 	agregar_a_paquete(paquete, &(pcb->tabla_paginas), sizeof(uint32_t));
 	agregar_a_paquete(paquete, &(pcb->estimacion_rafaga), sizeof(uint32_t));
 
-	return paquete;
+	return paquete;//un paquete con todas las instrucciones, id, tam,...
 }
 
 t_pcb *deserializar_pcb(t_paquete *paquete) {
@@ -50,17 +50,17 @@ t_pcb *deserializar_pcb(t_paquete *paquete) {
 	return pcb;
 }
 
-t_paquete *serializar_instrucciones(t_list *instrucciones, t_protocolo protocolo) {
-	t_paquete *paquete = crear_paquete(protocolo, buffer_vacio());
+t_paquete *serializar_instrucciones(t_list *instrucciones, t_protocolo protocolo) {//con las instrucciones y protocolo
+	t_paquete *paquete = crear_paquete(protocolo, buffer_vacio());//se crea un paquete
 
 	for(int i = 0; i < list_size(instrucciones); i++) {
-		t_instruccion *instruccion = (t_instruccion *)list_get(instrucciones, i);
+		t_instruccion *instruccion = (t_instruccion *)list_get(instrucciones, i);//cada instruccion se agrega al paquete
 		agregar_a_paquete(paquete, &(instruccion->identificador), sizeof(t_identificador));
 		agregar_a_paquete(paquete, &(instruccion->primer_operando), sizeof(uint32_t));
 		agregar_a_paquete(paquete, &(instruccion->segundo_operando), sizeof(uint32_t));
 	}
 
-	return paquete;
+	return paquete;//retorna paquete con todas las instrucciones
 }
 
 t_list *deserializar_instrucciones(t_list *datos, uint32_t longitud_datos) {

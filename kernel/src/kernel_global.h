@@ -15,8 +15,8 @@
 #include "kernel_config.h"
 
 // Kernel
-t_log *kernel_logger;
-t_kernel_config *kernel_config;
+t_log *kernel_logger;//global
+t_kernel_config *kernel_config;//variable con todos los atributos del config
 int socket_cpu_interrupt;
 int socket_cpu_dispatch;
 int socket_memoria;

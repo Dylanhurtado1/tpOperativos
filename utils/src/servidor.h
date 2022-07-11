@@ -18,7 +18,7 @@
 typedef struct {
 	int socket;
 	t_paquete *paquete;
-} t_cliente;
+} t_cliente;//un cliente representa un socket por donde viene y un paquete
 
 typedef struct {
 	int socket;

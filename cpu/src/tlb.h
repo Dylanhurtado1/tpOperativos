@@ -7,7 +7,7 @@ typedef struct {
 	uint32_t pagina;
 	uint32_t marco;
 	uint32_t ultima_referencia;
-} t_tlb;
+} t_tlb;//la tlb lleva pagina,marco y ultima referencia
 
 bool tlb_hit(uint32_t pagina);
 uint32_t tlb_marco_de_pagina(uint32_t pagina);

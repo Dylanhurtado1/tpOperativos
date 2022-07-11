@@ -7,7 +7,7 @@
 typedef enum {
 	CONTINUAR_EJECUTANDO,
 	PROCESO_DESALOJADO
-} t_desalojo;
+} t_desalojo;//tiene 2 atributos, para volver a hacer el ciclo de instruccion o hacer desalojo enviando a kernel
 
 void ejecutar_ciclo_de_instruccion(t_pcb *pcb, int socket_kernel);
 t_instruccion *fetch(t_pcb *pcb);

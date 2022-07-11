@@ -13,7 +13,7 @@ uint32_t indice_instante_carga_frame = 0;
 
 uint32_t crear_tablas_de_paginacion(uint32_t pid) {
 	uint32_t tabla_primer_nivel = indice_tabla_primer_nivel;
-	uint32_t cantidad_entradas_maximas = memoria_config->entradas_por_tabla * memoria_config->entradas_por_tabla;
+	uint32_t cantidad_entradas_maximas = memoria_config->entradas_por_tabla * memoria_config->entradas_por_tabla;//son las combinaciones
 
 	for(int i = 0; i < cantidad_entradas_maximas; i++) {
 		t_pagina *entrada_segundo_nivel = malloc(sizeof(t_pagina));
@@ -68,37 +68,37 @@ void actualizar_pagina_modificada(t_marco *marco_modificado) {
 	bool marco_asignado(t_pagina *pagina) {
 		return pagina->marco == marco_modificado->numero && pagina->pid == marco_modificado->pid;
 	}
-	t_pagina *pagina_modificada = list_find(tablas_de_paginacion, (void *)marco_asignado);
+	t_pagina *pagina_modificada = list_find(tablas_de_paginacion, (void *)marco_asignado);//devuelve una pagina, con el marco correspondietne y ese mismo pid
 
-	pagina_modificada->modificado = 1;
+	pagina_modificada->modificado = 1;//como se escribio se pone M = 1
 }
 
-void liberar_paginas_cargadas(uint32_t pid) {
-	t_list *paginas_en_memoria = paginas_cargadas_en_memoria(pid);
+void liberar_paginas_cargadas(uint32_t pid) {//
+	t_list *paginas_en_memoria = paginas_cargadas_en_memoria(pid);//tengo una lista con todas las paginas en memoria
 
-	void liberar_pagina(t_pagina *pagina) {
-		if(pagina_modificada(pagina)) {
-			swap_out(pagina->pid, pagina->numero_pagina, pagina->marco);
-			pagina->modificado = 0;
+	void liberar_pagina(t_pagina *pagina) {//por cada pagina de la lista
+		if(pagina_modificada(pagina)) {//si M = 1
+			swap_out(pagina->pid, pagina->numero_pagina, pagina->marco);//esto no se que hace
+			pagina->modificado = 0;// M = 0 de esa pagina
 		}
-		pagina->presencia = 0;
+		pagina->presencia = 0;//P = 0, porque ya no esta en memoria
 	}
-	list_iterate(paginas_en_memoria, (void *)liberar_pagina);
-	list_destroy(paginas_en_memoria);
+	list_iterate(paginas_en_memoria, (void *)liberar_pagina);//obtengo una lista con las paginas en M = 0, si fue modificada antes
+	list_destroy(paginas_en_memoria);//y las elimina
 
-	t_puntero_clock *puntero = buscar_puntero(pid);
-	puntero->indice_marco = 0;
+	t_puntero_clock *puntero = buscar_puntero(pid);//retorna un puntero con ese pid del proceso
+	puntero->indice_marco = 0;//y se le pone indice_marco = 0
 }
 
 bool page_fault(t_pagina *pagina) {
 	return !pagina_presente(pagina);
 }
 
-bool pagina_modificada(t_pagina *pagina) {
+bool pagina_modificada(t_pagina *pagina) {//booleano devuleve si M = 1
 	return pagina->modificado == 1;
 }
 
-bool pagina_presente(t_pagina *pagina) {
+bool pagina_presente(t_pagina *pagina) {//una pagina esta presente si su P=1
 	return pagina->presencia == 1;
 }
 
@@ -132,7 +132,7 @@ void print_paginas_memoria(t_list *paginas_en_memoria) { // TODO: solo para debu
 	list_iterate(paginas_en_memoria, (void *)print);
 }
 
-static t_list *paginas_cargadas_en_memoria(uint32_t pid) {
+static t_list *paginas_cargadas_en_memoria(uint32_t pid) {//retorna una lista con todas las paginas que tenga ese proceso
 	bool esta_cargada(t_pagina *pagina) {
 		return pagina_presente(pagina) && pagina->pid == pid;
 	}
@@ -216,10 +216,10 @@ static void crear_puntero_proceso(uint32_t pid) {
 	list_add(punteros_clock, puntero);
 }
 
-static t_puntero_clock *buscar_puntero(uint32_t pid) {
+static t_puntero_clock *buscar_puntero(uint32_t pid) {//de acuerdo a ese pid
 	bool mismo_pid(t_puntero_clock *clock) {
 		return clock->pid == pid;
 	}
-	return list_find(punteros_clock, (void *)mismo_pid);
+	return list_find(punteros_clock, (void *)mismo_pid);//retorna un puntero_clock de la lista de punteros con ese mis pid
 }
 

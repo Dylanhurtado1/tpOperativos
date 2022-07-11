@@ -4,7 +4,7 @@
 void init() {
 	pthread_mutex_init(&mutex_interrupt, NULL);
 	interrupcion_desalojo = false;
-	tlb = list_create();
+	tlb = list_create();//la tlb es una lista
 	cpu_logger = log_create("cpu.log", "CPU", true, LOG_LEVEL_INFO);
 	cpu_config = cpu_leer_configuracion(PATH_CPU_CONFIG);
 }
@@ -15,14 +15,14 @@ int main(void) {
 
 	init();
 
-	socket_memoria = conectar_a_modulo(cpu_config->ip_memoria, cpu_config->puerto_memoria, cpu_logger);
+	socket_memoria = conectar_a_modulo(cpu_config->ip_memoria, cpu_config->puerto_memoria, cpu_logger);//conecta a memoria como cliente
 	traductor = obtener_traductor_direcciones(socket_memoria);
-
+//son servidores dispatch  e interrupt
 	int socket_dispatch = iniciar_modulo_servidor(cpu_config->ip_cpu, cpu_config->puerto_escucha_dispatch, cpu_logger);
-	pthread_create(&th_dispatch, NULL, (void *)peticiones_dispatch, &socket_dispatch);
+	pthread_create(&th_dispatch, NULL, (void *)peticiones_dispatch, &socket_dispatch);//servidor a la escucha para el pasaje de procesos
 
 	int socket_interrupt = iniciar_modulo_servidor(cpu_config->ip_cpu, cpu_config->puerto_escucha_interrupt, cpu_logger);
-	pthread_create(&th_interrupt, NULL, (void *)peticiones_interrupt, &socket_interrupt);
+	pthread_create(&th_interrupt, NULL, (void *)peticiones_interrupt, &socket_interrupt);//servidor a la escucha para interrupciones
 
 	pthread_join(th_dispatch, NULL);
 	pthread_join(th_interrupt, NULL);
@@ -37,10 +37,10 @@ int main(void) {
 	return EXIT_SUCCESS;
 }
 
-t_traductor *obtener_traductor_direcciones(int socket_fd) {
+t_traductor *obtener_traductor_direcciones(int socket_fd) {//devuelve un traductor
 	realizar_handshake(socket_fd);
-	t_paquete *paquete = recibir_paquete(socket_fd);
-	t_traductor *traductor = deserializar_traductor(paquete);
+	t_paquete *paquete = recibir_paquete(socket_fd);//de memoria recibe el paquete, cant entrada y el tamanio
+	t_traductor *traductor = deserializar_traductor(paquete);//paquete lo transforma a traductor
 
 	eliminar_paquete(paquete);
 

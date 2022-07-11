@@ -8,9 +8,9 @@ typedef struct {
 	int socket;
 	t_pcb *pcb;
 	t_estado estado;
-	uint32_t tiempo_io;
-	uint32_t tiempo_inicio_bloqueo;
-	uint32_t tiempo_cpu;
+	uint32_t tiempo_io;//q son
+	uint32_t tiempo_inicio_bloqueo;//q son
+	uint32_t tiempo_cpu;//q son
 } t_proceso;
 
 

@@ -5,7 +5,7 @@ static t_swap *buscar_swap(uint32_t pid);
 static void retardo_acceso(uint32_t tiempo);
 
 
-void swap_crear_archivo(uint32_t pid, uint32_t tamanio_archivo) {
+void swap_crear_archivo(uint32_t pid, uint32_t tamanio_archivo) {//se crea el archico swap
 	char *path = string_from_format("%s/%d.swap", memoria_config->path_swap, pid);
 	FILE *fd = fopen(path, "w+b");
 
@@ -46,7 +46,7 @@ void swap_leer_pagina(uint32_t pid, void *buffer, uint32_t offset, uint32_t size
 	pthread_mutex_unlock(&mutex_swap);
 }
 
-void swap_escribir_pagina(uint32_t pid, void *buffer, uint32_t offset, uint32_t size) {
+void swap_escribir_pagina(uint32_t pid, void *buffer, uint32_t offset, uint32_t size) {//se escribe en el archivo de swap
 	pthread_mutex_lock(&mutex_swap);
 	t_swap *swap = buscar_swap(pid);
 
@@ -56,10 +56,10 @@ void swap_escribir_pagina(uint32_t pid, void *buffer, uint32_t offset, uint32_t 
 	pthread_mutex_unlock(&mutex_swap);
 }
 
-void swap_out(uint32_t pid, uint32_t pagina, uint32_t marco) {
+void swap_out(uint32_t pid, uint32_t pagina, uint32_t marco) {//
 	void *buffer = malloc(memoria_config->tamanio_pagina);
-	leer_marco_de_memoria(buffer, marco * memoria_config->tamanio_pagina, memoria_config->tamanio_pagina);
-	swap_escribir_pagina(pid, buffer, pagina * memoria_config->tamanio_pagina, memoria_config->tamanio_pagina);
+	leer_marco_de_memoria(buffer, marco * memoria_config->tamanio_pagina, memoria_config->tamanio_pagina);//
+	swap_escribir_pagina(pid, buffer, pagina * memoria_config->tamanio_pagina, memoria_config->tamanio_pagina);//se escribe en el archivo swap
 	free(buffer);
 }
 

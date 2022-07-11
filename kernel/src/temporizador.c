@@ -8,11 +8,11 @@ pthread_t th_timer;
 
 void iniciar_timer() {
 	pthread_mutex_init(&mutex_timer, NULL);
-	pthread_create(&th_timer, NULL, (void *)actualizar_timer, NULL);
+	pthread_create(&th_timer, NULL, (void *)actualizar_timer, NULL);//q es esto??
 	pthread_detach(th_timer);
 }
 
-uint32_t get_tiempo_actual() {
+uint32_t get_tiempo_actual() {//el tiempo actual
 	pthread_mutex_lock(&mutex_timer);
 	uint32_t tiempo_actual = tiempo * 1000;
 	pthread_mutex_unlock(&mutex_timer);

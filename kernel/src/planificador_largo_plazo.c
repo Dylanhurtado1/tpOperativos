@@ -13,12 +13,12 @@ void iniciar_planificador_largo_plazo() {
 	cola_new = queue_create();
 	cola_exit = queue_create();
 	pthread_create(&thread_exit, NULL, (void *)estado_exit, NULL);
-	pthread_create(&thread_admitir, NULL, (void *)transicion_admitir, NULL);
+	pthread_create(&thread_admitir, NULL, (void *)transicion_admitir, NULL);//aca inicia todo
 	pthread_detach(thread_exit);
 	pthread_detach(thread_admitir);
 }
 
-t_proceso *crear_proceso(t_consola *consola, int socket_consola) {
+t_proceso *crear_proceso(t_consola *consola, int socket_consola) {//devuelve algo de tipo proceso y se crea
 	t_proceso *proceso = malloc(sizeof(t_proceso));
 
 	proceso->socket = socket_consola;
@@ -29,47 +29,48 @@ t_proceso *crear_proceso(t_consola *consola, int socket_consola) {
 
 	pthread_mutex_lock(&mutex_generador_id);
 	proceso->pcb = crear_pcb(generador_de_id, consola->tamanio, consola->instrucciones, 0, kernel_config->estimacion_inicial);
-	generador_de_id++;
+	generador_de_id++;//aca se hace el contador de ids
 	pthread_mutex_unlock(&mutex_generador_id);
 
 	return proceso;
 }
 
-void agregar_proceso_a_new(t_proceso *proceso) {
+void agregar_proceso_a_new(t_proceso *proceso) {//un push a la cola de new
 	pthread_mutex_lock(&mutex_new);
 	queue_push(cola_new, proceso);
 	pthread_mutex_unlock(&mutex_new);
 	log_info(kernel_logger, "PID[%d] ingresa a NEW...", proceso->pcb->id);
 
-	sem_post(&sem_admitir);
+	sem_post(&sem_admitir);//se hace un post para indicar que hay un proceso en la cola new
 }
 
-void transicion_admitir(void *data) {
+void transicion_admitir(void *data) {//aca inicia todo
 	while(1) {
-		sem_wait(&sem_admitir);
-		sem_wait(&sem_grado_multiprogramacion);
+		sem_wait(&sem_admitir);//espera a que haya un proceso en la cola new
+		sem_wait(&sem_grado_multiprogramacion);//el grado viene en el config
 		t_proceso *proceso;
 
 		pthread_mutex_lock(&mutex_suspended_ready);
-		if(!queue_is_empty(cola_suspended_ready)) {
-			proceso = queue_pop(cola_suspended_ready);
+		if(!queue_is_empty(cola_suspended_ready)) {//si la cola suspended ready no esta vacia
+			proceso = queue_pop(cola_suspended_ready);//saca un proceso de susp-ready a ready
 			pthread_mutex_unlock(&mutex_suspended_ready);
 			log_info(kernel_logger, "PID[%d] ingresa a READY desde SUSPENDED-READY", proceso->pcb->id);
-		} else {
+		} else {//Si esta vacia la cola suspended-ready
 			pthread_mutex_unlock(&mutex_suspended_ready);
 			pthread_mutex_lock(&mutex_new);
-			proceso = queue_pop(cola_new);
+			proceso = queue_pop(cola_new);//saco un proceso de la cola new y lo pongo a ready
 			pthread_mutex_unlock(&mutex_new);
-			proceso->pcb->tabla_paginas = obtener_tabla_de_pagina(socket_memoria, proceso->pcb);
+			proceso->pcb->tabla_paginas = obtener_tabla_de_pagina(socket_memoria, proceso->pcb);//obtener el valor de la tabla de páginas que deberá estar almacenado en nuestro PCB.
+            //chequear como lo hace memoria
 			log_info(kernel_logger, "PID[%d] ingresa a READY desde NEW", proceso->pcb->id);
 		}
 
 		pthread_mutex_lock(&mutex_ready);
-		list_add(cola_ready, proceso);
+		list_add(cola_ready, proceso);//y lo pongo a ready
 		pthread_mutex_unlock(&mutex_ready);
 
 		//procesos_admitidos_en_ready++;
-		sem_post(&sem_ready);
+		sem_post(&sem_ready);//un post al contador ready, que hay un proceso
 	}
 }
 
@@ -92,12 +93,12 @@ void estado_exit(void *dato) {
 	}
 }
 
-uint32_t obtener_tabla_de_pagina(int socket_memoria, t_pcb *pcb) {
-	uint32_t tabla_de_paginas;
-	t_paquete *paquete = serializar_pcb(pcb, INICIALIZACION_DE_PROCESO);
-	enviar_paquete(paquete, socket_memoria);
+uint32_t obtener_tabla_de_pagina(int socket_memoria, t_pcb *pcb) {//de pcb lo transforma a paquete
+	uint32_t tabla_de_paginas;//es un numero
+	t_paquete *paquete = serializar_pcb(pcb, INICIALIZACION_DE_PROCESO);//tengo un paquete con todos los datos del pcb
+	enviar_paquete(paquete, socket_memoria);//se envia a memoria
 	eliminar_paquete(paquete);
-	recibir_datos(socket_memoria, &tabla_de_paginas, sizeof(uint32_t));
+	recibir_datos(socket_memoria, &tabla_de_paginas, sizeof(uint32_t));//espera respuesta de memoria
 
 	return tabla_de_paginas;
 }

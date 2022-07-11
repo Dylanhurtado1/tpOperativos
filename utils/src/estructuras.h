@@ -30,12 +30,12 @@ typedef struct {
 	t_identificador identificador;
 	uint32_t primer_operando;
 	uint32_t segundo_operando;
-} t_instruccion;
+} t_instruccion;//cada instruccion tiene esos atributos
 
 typedef struct {
 	t_list *instrucciones;
 	uint32_t tamanio;
-} t_consola;
+} t_consola;//la consonla tiene instrucciones y tamanio
 
 typedef struct {
 	uint32_t id;
@@ -44,17 +44,17 @@ typedef struct {
 	uint32_t program_counter;
 	uint32_t tabla_paginas;
 	uint32_t estimacion_rafaga;
-} t_pcb;
+} t_pcb;//un t_proceso tiene un t_pcb
 
 typedef struct {
 	uint32_t cantidad_entradas_tabla;
 	uint32_t tamanio_pagina;
-} t_traductor;
+} t_traductor;//un traductor tiene esos atributos
 
 typedef struct {
 	uint32_t direccion;
 	uint32_t entrada;
-} t_tabla_acceso;
+} t_tabla_acceso;//tiene el numero de tabla de primer nivel, y su entrada
 
 t_instruccion *crear_instruccion(t_identificador identificador, uint32_t primer_operando, uint32_t segundo_operando);
 void eliminar_instrucciones(t_list *instrucciones);

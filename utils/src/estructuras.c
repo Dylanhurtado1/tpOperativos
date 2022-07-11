@@ -24,7 +24,7 @@ t_consola *crear_consola(t_list *instrucciones, uint32_t tamanio) {
 }
 
 void eliminar_consola(t_consola *consola) {
-	eliminar_instrucciones(consola->instrucciones);
+	eliminar_instrucciones(consola->instrucciones);//se elimina todos los atributos
 	free(consola);
 }
 
@@ -45,7 +45,7 @@ void eliminar_pcb(t_pcb *pcb) {
 	free(pcb);
 }
 
-t_traductor *crear_traductor_direcciones(int entradas_tabla, int tamanio_pagina) {
+t_traductor *crear_traductor_direcciones(int entradas_tabla, int tamanio_pagina) {//devuelve un traductor con cant entradas y tamanio
 	t_traductor *traductor = malloc(sizeof(t_traductor));
 	traductor->cantidad_entradas_tabla = entradas_tabla;
 	traductor->tamanio_pagina = tamanio_pagina;
@@ -57,13 +57,13 @@ void eliminar_traductor_direcciones(t_traductor *traductor) {
 	free(traductor);
 }
 
-t_tabla_acceso *crear_tabla_de_acceso(uint32_t direccion, uint32_t entrada) {
+t_tabla_acceso *crear_tabla_de_acceso(uint32_t direccion, uint32_t entrada) {//con el numero de tabla de primer nivel, y la entrada de la dire logica
 	t_tabla_acceso *tabla_acceso = malloc(sizeof(t_tabla_acceso));
 
 	tabla_acceso->direccion = direccion;
 	tabla_acceso->entrada = entrada;
 
-	return tabla_acceso;
+	return tabla_acceso;//solo tiene el numero de tabla de 1er nivel y su primer entrada de la dir logica
 }
 
 void eliminar_tabla_de_acceso(t_tabla_acceso *tabla_acceso) {

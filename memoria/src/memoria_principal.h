@@ -7,7 +7,7 @@ typedef struct {
 	uint32_t pid;
 	uint8_t libre;
 	uint32_t numero;
-} t_marco;
+} t_marco;//cada marco tiene pid del proceso, si esta libre o no, y el numero de marco
 
 void iniciar_memoria_principal(uint32_t tamanio_memoria, uint32_t tamanio_marco);
 void eliminar_memoria_principal();

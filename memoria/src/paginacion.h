@@ -18,7 +18,7 @@ typedef struct {
 typedef struct {
 	uint32_t pid;
 	uint32_t indice_marco;
-} t_puntero_clock;
+} t_puntero_clock;//puntero de clock tiene pid del proceso y el indice del marco
 
 uint32_t crear_tablas_de_paginacion(uint32_t pid);
 uint32_t get_tabla_segundo_nivel(uint32_t tabla_primer_nivel, uint32_t entrada_tabla);
