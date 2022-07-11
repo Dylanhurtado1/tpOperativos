@@ -10,6 +10,8 @@ void init(char *config_path) {
 	punteros_clock = list_create();
 	pthread_mutex_init(&mutex_swap, NULL);
 	pthread_mutex_init(&mutex_memoria, NULL);
+	cantidad_acceso_disco = 0;
+	cantidad_page_fault = 0;
 }
 
 int main(int argc, char **argv) {

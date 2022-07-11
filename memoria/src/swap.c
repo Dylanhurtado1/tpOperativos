@@ -61,6 +61,7 @@ void swap_out(uint32_t pid, uint32_t pagina, uint32_t marco) {
 	leer_marco_de_memoria(buffer, marco * memoria_config->tamanio_pagina, memoria_config->tamanio_pagina);
 	swap_escribir_pagina(pid, buffer, pagina * memoria_config->tamanio_pagina, memoria_config->tamanio_pagina);
 	free(buffer);
+	cantidad_acceso_disco++;
 }
 
 void swap_in(uint32_t pid, uint32_t pagina, uint32_t marco) {
@@ -68,6 +69,7 @@ void swap_in(uint32_t pid, uint32_t pagina, uint32_t marco) {
 	swap_leer_pagina(pid, buffer, pagina * memoria_config->tamanio_pagina, memoria_config->tamanio_pagina);
 	cargar_marco_en_memoria(buffer, marco * memoria_config->tamanio_pagina, memoria_config->tamanio_pagina);
 	free(buffer);
+	cantidad_acceso_disco++;
 }
 
 
