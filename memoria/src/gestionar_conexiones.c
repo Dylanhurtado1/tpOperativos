@@ -38,7 +38,7 @@ void procesar_conexiones(t_cliente *datos_cliente) {
 			swap_eliminar_archivo(pcb->id);
 			informar_estado_proceso(datos_cliente->socket, PROCESO_FINALIZADO);
 
-			log_info(memoria_logger, "PFs = %d, Acceso a disco = %d", cantidad_page_fault, cantidad_acceso_disco);
+			log_info(memoria_logger, "PFs = %d, Accesos a DISCO = %d", cantidad_page_fault, cantidad_acceso_disco);
 
 			eliminar_pcb(pcb);
 			break;

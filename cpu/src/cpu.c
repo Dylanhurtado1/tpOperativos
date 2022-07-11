@@ -18,6 +18,7 @@ void init(char *config_path) {
 	//cpu_logger = log_create("cpu.log", "CPU", true, LOG_LEVEL_INFO);
 	cpu_config = cpu_leer_configuracion(config_path);
 	ultimo_en_ejecutar = 0xFF;
+	cantidad_acceso_tlb = 0;
 	signal(SIGINT, sigint_handler);
 }
 

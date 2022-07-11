@@ -18,6 +18,8 @@ void peticiones_dispatch(int *socket_dispatch) {
 				}
 				ejecutar_ciclo_de_instruccion(pcb, socket_kernel);
 
+				log_info(cpu_logger, "Accesos a MEMORIA = %d", cantidad_acceso_tlb);
+
 				eliminar_pcb(pcb);
 				break;
 			default:
