@@ -1,8 +1,8 @@
 #include "memoria.h"
 
 
-void init() {
-	memoria_logger = log_create("memoria.log", "MEMORIA", true, LOG_LEVEL_INFO);
+void init(char *config_path) {
+	//memoria_logger = log_create("memoria.log", "MEMORIA", true, LOG_LEVEL_INFO);
 	memoria_config = memoria_leer_configuracion(PATH_MEMORIA_CONFIG);
 	iniciar_memoria_principal(memoria_config->tamanio_memoria, memoria_config->tamanio_pagina);
 	tablas_de_paginacion = list_create();
@@ -12,9 +12,14 @@ void init() {
 	pthread_mutex_init(&mutex_memoria, NULL);
 }
 
-int main(void) {
-
-	init();
+int main(int argc, char **argv) {
+	memoria_logger = log_create("memoria.log", "MEMORIA", true, LOG_LEVEL_INFO);
+	if(argc < 2) {
+		log_error(memoria_logger, "Error de parametros. Ejemplo de uso: ./memoria <archivo_configuracion>");
+		log_destroy(memoria_logger);
+		return EXIT_FAILURE;
+	}
+	init(argv[1]);
 
 	int socket_memoria = iniciar_modulo_servidor(memoria_config->ip_memoria, memoria_config->puerto_escucha, memoria_logger);
 	log_info(memoria_logger, "Memoria iniciado como servidor");

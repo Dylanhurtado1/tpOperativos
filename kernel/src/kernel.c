@@ -1,10 +1,14 @@
 #include "kernel.h"
 
 
-int main(void) {
-
+int main(int argc, char **argv) {
 	kernel_logger = log_create("kernel.log", "KERNEL", true, LOG_LEVEL_INFO);
-	kernel_config = kernel_leer_configuracion(PATH_KERNEL_CONFIG);
+	if(argc < 2) {
+		log_error(kernel_logger, "Error de parametros. Ejemplo de uso: ./kernel <archivo_configuracion>");
+		log_destroy(kernel_logger);
+		return EXIT_FAILURE;
+	}
+	kernel_config = kernel_leer_configuracion(argv[1]);
 
 	socket_memoria = conectar_a_modulo(kernel_config->ip_memoria, kernel_config->puerto_memoria, kernel_logger);
 
