@@ -12,7 +12,8 @@ void procesar_datos_consola(t_cliente *datos_cliente) {
 			t_proceso *proceso = crear_proceso(consola, datos_cliente->socket);
 			agregar_proceso_a_new(proceso);
 
-			eliminar_consola(consola);
+			//eliminar_consola(consola);
+			free(consola);
 			break;
 		default:
 			log_error(kernel_logger,"Protocolo invalido.");

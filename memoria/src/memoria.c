@@ -9,6 +9,7 @@ void init() {
 	archivos_swap = list_create();
 	punteros_clock = list_create();
 	pthread_mutex_init(&mutex_swap, NULL);
+	pthread_mutex_init(&mutex_memoria, NULL);
 }
 
 int main(void) {

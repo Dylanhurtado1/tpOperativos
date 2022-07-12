@@ -60,7 +60,7 @@ uint32_t get_marco_de_pagina(uint32_t tabla_segundo_nivel, uint32_t entrada_tabl
 
 	pagina->uso = 1;
 
-	print_paginas_memoria(pagina->pid); // TODO: solo para debug
+	print_paginas_memoria(pagina->pid);
 
 	return pagina->marco;
 }
@@ -88,7 +88,9 @@ void liberar_paginas_cargadas(uint32_t pid) {
 		pagina->presencia = 0;
 		pagina->uso = 0;
 	}
-	list_iterate(paginas_en_memoria, (void *)liberar_pagina);
+	if(!list_is_empty(paginas_en_memoria)) {
+		list_iterate(paginas_en_memoria, (void *)liberar_pagina);
+	}
 	list_destroy(paginas_en_memoria);
 
 	t_puntero_clock *puntero = buscar_puntero(pid);

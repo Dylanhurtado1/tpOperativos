@@ -33,7 +33,7 @@ t_pcb *crear_pcb(uint32_t id, uint32_t tamanio_proceso, t_list *instrucciones, u
 
 	pcb->id = id;
 	pcb->tamanio_proceso = tamanio_proceso;
-	pcb->instrucciones = list_duplicate(instrucciones);
+	pcb->instrucciones = instrucciones;//list_duplicate(instrucciones);
 	pcb->program_counter = program_counter;
 	pcb->estimacion_rafaga = estimacion_rafaga;
 
