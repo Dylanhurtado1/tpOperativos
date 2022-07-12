@@ -7,7 +7,7 @@ COMMON_PATH=/home/utnso/swap/so-commons-library
 
 if [ "$1" == "" ]; then
 	echo "Error de ejecucion: ./deploy.sh <install | uninstall>"
-	exit(1)
+	exit 1
 fi
 
 
