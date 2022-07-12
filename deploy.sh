@@ -3,7 +3,7 @@
 PROJECT_PATH=/home/utnso/tp-2022-1c-lo-importante-es-aprobar
 TESTING_PATH=/home/utnso/kiss-pruebas
 SWAP_PATH=/home/utnso/swap
-COMMON_PATH=/home/utnso/swap/so-commons-library
+COMMON_PATH=/home/utnso/so-commons-library
 
 if [ "$1" == "" ]; then
 	echo "Error de ejecucion: ./deploy.sh <install | uninstall>"
@@ -19,8 +19,8 @@ if [ "$1" == "install" ]; then
 	rm -rf $COMMONS
 	git clone "https://github.com/sisoputnfrba/${COMMONS}.git" $COMMONS
 	cd $COMMONS
-	sudo make uninstall
-	sudo make install
+	make uninstall
+	make install
 
 
 	echo -e "\n\n **** Descargando Pruebas... ****\n\n"
@@ -35,7 +35,7 @@ if [ "$1" == "install" ]; then
 else
 	echo -e "\n\n **** Desinstalando todo... ****\n\n"
 	cd $COMMON_PATH
-	sudo make uninstall
+	make uninstall
 	cd $HOME
 	rm -rf $COMMON_PATH
 
