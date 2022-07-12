@@ -38,7 +38,7 @@ t_identificador transformar_identificador(char *identificador) {
 	if(string_equals_ignore_case(identificador, "NO_OP")) {
 		return NO_OP;
 	}
-	if(string_equals_ignore_case(identificador, "I/O")) {
+	if(string_equals_ignore_case(identificador, "I/O") || string_equals_ignore_case(identificador, "IO")) {
 		return IO;
 	}
 	if(string_equals_ignore_case(identificador, "READ")) {

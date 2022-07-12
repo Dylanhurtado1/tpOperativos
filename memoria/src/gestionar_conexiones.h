@@ -13,6 +13,7 @@ void enviar_estructura_traductora(int socket_fd, t_traductor *traductor);
 void enviar_direccion_tabla_segundo_nivel(int socket_fd, uint32_t direccion);
 void enviar_numero_marco_de_pagina(int socket_fd, uint32_t numero);
 void enviar_valor_leido_de_memoria(int socket_fd, uint32_t valor);
+void informar_escritura_realizada(int socket_fd, t_protocolo protocolo);
 
 
 #endif /* GESTIONAR_CONEXIONES_H_ */

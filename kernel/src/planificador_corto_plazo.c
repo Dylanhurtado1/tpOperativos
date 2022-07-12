@@ -3,7 +3,7 @@
 
 static uint32_t diferencia_absoluta(uint32_t tiempo_1, uint32_t tiempo_2);
 static void io(uint32_t tiempo);
-static double calcular_estimacion_rafaga(uint32_t tiempo_ejecucion, double tiempo_estimado);
+static double calcular_estimacion_proxima_rafaga(uint32_t tiempo_ejecucion, double tiempo_estimado_anterior);
 
 bool proceso_ejecutando;
 
@@ -79,7 +79,7 @@ void estado_exec(void *data) {
 				pthread_mutex_lock(&mutex_blocked);
 				proceso->estado = BLOCKED;
 				proceso->tiempo_inicio_bloqueo = get_tiempo_actual();
-				proceso->pcb->estimacion_rafaga = calcular_estimacion_rafaga(proceso->tiempo_cpu, proceso->pcb->estimacion_rafaga);
+				proceso->pcb->estimacion_rafaga = calcular_estimacion_proxima_rafaga(proceso->tiempo_cpu, proceso->pcb->estimacion_rafaga);
 				proceso->tiempo_cpu = 0;
 				queue_push(cola_blocked, proceso);
 				pthread_mutex_unlock(&mutex_blocked);
@@ -188,7 +188,7 @@ static uint32_t diferencia_absoluta(uint32_t tiempo_1, uint32_t tiempo_2) {
 	return tiempo_1 > tiempo_2 ? tiempo_1 - tiempo_2 : tiempo_2 - tiempo_1;
 }
 
-static double calcular_estimacion_rafaga(uint32_t tiempo_ejecucion, double tiempo_estimado) {
-	return kernel_config->alfa * tiempo_ejecucion + (1 - kernel_config->alfa) * tiempo_estimado;
+static double calcular_estimacion_proxima_rafaga(uint32_t tiempo_ejecucion, double tiempo_estimado_anterior) {
+	return kernel_config->alfa * tiempo_ejecucion + (1 - kernel_config->alfa) * tiempo_estimado_anterior;
 }
 

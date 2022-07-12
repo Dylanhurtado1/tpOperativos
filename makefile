@@ -15,7 +15,7 @@ lib:
 
 $(TARGET_1): lib
 	-cd $@/Debug && make all
-	-cd $@/Debug && $(LD) ./$@ $(PATH_INSTRUCCIONES) 4
+	-cd $@/Debug && $(LD) ./$@ $(PATH_I) $(TAMANIO)
 
 $(TARGET_2): lib
 	-cd $@/Debug && make all
@@ -47,7 +47,7 @@ all: clean run
 
 memcheck: 
 	$(MAKE) build ARG=$(PROCESO)
-	$(LD) valgrind --leak-check=full --show-leak-kinds=all --log-file="$@-$(PROCESO).log" $(PROCESO)/Debug/$(PROCESO) $(PATH_I) $(TAMANIO)
+	$(LD) valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --log-file="$@-$(PROCESO).log" $(PROCESO)/Debug/$(PROCESO) $(PATH_I) $(TAMANIO)
 
 
 helgrind:

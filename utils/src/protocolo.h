@@ -27,7 +27,8 @@ typedef enum {
 	ACCESO_TABLA_PRIMER_NIVEL,		// Protocolo que envia CPU/MMU a Memoria para pedir la direccion de la tabla de segundo nivel
 	ACCESO_TABLA_SEGUNDO_NIVEL,		// Protocolo que envia CPU/MMU a Memoria para pedir el marco de la pagina en la tabla de segundo nivel
 	LEER_MEMORIA,					// Protocolo que envia CPU/MMU a Memoria para pedir el valor almacenado en memoria
-	ESCRIBIR_MEMORIA				// Protocolo que envia CPU/MMU a Memoria escribir en memoria un valor
+	ESCRIBIR_MEMORIA,				// Protocolo que envia CPU/MMU a Memoria para escribir en memoria un valor
+	MEMORIA_MODIFICADA_OK			// Protocolo que envia Memoria a CPU/MMU para indicar que se escribio en memoria
 } t_protocolo;
 
 #endif /* PROTOCOLO_H_ */
