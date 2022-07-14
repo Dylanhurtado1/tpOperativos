@@ -18,6 +18,8 @@ t_traductor *traductor;
 pthread_mutex_t mutex_interrupt;
 bool interrupcion_desalojo;
 t_list *tlb;
+uint8_t ultimo_en_ejecutar;
+uint32_t cantidad_acceso_tlb;
 
 
 #endif /* CPU_GLOBAL_H_ */

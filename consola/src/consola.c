@@ -6,7 +6,7 @@ int main(int argc, char **argv) {
 	t_log *consola_logger = log_create("consola.log", "CONSOLA", true, LOG_LEVEL_INFO);
 	t_consola_config *config = consola_leer_configuracion(PATH_CONSOLA_CONFIG);
 
-	if(argc < 2) {
+	if(argc < 3) {
 		log_error(consola_logger, "Error de parametros. Ejemplo de uso: ./consola <ruta_a_pseudocodigo> <tam_proceso>");
 		log_destroy(consola_logger);
 		consola_eliminar_configuracion(config);

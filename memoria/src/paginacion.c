@@ -54,6 +54,7 @@ uint32_t get_marco_de_pagina(uint32_t tabla_segundo_nivel, uint32_t entrada_tabl
 			reemplazar_pagina(pagina, puntero, memoria_config->algoritmo_reemplazo);
 		}
 		swap_in(pagina->pid, pagina->numero_pagina, pagina->marco);
+		cantidad_page_fault++;
 
 		pagina->presencia = 1;
 	}

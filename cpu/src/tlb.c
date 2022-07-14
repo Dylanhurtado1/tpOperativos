@@ -50,7 +50,9 @@ void tlb_agregar_entrada(uint32_t pagina, uint32_t marco) {
 }
 
 void tlb_limpiar_cache() {
-	list_clean_and_destroy_elements(tlb, (void *)eliminar_entrada_tlb);
+	if(!list_is_empty(tlb)) {
+		list_clean_and_destroy_elements(tlb, (void *)eliminar_entrada_tlb);
+	}
 	indice_ultima_referencia = 0;
 }
 

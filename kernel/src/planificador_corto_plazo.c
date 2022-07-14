@@ -5,7 +5,7 @@ static uint32_t diferencia_absoluta(uint32_t tiempo_1, uint32_t tiempo_2);
 static void io(uint32_t tiempo);
 static double calcular_estimacion_proxima_rafaga(uint32_t tiempo_ejecucion, double tiempo_estimado_anterior);
 
-bool proceso_ejecutando;
+//bool proceso_ejecutando;
 
 
 void iniciar_planificador_corto_plazo() {
@@ -27,20 +27,14 @@ void iniciar_planificador_corto_plazo() {
 	pthread_detach(thread_blocked);
 
 	iniciar_timer();
-	proceso_ejecutando = false;
+	//proceso_ejecutando = false;
 }
 
 void estado_ready(void *data) {
 	while(1) {
 		sem_wait(&sem_ready);
 
-		if(string_equals_ignore_case(kernel_config->algoritmo_planificacion, "SRT")) {
-			pthread_mutex_lock(&mutex_exec);
-			if(proceso_ejecutando) {
-				enviar_interrupcion_a_cpu(socket_cpu_interrupt, DESALOJAR_PROCESO);
-			}
-			pthread_mutex_unlock(&mutex_exec);
-		}
+		//enviar_interrupcion_a_cpu(socket_fd, &protocolo, sizeof(t_protocolo));
 
 		sem_wait(&sem_desalojo);
 		t_proceso *proceso = siguiente_a_ejecutar(kernel_config->algoritmo_planificacion);
@@ -58,7 +52,7 @@ void estado_exec(void *data) {
 		sem_wait(&sem_exec);
 		pthread_mutex_lock(&mutex_exec);
 		t_proceso *proceso = queue_pop(cola_exec);
-		proceso_ejecutando = true;
+		//proceso_ejecutando = true;
 		pthread_mutex_unlock(&mutex_exec);
 		log_info(kernel_logger, "PID[%d] ingresa a EXEC", proceso->pcb->id);
 
@@ -68,7 +62,7 @@ void estado_exec(void *data) {
 		t_paquete *paquete = esperar_respuesta_cpu(socket_cpu_dispatch);
 		proceso->tiempo_cpu += get_tiempo_actual() - tiempo_inicio_cpu;
 		pthread_mutex_lock(&mutex_exec);
-		proceso_ejecutando = false;
+		//proceso_ejecutando = false;
 		pthread_mutex_unlock(&mutex_exec);
 
 		proceso->pcb = deserializar_pcb(paquete);
@@ -138,6 +132,7 @@ void estado_blocked(void *data) {
 			list_add(cola_ready, proceso);
 			pthread_mutex_unlock(&mutex_ready);
 
+			enviar_interrupcion_a_cpu(socket_cpu_interrupt, DESALOJAR_PROCESO);
 			sem_post(&sem_ready);
 		}
 
@@ -155,7 +150,13 @@ t_paquete *esperar_respuesta_cpu(int socket_cpu_dispatch) {
 }
 
 void enviar_interrupcion_a_cpu(int socket_fd, t_protocolo protocolo) {
-	enviar_datos(socket_fd, &protocolo, sizeof(t_protocolo));
+	if(string_equals_ignore_case(kernel_config->algoritmo_planificacion, "SRT")) {
+		//pthread_mutex_lock(&mutex_exec);
+		//if(proceso_ejecutando) {
+			enviar_datos(socket_fd, &protocolo, sizeof(t_protocolo));
+		//}
+		//pthread_mutex_unlock(&mutex_exec);
+	}
 }
 
 t_proceso *siguiente_a_ejecutar(char *algoritmo) {
