@@ -69,6 +69,8 @@ void transicion_admitir(void *data) {
 		pthread_mutex_unlock(&mutex_ready);
 
 		//procesos_admitidos_en_ready++;
+		enviar_interrupcion_a_cpu(socket_cpu_interrupt, DESALOJAR_PROCESO);
+
 		sem_post(&sem_ready);
 	}
 }

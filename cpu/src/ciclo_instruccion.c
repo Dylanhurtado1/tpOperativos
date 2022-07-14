@@ -14,8 +14,11 @@ void ejecutar_ciclo_de_instruccion(t_pcb *pcb, int socket_kernel) {
 		tipo_desalojo = execute(proxima_instruccion, pcb, socket_kernel);
 	} while(!check_interrupt() && tipo_desalojo == CONTINUAR_EJECUTANDO);
 
+	ultimo_en_ejecutar = 0xFF;
+
 	if(tipo_desalojo == CONTINUAR_EJECUTANDO) {
 		desalojar_proceso(socket_kernel, pcb, DESALOJO_POR_IRQ);
+		ultimo_en_ejecutar = pcb->id;
 	}
 }
 

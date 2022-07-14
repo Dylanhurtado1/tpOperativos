@@ -13,8 +13,10 @@ void peticiones_dispatch(int *socket_dispatch) {
 				pcb = deserializar_pcb(paquete);
 				log_info(cpu_logger,"PCB[%d] recibido, ejecutando instrucciones", pcb->id);
 
+				if(ultimo_en_ejecutar != pcb->id) {
+					tlb_limpiar_cache();
+				}
 				ejecutar_ciclo_de_instruccion(pcb, socket_kernel);
-				tlb_limpiar_cache();
 
 				eliminar_pcb(pcb);
 				break;

@@ -41,7 +41,7 @@ void liberar_espacio_de_usuario(uint32_t pid) {
 
 	t_list *marcos_asignados = list_filter(bitmap_marcos, (void *)marco_id);
 	if(!list_is_empty(marcos_asignados)) {
-		list_iterate(bitmap_marcos, (void *)liberar_marco);
+		list_iterate(marcos_asignados, (void *)liberar_marco);
 	}
 
 	list_destroy(marcos_asignados);
