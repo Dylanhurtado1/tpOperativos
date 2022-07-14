@@ -20,6 +20,8 @@ t_list *archivos_swap;
 t_list *punteros_clock;
 pthread_mutex_t mutex_swap;
 pthread_mutex_t mutex_memoria;
+uint32_t cantidad_acceso_disco;
+uint32_t cantidad_page_fault;
 
 
 #endif /* MEMORIA_GLOBAL_H_ */

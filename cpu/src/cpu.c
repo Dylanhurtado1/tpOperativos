@@ -11,18 +11,26 @@ void sigint_handler(int sig_num) {
 	pthread_cancel(th_dispatch);
 }
 
-void init() {
+void init(char *config_path) {
 	pthread_mutex_init(&mutex_interrupt, NULL);
 	interrupcion_desalojo = false;
 	tlb = list_create();
-	cpu_logger = log_create("cpu.log", "CPU", true, LOG_LEVEL_INFO);
-	cpu_config = cpu_leer_configuracion(PATH_CPU_CONFIG);
+	//cpu_logger = log_create("cpu.log", "CPU", true, LOG_LEVEL_INFO);
+	cpu_config = cpu_leer_configuracion(config_path);
 	ultimo_en_ejecutar = 0xFF;
+	cantidad_acceso_tlb = 0;
 	signal(SIGINT, sigint_handler);
 }
 
-int main(void) {
-	init();
+int main(int argc, char **argv) {
+	cpu_logger = log_create("cpu.log", "CPU", true, LOG_LEVEL_INFO);
+	if(argc < 2) {
+		log_error(cpu_logger, "Error de parametros. Ejemplo de uso: ./cpu <archivo_configuracion>");
+		log_destroy(cpu_logger);
+		return EXIT_FAILURE;
+	}
+
+	init(argv[1]);
 
 	socket_memoria = conectar_a_modulo(cpu_config->ip_memoria, cpu_config->puerto_memoria, cpu_logger);
 	traductor = obtener_traductor_direcciones(socket_memoria);

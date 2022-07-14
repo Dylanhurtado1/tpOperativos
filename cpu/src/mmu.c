@@ -15,6 +15,7 @@ uint32_t mmu_traducir_direccion_logica(uint32_t tabla_primer_nivel, uint32_t dir
 		tabla_segundo_nivel = acceder_tablas_en_memoria(tabla_primer_nivel, traducciones.entrada_tabla_nivel_1, ACCESO_TABLA_PRIMER_NIVEL);
 		numero_de_marco = acceder_tablas_en_memoria(tabla_segundo_nivel, traducciones.entrada_tabla_nivel_2, ACCESO_TABLA_SEGUNDO_NIVEL);
 		tlb_agregar_entrada(traducciones.numero_pagina, numero_de_marco);
+		cantidad_acceso_tlb += 2;
 	}
 
 	uint32_t direccion_fisica = numero_de_marco * traductor->tamanio_pagina + traducciones.desplazamiento;
@@ -31,6 +32,7 @@ uint32_t mmu_leer_memoria(uint32_t direccion_fisica) {
 	eliminar_paquete(paquete);
 
 	recibir_datos(socket_memoria, &valor_memoria, sizeof(uint32_t));
+	cantidad_acceso_tlb += 1;
 	return valor_memoria;
 }
 
@@ -48,6 +50,7 @@ void mmu_escribir_memoria(uint32_t direccion_fisica, uint32_t valor) {
 	if(protocolo != MEMORIA_MODIFICADA_OK) {
 		log_error(cpu_logger, "No se escribio memoria correctamente");
 	}
+	cantidad_acceso_tlb += 1;
 }
 
 

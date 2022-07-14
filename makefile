@@ -19,15 +19,15 @@ $(TARGET_1): lib
 
 $(TARGET_2): lib
 	-cd $@/Debug && make all
-	-cd $@/Debug && $(LD) ./$@
+	-cd $@/Debug && $(LD) ./$@ $(CONFIG)
 
 $(TARGET_3): lib
 	-cd $@/Debug && make all
-	-cd $@/Debug && $(LD) ./$@
+	-cd $@/Debug && $(LD) ./$@ $(CONFIG)
 
 $(TARGET_4): lib
 	-cd $@/Debug && make all
-	-cd $@/Debug && $(LD) ./$@
+	-cd $@/Debug && $(LD) ./$@ $(CONFIG)
 
 clean:
 	-cd $(SHARED_LIB)/Debug && make clean
@@ -47,7 +47,7 @@ all: clean run
 
 memcheck: 
 	$(MAKE) build ARG=$(PROCESO)
-	$(LD) valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --log-file="$@-$(PROCESO).log" $(PROCESO)/Debug/$(PROCESO) $(PATH_I) $(TAMANIO)
+	$(LD) valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --log-file="$@-$(PROCESO).log" $(PROCESO)/Debug/$(PROCESO) $(PATH_I) $(TAMANIO) $(CONFIG)
 
 
 helgrind:
